@@ -61,9 +61,10 @@ body {
 
 /* Khung chứa ảnh */
 #projects .group {
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
     border-radius: 0.5rem; /* Bo góc */
     box-shadow: 0 5px 15px rgba(0,0,0,0.3); /* Thêm bóng đổ nhẹ ban đầu */
+    border: 2px solid transparent; /* Thêm viền trong suốt để chống giật layout khi hover */
 }
 
 /* Ảnh bên trong */
@@ -86,10 +87,11 @@ body {
 #projects .group:hover {
     transform: translateY(-8px); /* Nhấc nhẹ ảnh lên */
     box-shadow: 0 0 35px rgba(29, 185, 84, 0.5); /* Tăng hiệu ứng toả sáng */
+    border-color: #1DB954; /* CẬP NHẬT: Hiện viền màu xanh lá */
 }
 
 /* Ảnh khi hover */
 #projects .group:hover img {
-    transform: scale(1.05); /* Phóng to vừa phải */
+    transform: scale(1.08); /* CẬP NHẬT: Tăng độ phóng to */
     filter: brightness(1.1); /* Làm ảnh sáng và rực rỡ hơn */
 }
