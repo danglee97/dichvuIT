@@ -56,3 +56,36 @@ body {
     opacity: 1;
     transform: translateY(0);
 }
+
+/* === PHẦN CẬP NHẬT CHO HÌNH ẢNH DỰ ÁN === */
+
+/* Thêm transition cho khung chứa ảnh */
+#projects .group {
+    transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+    border: 2px solid transparent; /* Thêm đường viền trong suốt để không bị giật layout */
+    border-radius: 0.5rem; /* Bo góc cho đẹp hơn */
+}
+
+/* Hiệu ứng khi di chuột vào khung ảnh */
+#projects .group:hover {
+    border-color: #1DB954; /* Hiện đường viền màu xanh */
+    box-shadow: 0 0 25px rgba(29, 185, 84, 0.4); /* Hiệu ứng toả sáng */
+}
+
+/* Giữ hiệu ứng phóng to ảnh mượt mà */
+#projects .group img {
+    transition: transform 0.4s ease, filter 0.4s ease;
+}
+
+/* Phóng to và làm sáng ảnh khi di chuột */
+#projects .group:hover img {
+    transform: scale(1.1);
+    filter: brightness(1.1);
+}
+
+/* Điều chỉnh lớp phủ để tiêu đề luôn rõ ràng */
+#projects .group .overlay {
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.85) 0%, transparent 100%);
+    transition: background 0.3s ease;
+}
+
