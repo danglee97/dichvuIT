@@ -15,57 +15,12 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;900&display=swap" rel="stylesheet">
     
-    <!-- Favicon (Sử dụng logo chữ 'd') -->
-    <link rel="icon" href="favicon.png">
+    <!-- Favicon -->
+    <link rel="icon" href="img/favicon.png">
 
-    <style>
-        body {
-            font-family: 'Be Vietnam Pro', sans-serif;
-            background-color: #121212;
-            color: #E0E0E0;
-        }
-        .hero-bg {
-            background-image: linear-gradient(to bottom, rgba(18, 18, 18, 0.9), rgba(18, 18, 18, 1)), url('https://placehold.co/1920x1080/121212/1DB954?text=PC+Gaming+Setup');
-            background-size: cover;
-            background-position: center;
-        }
-        .brand-green {
-            color: #1DB954;
-        }
-        .bg-brand-green {
-            background-color: #1DB954;
-        }
-        .border-brand-green {
-            border-color: #1DB954;
-        }
-        .card {
-            background-color: #1E1E1E;
-            border: 1px solid #333;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-        .card:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 10px 20px rgba(29, 185, 84, 0.1);
-        }
-        .section-title {
-            font-weight: 900;
-            font-size: 2.5rem;
-        }
-        @media (max-width: 768px) {
-            .section-title {
-                font-size: 2rem;
-            }
-        }
-        .fade-in {
-            opacity: 0;
-            transform: translateY(20px);
-            transition: opacity 0.6s ease-out, transform 0.6s ease-out;
-        }
-        .fade-in.visible {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    </style>
+    <!-- Liên kết đến tệp CSS ngoài -->
+    <link rel="stylesheet" href="style.css">
+
 </head>
 <body class="antialiased">
 
@@ -73,10 +28,9 @@
     <header id="header" class="bg-black/80 backdrop-blur-sm sticky top-0 z-50 transition-all duration-300">
         <div class="container mx-auto px-6 py-4">
             <div class="flex items-center justify-between">
-                <!-- Logo -->
-                <a href="#" class="text-2xl font-bold text-white flex items-center">
-                    <span class="bg-brand-green text-black rounded-md px-2 py-1 font-black text-3xl">d</span>
-                    <span class="ml-2">MINH ĐĂNG</span>
+                <!-- Logo - ĐÃ CẬP NHẬT -->
+                <a href="#" class="flex items-center">
+                    <img src="img/logo.png" alt="Logo Máy Tính Minh Đăng" class="h-8 w-auto">
                 </a>
 
                 <!-- Navigation (Desktop) -->
@@ -221,37 +175,37 @@
                 </div>
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                     <div class="group relative overflow-hidden rounded-lg fade-in">
-                        <img src="https://placehold.co/600x400/121212/1DB954?text=PC+Gaming" alt="Dàn PC Gaming" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
+                        <img src="img/project-pc-gaming.jpg" alt="Dàn PC Gaming" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" onerror="this.onerror=null;this.src='img/pc-gaming.jpg';">
                         <div class="absolute inset-0 bg-black/60 flex items-end p-6">
                             <h3 class="text-white text-xl font-bold">Dàn PC Gaming Cấu Hình Khủng</h3>
                         </div>
                     </div>
                     <div class="group relative overflow-hidden rounded-lg fade-in" style="transition-delay: 100ms;">
-                        <img src="https://placehold.co/600x400/121212/FFFFFF?text=Camera+An+Ninh" alt="Hệ thống camera an ninh" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
+                        <img src="img/project-camera.jpg" alt="Hệ thống camera an ninh" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" onerror="this.onerror=null;this.src='https://placehold.co/600x400/1E1E1E/E0E0E0?text=Lỗi+Tải+Ảnh';">
                         <div class="absolute inset-0 bg-black/60 flex items-end p-6">
                             <h3 class="text-white text-xl font-bold">Hệ Thống Camera Cho Cửa Hàng</h3>
                         </div>
                     </div>
                     <div class="group relative overflow-hidden rounded-lg fade-in" style="transition-delay: 200ms;">
-                        <img src="https://placehold.co/600x400/121212/1DB954?text=PC+Do+Hoa" alt="PC đồ họa" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
+                        <img src="img/project-pc-graphics.jpg" alt="PC đồ họa" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" onerror="this.onerror=null;this.src='https://placehold.co/600x400/1E1E1E/E0E0E0?text=Lỗi+Tải+Ảnh';">
                         <div class="absolute inset-0 bg-black/60 flex items-end p-6">
                             <h3 class="text-white text-xl font-bold">PC Chuyên Dụng Cho Thiết Kế Đồ Họa</h3>
                         </div>
                     </div>
                     <div class="group relative overflow-hidden rounded-lg fade-in" style="transition-delay: 300ms;">
-                        <img src="https://placehold.co/600x400/121212/FFFFFF?text=Nha+Thong+Minh" alt="Nhà thông minh" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
+                        <img src="img/project-smarthome.jpg" alt="Nhà thông minh" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" onerror="this.onerror=null;this.src='https://placehold.co/600x400/1E1E1E/E0E0E0?text=Lỗi+Tải+Ảnh';">
                         <div class="absolute inset-0 bg-black/60 flex items-end p-6">
                             <h3 class="text-white text-xl font-bold">Lắp Đặt Rèm Cửa Thông Minh</h3>
                         </div>
                     </div>
                     <div class="group relative overflow-hidden rounded-lg fade-in" style="transition-delay: 400ms;">
-                        <img src="https://placehold.co/600x400/121212/1DB954?text=Mang+Van+Phong" alt="Mạng văn phòng" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
+                        <img src="img/project-network.jpg" alt="Mạng văn phòng" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" onerror="this.onerror=null;this.src='https://placehold.co/600x400/1E1E1E/E0E0E0?text=Lỗi+Tải+Ảnh';">
                         <div class="absolute inset-0 bg-black/60 flex items-end p-6">
                             <h3 class="text-white text-xl font-bold">Thi Công Hệ Thống Mạng Văn Phòng</h3>
                         </div>
                     </div>
                     <div class="group relative overflow-hidden rounded-lg fade-in" style="transition-delay: 500ms;">
-                        <img src="https://placehold.co/600x400/121212/FFFFFF?text=Server+Doanh+Nghiep" alt="Server doanh nghiệp" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
+                        <img src="img/project-server.jpg" alt="Server doanh nghiệp" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" onerror="this.onerror=null;this.src='https://placehold.co/600x400/1E1E1E/E0E0E0?text=Lỗi+Tải+Ảnh';">
                         <div class="absolute inset-0 bg-black/60 flex items-end p-6">
                             <h3 class="text-white text-xl font-bold">Bảo Trì Server Cho Doanh Nghiệp</h3>
                         </div>
@@ -274,7 +228,7 @@
                             <div class="space-y-4 text-lg">
                                 <p class="flex items-start">
                                     <svg class="w-6 h-6 mr-3 mt-1 brand-green flex-shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" /></svg>
-                                    <span>Khóm 5 - Càng Long - Vĩnh Long</span>
+                                    <span>Khóm 5 - Càng Long - Trà Vinh</span>
                                 </p>
                                 <p class="flex items-center">
                                     <svg class="w-6 h-6 mr-3 brand-green flex-shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 002.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 01-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 00-1.091-.852H4.5A2.25 2.25 0 002.25 4.5v2.25z" /></svg>
@@ -304,56 +258,13 @@
     <!-- Footer -->
     <footer class="bg-black py-8">
         <div class="container mx-auto px-6 text-center text-gray-400">
-            <p>&copy; 2025 Máy Tính Minh Đăng. All Rights Reserved.</p>
+            <p>&copy; 2024 Máy Tính Minh Đăng. All Rights Reserved.</p>
+            <p class="mt-2">Thiết kế và phát triển bởi Gemini.</p>
         </div>
     </footer>
 
-    <script>
-        // Mobile Menu Toggle
-        const mobileMenuButton = document.getElementById('mobile-menu-button');
-        const mobileMenu = document.getElementById('mobile-menu');
-        mobileMenuButton.addEventListener('click', () => {
-            mobileMenu.classList.toggle('hidden');
-        });
-
-        // Close mobile menu when a link is clicked
-        document.querySelectorAll('#mobile-menu a').forEach(link => {
-            link.addEventListener('click', () => {
-                mobileMenu.classList.add('hidden');
-            });
-        });
-
-        // Header shadow on scroll
-        const header = document.getElementById('header');
-        window.addEventListener('scroll', () => {
-            if (window.scrollY > 10) {
-                header.classList.add('shadow-lg', 'shadow-green-500/10');
-            } else {
-                header.classList.remove('shadow-lg', 'shadow-green-500/10');
-            }
-        });
-
-        // Fade-in animation on scroll
-        const faders = document.querySelectorAll('.fade-in');
-        const appearOptions = {
-            threshold: 0.2,
-            rootMargin: "0px 0px -50px 0px"
-        };
-        const appearOnScroll = new IntersectionObserver(function(entries, appearOnScroll) {
-            entries.forEach(entry => {
-                if (!entry.isIntersecting) {
-                    return;
-                } else {
-                    entry.target.classList.add('visible');
-                    appearOnScroll.unobserve(entry.target);
-                }
-            });
-        }, appearOptions);
-
-        faders.forEach(fader => {
-            appearOnScroll.observe(fader);
-        });
-    </script>
+    <!-- Liên kết đến tệp JS ngoài -->
+    <script src="script.js"></script>
 
 </body>
 </html>

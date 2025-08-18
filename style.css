@@ -1,0 +1,58 @@
+/* style.css */
+
+body {
+    font-family: 'Be Vietnam Pro', sans-serif;
+    background-color: #121212;
+    color: #E0E0E0;
+}
+
+.hero-bg {
+    background-image: linear-gradient(to bottom, rgba(18, 18, 18, 0.9), rgba(18, 18, 18, 1)), url('img/hero-bg.jpg');
+    background-size: cover;
+    background-position: center;
+}
+
+.brand-green {
+    color: #1DB954;
+}
+
+.bg-brand-green {
+    background-color: #1DB954;
+}
+
+.border-brand-green {
+    border-color: #1DB954;
+}
+
+.card {
+    background-color: #1E1E1E;
+    border: 1px solid #333;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 10px 20px rgba(29, 185, 84, 0.1);
+}
+
+.section-title {
+    font-weight: 900;
+    font-size: 2.5rem;
+}
+
+@media (max-width: 768px) {
+    .section-title {
+        font-size: 2rem;
+    }
+}
+
+.fade-in {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+}
+
+.fade-in.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
