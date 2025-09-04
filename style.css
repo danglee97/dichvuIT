@@ -1,97 +1,171 @@
-/* style.css */
+:root {
+    --dark-bg: #0a0a1a;
+    --primary: #00ffff; /* Cyan */
+    --secondary: #ff00ff; /* Magenta */
+    --glow-color: rgba(0, 255, 255, 0.75);
+    --card-bg: rgba(10, 10, 26, 0.5);
+}
 
 body {
-    font-family: 'Be Vietnam Pro', sans-serif;
-    background-color: #121212;
+    font-family: 'Roboto', sans-serif;
+    background-color: var(--dark-bg);
     color: #E0E0E0;
+    overflow-x: hidden;
 }
 
-.hero-bg {
-    background-image: linear-gradient(to bottom, rgba(18, 18, 18, 0.9), rgba(18, 18, 18, 1)), url('img/hero-bg.jpg');
-    background-size: cover;
-    background-position: center;
+/* Custom scrollbar for a techy feel */
+::-webkit-scrollbar {
+    width: 8px;
+}
+::-webkit-scrollbar-track {
+    background: var(--dark-bg);
+}
+::-webkit-scrollbar-thumb {
+    background: var(--primary);
+    border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: #fff;
 }
 
-.brand-green {
-    color: #1DB954;
+/* Updated font with Vietnamese support */
+h1, h2, h3, .font-tech {
+    font-family: 'Exo 2', sans-serif;
+    text-shadow: 0 0 5px var(--glow-color);
 }
 
-.bg-brand-green {
-    background-color: #1DB954;
+.header-glass {
+    background: rgba(10, 10, 26, 0.5);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(0, 255, 255, 0.2);
 }
 
-.border-brand-green {
-    border-color: #1DB954;
+/* Hero Section Interactive Background */
+#hero-canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
 }
 
-.card {
-    background-color: #1E1E1E;
-    border: 1px solid #333;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+.hero-section {
+    position: relative;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    overflow: hidden;
+    background-image: radial-gradient(circle, rgba(0, 255, 255, 0.1) 0%, transparent 70%);
 }
 
-.card:hover {
-    transform: translateY(-8px);
-    box-shadow: 0 10px 20px rgba(29, 185, 84, 0.1);
+.hero-content {
+    position: relative;
+    z-index: 10;
 }
 
-.section-title {
-    font-weight: 900;
-    font-size: 2.5rem;
+.typing-cursor {
+    display: inline-block;
+    width: 3px;
+    height: 1em;
+    background-color: var(--primary);
+    animation: blink 0.7s infinite;
+    vertical-align: middle;
 }
 
-@media (max-width: 768px) {
-    .section-title {
-        font-size: 2rem;
-    }
+@keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
 }
 
+.cta-button {
+    background: linear-gradient(45deg, var(--primary), var(--secondary));
+    border: none;
+    color: var(--dark-bg);
+    text-shadow: none;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+.cta-button:hover {
+    transform: scale(1.05) translateY(-3px);
+    box-shadow: 0 0 25px var(--glow-color);
+}
+
+/* Modern Service Cards with 3D Tilt Effect */
+.service-card {
+    background: var(--card-bg);
+    border: 1px solid rgba(0, 255, 255, 0.2);
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+    position: relative;
+    z-index: 1;
+    transition: all 0.3s ease-out;
+    will-change: transform; /* Performance optimization */
+}
+
+.service-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border-radius: 0.5rem;
+    border: 2px solid transparent;
+    background: linear-gradient(var(--primary), var(--secondary)) border-box;
+    -webkit-mask: 
+        linear-gradient(#fff 0 0) padding-box, 
+        linear-gradient(#fff 0 0);
+    -webkit-mask-composite: destination-out;
+    mask-composite: exclude;
+    opacity: 0;
+    transition: opacity 0.3s ease-in-out;
+}
+
+.service-card:hover::before {
+    opacity: 1;
+}
+.service-card:hover {
+     box-shadow: 0 0 30px rgba(0, 255, 255, 0.3);
+}
+
+.section-glow {
+    width: 100px;
+    height: 2px;
+    background: var(--primary);
+    margin: 1rem auto;
+    border-radius: 1px;
+    box-shadow: 0 0 10px var(--glow-color);
+}
+
+/* Project Image Hover Effect */
+.project-card .overlay {
+    background: linear-gradient(to top, rgba(10, 10, 26, 0.95) 0%, transparent 100%);
+    opacity: 0;
+    transition: opacity 0.4s ease;
+}
+.project-card:hover .overlay {
+    opacity: 1;
+}
+.project-card img {
+    transition: transform 0.4s ease;
+}
+.project-card:hover img {
+    transform: scale(1.1);
+}
+
+/* Fade-in animation */
 .fade-in {
     opacity: 0;
-    transform: translateY(20px);
+    transform: translateY(30px);
     transition: opacity 0.6s ease-out, transform 0.6s ease-out;
 }
 
 .fade-in.visible {
     opacity: 1;
     transform: translateY(0);
-}
-
-/* === PHẦN CẬP NHẬT MỚI CHO HÌNH ẢNH DỰ ÁN === */
-
-/* Khung chứa ảnh */
-#projects .group {
-    transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
-    border-radius: 0.5rem; /* Bo góc */
-    box-shadow: 0 5px 15px rgba(0,0,0,0.3); /* Thêm bóng đổ nhẹ ban đầu */
-    border: 2px solid transparent; /* Thêm viền trong suốt để chống giật layout khi hover */
-}
-
-/* Ảnh bên trong */
-#projects .group img {
-    transition: transform 0.4s ease, filter 0.4s ease;
-    border-radius: 0.5rem; /* Bo góc cho ảnh */
-}
-
-/* Lớp phủ chứa text */
-#projects .group .overlay {
-    /* Lớp nền gradient chỉ ở dưới để đọc chữ, không che toàn bộ ảnh */
-    background: linear-gradient(to top, rgba(0, 0, 0, 0.9) 0%, transparent 80%);
-    transition: opacity 0.4s ease;
-    opacity: 1; /* Luôn hiển thị để đọc chữ */
-}
-
-/* --- HIỆU ỨNG KHI DI CHUỘT --- */
-
-/* Khung ảnh khi hover */
-#projects .group:hover {
-    transform: translateY(-8px); /* Nhấc nhẹ ảnh lên */
-    box-shadow: 0 0 35px rgba(29, 185, 84, 0.5); /* Tăng hiệu ứng toả sáng */
-    border-color: #1DB954; /* CẬP NHẬT: Hiện viền màu xanh lá */
-}
-
-/* Ảnh khi hover */
-#projects .group:hover img {
-    transform: scale(1.08); /* CẬP NHẬT: Tăng độ phóng to */
-    filter: brightness(1.1); /* Làm ảnh sáng và rực rỡ hơn */
 }
