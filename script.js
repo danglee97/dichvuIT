@@ -23,7 +23,7 @@ function init3DTiltEffect() {
             card.style.transition = 'transform 0.1s ease-out';
         });
         card.addEventListener('mouseleave', () => {
-            card.style.transform = 'perspective(1000px) rotateX(0) rotateY(0) scale(1)';
+            card.style.transform = `perspective(1000px) rotateX(0) rotateY(0) scale(1)`;
             card.style.transition = 'transform 0.5s cubic-bezier(0.23, 1, 0.32, 1)';
         });
     });
@@ -127,8 +127,13 @@ function initCoreEffects() {
 //  MODULE 2: DỊCH VỤ, GIỎ HÀNG VÀ FORM
 // ===================================================================
 async function initServiceAndCart() {
-    const appsScriptUrl = 'https://script.google.com/macros/s/AKfycbyIremqvgCwYcVxsf09X-LbR1JRHZipuUr3xq9z-ZrGzaeXqgjxogkd3QyqKx_fYmQv/exec'; // THAY URL APPS SCRIPT CỦA BẠN
+    const appsScriptUrl = 'https://script.google.com/macros/s/AKfycbyIremqvgCwYcVxsf09X-LbR1JRHZipuUr3xq9z-ZrGzaeXqgjxogkd3QyqKx_fYmQv/exec';
     let servicesData = [], cart = JSON.parse(localStorage.getItem('minhdangCart')) || [];
+    let currentServiceInModal = null;
+
+    let slideshowInterval = null;
+    let currentImageIndex = 0;
+    let currentImages = [];
 
     const serviceList = document.getElementById('service-list');
     const modal = document.getElementById('service-modal');
@@ -143,9 +148,20 @@ async function initServiceAndCart() {
     const submitOrderBtn = document.getElementById('submit-order-btn');
     const formContainer = document.getElementById('customer-form-container');
     const formMessage = document.getElementById('form-message');
-    // === BỔ SUNG: Lấy phần tử input ===
     const customerNameInput = document.getElementById('customerName');
     const customerPhoneInput = document.getElementById('customerPhone');
+    const nameError = document.getElementById('nameError');
+    const phoneError = document.getElementById('phoneError');
+    const modalSubservicesList = document.getElementById('modal-subservices-list');
+    
+    const lightbox = document.getElementById('image-lightbox');
+    const lightboxImg = document.getElementById('lightbox-img');
+    const closeLightboxBtn = document.getElementById('close-lightbox-btn');
+    const zoomBtn = document.getElementById('zoom-image-btn');
+    // === BỔ SUNG: Thêm hằng số cho nút điều khiển lightbox ===
+    const prevLightboxBtn = document.getElementById('prev-lightbox-btn');
+    const nextLightboxBtn = document.getElementById('next-lightbox-btn');
+    // === KẾT THÚC BỔ SUNG ===
 
     try {
         const response = await fetch(appsScriptUrl);
@@ -157,18 +173,35 @@ async function initServiceAndCart() {
         serviceList.innerHTML = `<p class="text-center text-red-400 col-span-full">Không thể tải dữ liệu.</p>`;
     }
 
-    // === BỔ SUNG: Hàm kiểm tra form và ẩn/hiện nút ===
-    function checkFormAndToggleButton() {
-        const isNameValid = customerNameInput.value.trim() !== '';
-        const isPhoneValid = customerPhoneInput.value.trim() !== '';
-        const isCartNotEmpty = cart.length > 0;
-        
-        // Chỉ hiển thị nút khi giỏ hàng có đồ VÀ cả 2 trường đã được điền
-        if (isCartNotEmpty && isNameValid && isPhoneValid) {
-            submitOrderBtn.classList.remove('is-hidden');
+    function validateForm() {
+        const phoneRegex = /^0\d{9}$/;
+        const nameRegex = /^[a-zA-ZàáâãèéêìíòóôõùúăđĩũơưăạảấầẩẫậắằẳẵặẹẻẽếềểễệỉịọỏốồổỗộớờởỡợụủứừửữựỳýỵỷỹĐ\s]+$/;
+        const nameValue = customerNameInput.value.trim();
+        const phoneValue = customerPhoneInput.value.trim();
+        let isNameValid = true;
+        if (!nameRegex.test(nameValue) && nameValue !== '') {
+            nameError.textContent = 'Họ tên không hợp lệ.';
+            nameError.classList.remove('is-hidden');
+            customerNameInput.classList.add('invalid');
+            isNameValid = false;
         } else {
-            submitOrderBtn.classList.add('is-hidden');
+            nameError.classList.add('is-hidden');
+            customerNameInput.classList.remove('invalid');
         }
+        let isPhoneValid = true;
+        if (!phoneRegex.test(phoneValue) && phoneValue !== '') {
+            phoneError.textContent = 'SĐT phải có 10 số, bắt đầu bằng 0.';
+            phoneError.classList.remove('is-hidden');
+            customerPhoneInput.classList.add('invalid');
+            isPhoneValid = false;
+        } else {
+            phoneError.classList.add('is-hidden');
+            customerPhoneInput.classList.remove('invalid');
+        }
+        const isCartNotEmpty = cart.length > 0;
+        const bothFieldsFilledAndValid = isNameValid && isPhoneValid && nameValue !== '' && phoneValue !== '';
+        submitOrderBtn.classList.toggle('is-hidden', !(isCartNotEmpty && bothFieldsFilledAndValid));
+        return bothFieldsFilledAndValid;
     }
 
     function renderServiceCards() {
@@ -187,12 +220,12 @@ async function initServiceAndCart() {
     }
 
     function renderCart() {
-        if (cart.length === 0) {
-            cartItemsContainer.innerHTML = '<p class="text-gray-400 text-center p-8">Giỏ hàng của bạn đang trống.</p>';
-        } else {
-            cartItemsContainer.innerHTML = cart.map(item => `
+        cartItemsContainer.innerHTML = cart.length === 0 ? '<p class="text-gray-400 text-center p-8">Giỏ hàng của bạn đang trống.</p>' : cart.map(item => {
+            const service = servicesData.flatMap(s => s.subServices).find(sub => sub.subId === item.subId);
+            const image = service && service.images && service.images.length > 0 ? service.images[0] : 'https://placehold.co/100x100/0a0a1a/00ffff?text=IMG';
+            return `
                 <div class="cart-item">
-                    <img src="${item.image}" alt="${item.name}" class="w-16 h-16 object-cover rounded-md flex-shrink-0">
+                    <img src="${image}" alt="${item.name}" class="w-16 h-16 object-cover rounded-md flex-shrink-0">
                     <div class="cart-item-info">
                         <p class="font-bold text-white text-sm">${item.name}</p>
                         <p class="font-tech text-primary text-xs">${isNaN(item.price) ? item.price : new Intl.NumberFormat('vi-VN').format(item.price) + ' VNĐ'}</p>
@@ -202,13 +235,12 @@ async function initServiceAndCart() {
                         <span>${item.quantity}</span>
                         <button class="quantity-btn" data-sub-id="${item.subId}" data-change="1">+</button>
                     </div>
-                </div>`).join('');
-        }
+                </div>`;
+        }).join('');
         updateCartTotal();
         updateCartIcon();
         formContainer.classList.toggle('is-hidden', cart.length === 0);
-        // === THAY ĐỔI: Luôn gọi hàm kiểm tra để quyết định hiển thị nút ===
-        checkFormAndToggleButton();
+        validateForm();
     }
 
     function updateCartTotal() {
@@ -222,33 +254,126 @@ async function initServiceAndCart() {
         cartCount.textContent = totalItems;
         cartIconContainer.classList.toggle('is-hidden', totalItems === 0);
     }
+    
+    function stopSlideshow() {
+        if (slideshowInterval) {
+            clearInterval(slideshowInterval);
+            slideshowInterval = null;
+        }
+    }
+
+    function startSlideshow() {
+        stopSlideshow();
+        if (currentImages.length > 1) {
+            slideshowInterval = setInterval(nextImage, 3000);
+        }
+    }
+    
+    function showImage(index) {
+        if (!currentImages || currentImages.length === 0) return;
+        currentImageIndex = (index + currentImages.length) % currentImages.length;
+    
+        const mainImg = document.getElementById('modal-main-img');
+        mainImg.style.opacity = 0;
+        setTimeout(() => {
+            mainImg.src = currentImages[currentImageIndex];
+            mainImg.style.opacity = 1;
+        }, 400);
+    
+        document.querySelectorAll('.modal-thumbnail').forEach((thumb, idx) => {
+            thumb.classList.toggle('active', idx === currentImageIndex);
+        });
+    }
+
+    function nextImage() {
+        showImage(currentImageIndex + 1);
+    }
+
+    function prevImage() {
+        showImage(currentImageIndex - 1);
+    }
+
+    function openLightbox() {
+        if (currentImages.length > 0) {
+            lightboxImg.src = currentImages[currentImageIndex];
+            lightbox.classList.add('visible');
+            stopSlideshow();
+
+            // Bổ sung: Hiển thị/ẩn nút điều khiển lightbox
+            const showButtons = currentImages.length > 1;
+            prevLightboxBtn.classList.toggle('is-hidden', !showButtons);
+            nextLightboxBtn.classList.toggle('is-hidden', !showButtons);
+        }
+    }
+    
+    function closeLightbox() {
+        lightbox.classList.remove('visible');
+        startSlideshow();
+    }
+
+    function updateModalGallery(subId) {
+        stopSlideshow();
+        if (!currentServiceInModal) return;
+        const subService = currentServiceInModal.subServices.find(sub => sub.subId === subId);
+        
+        const prevBtn = document.getElementById('prev-image-btn');
+        const nextBtn = document.getElementById('next-image-btn');
+
+        if (!subService || !subService.images || subService.images.length === 0) {
+            currentImages = [currentServiceInModal.image];
+            document.getElementById('modal-thumbnail-container').innerHTML = '';
+            prevBtn.classList.add('is-hidden');
+            nextBtn.classList.add('is-hidden');
+        } else {
+            currentImages = subService.images;
+            document.getElementById('modal-thumbnail-container').innerHTML = currentImages.map((img, index) =>
+                `<img src="${img}" alt="${subService.name}" class="modal-thumbnail" data-full-src="${img}">`
+            ).join('');
+            const showButtons = currentImages.length > 1;
+            prevBtn.classList.toggle('is-hidden', !showButtons);
+            nextBtn.classList.toggle('is-hidden', !showButtons);
+        }
+        
+        showImage(0);
+        startSlideshow();
+        
+        document.querySelectorAll('.subservice-item').forEach(item => {
+            item.classList.toggle('highlighted', item.dataset.subId === subId);
+        });
+    }
 
     function openModal(serviceId) {
         const service = servicesData.find(s => s.id === serviceId);
         if (!service) return;
-        document.getElementById('modal-main-img').src = service.image;
-        document.getElementById('modal-thumbnail-container').innerHTML = service.subServices.map((sub, index) =>
-            sub.image ? `<img src="${sub.image}" alt="${sub.name}" class="modal-thumbnail ${index === 0 ? 'active' : ''}" data-full-src="${sub.image}">` : ''
-        ).join('');
+        currentServiceInModal = service;
+
         document.getElementById('modal-title').textContent = service.name;
-        document.getElementById('modal-subservices-list').innerHTML = service.subServices.map(sub => `
-            <div class="subservice-item">
+        modalSubservicesList.innerHTML = service.subServices.map(sub => `
+            <div class="subservice-item" data-sub-id="${sub.subId}">
                 <div class="subservice-info">
                     <h4 class="font-bold text-white">${sub.name}</h4>
                     <p class="text-sm text-gray-400">${sub.details}</p>
                 </div>
                 <div class="subservice-action">
                     <span class="font-tech text-lg text-primary">${isNaN(sub.price) ? sub.price : new Intl.NumberFormat('vi-VN').format(sub.price) + ' VNĐ'}</span>
-                    <button class="add-to-cart-btn" data-sub-id="${sub.subId}">Thêm +</button>
+                    <button class="add-to-cart-btn" data-sub-id="${sub.subId}" data-service-name="${sub.name}" data-price="${sub.price}">Thêm +</button>
                 </div>
             </div>`).join('');
+        
+        if (service.subServices.length > 0) {
+            updateModalGallery(service.subServices[0].subId);
+        }
+
         document.getElementById('modal-loader').style.display = 'none';
         document.getElementById('modal-data').classList.remove('hidden');
         modal.classList.add('visible');
     }
 
     function closeModal() {
+        closeLightbox();
+        stopSlideshow();
         modal.classList.remove('visible');
+        currentServiceInModal = null;
         setTimeout(() => {
             document.getElementById('modal-data').classList.add('hidden');
             document.getElementById('modal-loader').style.display = 'block';
@@ -256,14 +381,22 @@ async function initServiceAndCart() {
     }
 
     function addToCart(subId, buttonElement) {
-        const service = servicesData.flatMap(s => s.subServices).find(sub => sub.subId === subId);
-        if (!service) return;
+        if (!currentServiceInModal) return;
+        const subService = currentServiceInModal.subServices.find(sub => sub.subId === subId);
+        if (!subService) return;
+
         const existingItem = cart.find(item => item.subId === subId);
-        if (existingItem) existingItem.quantity++;
-        else cart.push({ ...service, quantity: 1 });
+        if (existingItem) {
+            existingItem.quantity++;
+        } else {
+            cart.push({ subId: subService.subId, name: subService.name, price: subService.price, quantity: 1 });
+        }
+        
         saveCartAndRender();
-        if (service.image) flyToCart(service.image, buttonElement);
+        const imageToFly = subService.images && subService.images.length > 0 ? subService.images[0] : currentServiceInModal.image;
+        flyToCart(imageToFly, buttonElement);
     }
+
 
     function handleQuantityChange(subId, change) {
         const item = cart.find(i => i.subId === subId);
@@ -287,6 +420,12 @@ async function initServiceAndCart() {
 
     async function handleOrderSubmit(event) {
         event.preventDefault();
+        if (!validateForm()) {
+            formMessage.textContent = 'Vui lòng kiểm tra lại thông tin.';
+            formMessage.className = 'text-red-400 text-center mt-4';
+            return;
+        }
+
         submitOrderBtn.disabled = true; submitOrderBtn.textContent = 'ĐANG GỬI...'; formMessage.textContent = '';
         try {
             await fetch(appsScriptUrl, {
@@ -334,15 +473,23 @@ async function initServiceAndCart() {
     });
     closeModalBtn.addEventListener('click', closeModal);
     modal.addEventListener('click', e => { if (e.target === modal) closeModal(); });
-    document.getElementById('modal-subservices-list').addEventListener('click', e => {
+    
+    modalSubservicesList.addEventListener('click', e => {
         const btn = e.target.closest('.add-to-cart-btn');
-        if (btn) addToCart(btn.dataset.subId, btn);
+        const item = e.target.closest('.subservice-item');
+
+        if (btn) {
+            addToCart(btn.dataset.subId, btn);
+        } else if (item) {
+            updateModalGallery(item.dataset.subId);
+        }
     });
+
     document.getElementById('modal-thumbnail-container').addEventListener('click', e => {
         if (e.target.classList.contains('modal-thumbnail')) {
-            document.getElementById('modal-main-img').src = e.target.dataset.fullSrc;
-            document.querySelectorAll('.modal-thumbnail').forEach(t => t.classList.remove('active'));
-            e.target.classList.add('active');
+            const index = Array.from(e.target.parentNode.children).indexOf(e.target);
+            showImage(index);
+            startSlideshow();
         }
     });
     cartIconContainer.addEventListener('click', toggleCartPanel);
@@ -354,9 +501,55 @@ async function initServiceAndCart() {
     });
     orderForm.addEventListener('submit', handleOrderSubmit);
     
-    // === BỔ SUNG: Gán sự kiện 'input' để kiểm tra form mỗi khi người dùng gõ chữ ===
-    customerNameInput.addEventListener('input', checkFormAndToggleButton);
-    customerPhoneInput.addEventListener('input', checkFormAndToggleButton);
+    customerNameInput.addEventListener('input', validateForm);
+    customerPhoneInput.addEventListener('input', validateForm);
+
+    const prevBtn = document.getElementById('prev-image-btn');
+    const nextBtn = document.getElementById('next-image-btn');
+    const imageContainer = document.getElementById('modal-image-container');
+
+    prevBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        prevImage();
+        startSlideshow();
+    });
+
+    nextBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        nextImage();
+        startSlideshow();
+    });
+
+    imageContainer.addEventListener('mouseenter', stopSlideshow);
+    imageContainer.addEventListener('mouseleave', startSlideshow);
+    
+    zoomBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        openLightbox();
+    });
+
+    closeLightboxBtn.addEventListener('click', closeLightbox);
+    
+    lightbox.addEventListener('click', (e) => {
+        if (e.target === lightbox) {
+            closeLightbox();
+        }
+    });
+
+    // === BỔ SUNG: Gán sự kiện cho nút điều khiển lightbox ===
+    prevLightboxBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        prevImage(); // Hàm này đã cập nhật index và ảnh trong modal
+        lightboxImg.src = currentImages[currentImageIndex]; // Chỉ cần cập nhật ảnh lightbox theo index mới
+    });
+
+    nextLightboxBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        nextImage();
+        lightboxImg.src = currentImages[currentImageIndex];
+    });
+    // === KẾT THÚC BỔ SUNG ===
 
     renderCart();
 }
+

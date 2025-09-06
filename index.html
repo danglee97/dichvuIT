@@ -29,10 +29,10 @@
             <a href="#" aria-label="Trang chủ">
                 <img src="img/logo.jpg" alt="Logo Minh Đăng IT" class="h-10">
             </a>
-            <div class="hidden md:flex items-center space-x-8">
-                <a href="#services" class="hover:text-primary transition-colors">Dịch Vụ</a>
-                <a href="#projects" class="hover:text-primary transition-colors">Dự Án</a>
-                <a href="#contact" class="hover:text-primary transition-colors">Liên Hệ</a>
+            <div class="hidden md:flex items-center space-x-2">
+                <a href="#services" class="nav-link">Dịch Vụ</a>
+                <a href="#projects" class="nav-link">Dự Án</a>
+                <a href="#contact" class="nav-link">Liên Hệ</a>
             </div>
             <div class="md:hidden"></div> <!-- Placeholder for layout -->
         </nav>
@@ -121,8 +121,13 @@
             <div id="modal-loader" class="modal-loader">Đang tải dữ liệu...</div>
             <div id="modal-data" class="hidden">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    <div>
+                    <div id="modal-image-container" class="relative group">
                         <img id="modal-main-img" src="" alt="Hình ảnh dịch vụ" class="w-full h-auto object-cover rounded-lg aspect-video mb-4">
+                        <button id="zoom-image-btn" class="modal-zoom-btn" aria-label="Phóng to ảnh">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>
+                        </button>
+                        <button id="prev-image-btn" class="modal-nav-btn left-2 is-hidden" aria-label="Ảnh trước đó">&#10094;</button>
+                        <button id="next-image-btn" class="modal-nav-btn right-2 is-hidden" aria-label="Ảnh kế tiếp">&#10095;</button>
                         <div id="modal-thumbnail-container" class="flex gap-2 flex-wrap"></div>
                     </div>
                     <div>
@@ -144,9 +149,20 @@
             <div id="cart-items-container"></div>
             <div id="customer-form-container" class="mt-6 pt-6 border-t border-gray-700 is-hidden">
                 <form id="order-form" class="space-y-4">
-                     <div><label for="customerName" class="form-label">Họ và Tên</label><input type="text" id="customerName" name="customerName" class="form-input" required></div>
-                     <div><label for="customerPhone" class="form-label">Số Điện Thoại</label><input type="tel" id="customerPhone" name="customerPhone" class="form-input" required></div>
-                     <div><label for="customerNotes" class="form-label">Ghi Chú Thêm</label><textarea id="customerNotes" name="customerNotes" rows="3" class="form-input"></textarea></div>
+                     <div>
+                         <label for="customerName" class="form-label">Họ và Tên</label>
+                         <input type="text" id="customerName" name="customerName" class="form-input" required>
+                         <p id="nameError" class="form-error is-hidden"></p>
+                     </div>
+                     <div>
+                         <label for="customerPhone" class="form-label">Số Điện Thoại</label>
+                         <input type="tel" id="customerPhone" name="customerPhone" class="form-input" required>
+                         <p id="phoneError" class="form-error is-hidden"></p>
+                     </div>
+                     <div>
+                         <label for="customerNotes" class="form-label">Ghi Chú Thêm</label>
+                         <textarea id="customerNotes" name="customerNotes" rows="3" class="form-input"></textarea>
+                     </div>
                 </form>
             </div>
         </div>
@@ -156,8 +172,15 @@
             <div id="form-message" class="text-center mt-4"></div>
         </div>
     </div>
-    </div>
     <div id="cart-overlay" class="fixed inset-0 bg-black bg-opacity-70 z-[90] opacity-0 pointer-events-none transition-opacity duration-300"></div>
+
+    <!-- THAY ĐỔI: Bổ sung nút điều khiển cho Lightbox -->
+    <div id="image-lightbox" class="lightbox-container">
+        <span id="close-lightbox-btn" class="lightbox-close-btn">&times;</span>
+        <button id="prev-lightbox-btn" class="lightbox-nav-btn left-4 is-hidden" aria-label="Ảnh trước đó">&#10094;</button>
+        <img id="lightbox-img" src="" alt="Hình ảnh dịch vụ phóng to">
+        <button id="next-lightbox-btn" class="lightbox-nav-btn right-4 is-hidden" aria-label="Ảnh kế tiếp">&#10095;</button>
+    </div>
 
     <script src="script.js"></script>
 </body>

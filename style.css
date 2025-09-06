@@ -11,6 +11,7 @@
     --glow-color: rgba(0, 255, 255, 0.75);
     --card-bg: rgba(10, 10, 26, 0.5);
     --border-color: rgba(0, 255, 255, 0.2);
+    --error-color: #ff6b6b; /* Thêm màu cho thông báo lỗi */
 }
 
 /* === BỔ SUNG: TĂNG CỠ CHỮ TOÀN TRANG === */
@@ -36,7 +37,47 @@ header.scrolled {
     backdrop-filter: blur(10px);
     border-bottom: 1px solid var(--border-color);
 }
+
+/* === BỔ SUNG: LÀM NỔI BẬT THANH ĐIỀU HƯỚNG (MENU) === */
+.nav-link {
+    padding: 0.5rem 1rem; /* 8px 16px */
+    border: 1px solid transparent;
+    border-radius: 9999px; /* Dạng viên thuốc */
+    transition: all 0.3s ease;
+    font-weight: 500;
+    color: #E0E0E0;
+    text-decoration: none;
+}
+.nav-link:hover {
+    color: var(--dark-bg);
+    background-color: var(--primary);
+    border-color: var(--primary);
+    box-shadow: 0 0 10px var(--glow-color);
+}
+/* === KẾT THÚC BỔ SUNG === */
+
+
 .hero-section { position: relative; height: 100vh; display: flex; align-items: center; justify-content: center; text-align: center; overflow: hidden; background: transparent; }
+
+/* === BỔ SUNG: TẠO ĐIỂM NHẤN CHO TIÊU ĐỀ CHÍNH === */
+.hero-section > .relative::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    /* Dịch chuyển tâm của pseudo-element về đúng giữa */
+    transform: translate(-50%, -50%);
+    width: 90%;
+    max-width: 800px; /* Giới hạn chiều rộng tối đa */
+    height: 250px; /* Tăng chiều cao quầng sáng */
+    /* Tạo một quầng sáng mềm phía sau */
+    background: radial-gradient(circle, rgba(0, 255, 255, 0.12) 0%, rgba(10, 10, 26, 0) 65%);
+    filter: blur(25px); /* Làm mờ mạnh để hiệu ứng mềm mại */
+    z-index: -1; /* Đảm bảo nằm sau chữ */
+    pointer-events: none; /* Không cho phép click vào */
+}
+/* === KẾT THÚC BỔ SUNG === */
+
 .fade-in { opacity: 0; transform: translateY(20px); transition: opacity 0.6s ease-out, transform 0.6s ease-out; }
 .fade-in.visible { opacity: 1; transform: translateY(0); }
 .section-glow { width: 100px; height: 2px; background: var(--primary); margin: 1rem auto; border-radius: 1px; box-shadow: 0 0 10px var(--glow-color); }
@@ -67,11 +108,145 @@ header.scrolled {
 .modal-loader { text-align: center; padding: 4rem 0; color: white; }
 .modal-thumbnail { width: 80px; height: 50px; object-cover; border-radius: 4px; cursor: pointer; border: 2px solid transparent; transition: border-color 0.2s; }
 .modal-thumbnail.active, .modal-thumbnail:hover { border-color: var(--primary); }
-.subservice-item { display: flex; justify-content: space-between; align-items: center; padding: 1rem 0; border-bottom: 1px solid var(--border-color); }
+.subservice-item { display: flex; justify-content: space-between; align-items: center; padding: 1rem; border-bottom: 1px solid var(--border-color); transition: background-color 0.2s ease-in-out; border-radius: 0.25rem; margin-bottom: 0.25rem; cursor: pointer;}
 .subservice-info { flex-grow: 1; padding-right: 1rem; }
 .subservice-action { text-align: right; flex-shrink: 0; }
 .add-to-cart-btn { background-color: var(--primary); color: black; font-weight: bold; padding: 0.5rem 1rem; border-radius: 9999px; border: none; cursor: pointer; transition: background-color 0.2s; margin-top: 0.5rem; }
 .add-to-cart-btn:hover { background-color: var(--secondary); }
+.subservice-item.highlighted {
+    background-color: rgba(0, 255, 255, 0.1);
+}
+
+/* === BỔ SUNG: Định dạng cho slideshow ảnh và lightbox === */
+#modal-main-img {
+    transition: opacity 0.4s ease-in-out;
+}
+.modal-nav-btn {
+    position: absolute;
+    top: 40%;
+    transform: translateY(-50%);
+    background-color: rgba(0, 0, 0, 0.4);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 2.5rem;
+    height: 2.5rem;
+    font-size: 1.5rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+    opacity: 0;
+    transition: opacity 0.3s, background-color 0.3s;
+    z-index: 10;
+}
+#modal-image-container:hover .modal-nav-btn {
+    opacity: 1;
+}
+.modal-nav-btn:hover {
+    background-color: rgba(0, 0, 0, 0.7);
+}
+.modal-nav-btn.left-2 { left: 0.5rem; }
+.modal-nav-btn.right-2 { right: 0.5rem; }
+
+.modal-zoom-btn {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    background-color: rgba(0, 0, 0, 0.4);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 2.5rem;
+    height: 2.5rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.3s, background-color 0.3s;
+    z-index: 10;
+}
+#modal-image-container:hover .modal-zoom-btn {
+    opacity: 1;
+}
+.modal-zoom-btn:hover {
+    background-color: rgba(0, 0, 0, 0.7);
+}
+
+.lightbox-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(5px);
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease-in-out;
+}
+.lightbox-container.visible {
+    opacity: 1;
+    pointer-events: auto;
+}
+#lightbox-img {
+    max-width: 90vw;
+    max-height: 90vh;
+    object-fit: contain;
+    border-radius: 0.25rem;
+    transform: scale(0.95);
+    transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
+}
+.lightbox-container.visible #lightbox-img {
+    transform: scale(1);
+}
+.lightbox-close-btn {
+    position: absolute;
+    top: 1rem;
+    right: 2rem;
+    color: #fff;
+    font-size: 3rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+.lightbox-close-btn:hover {
+    color: var(--primary);
+}
+
+.lightbox-nav-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background-color: rgba(0, 0, 0, 0.3);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 3.5rem; /* 56px */
+    height: 3.5rem; /* 56px */
+    font-size: 2rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+    opacity: 0.7;
+    transition: opacity 0.3s, background-color 0.3s;
+    z-index: 10000;
+}
+.lightbox-nav-btn:hover {
+    background-color: rgba(0, 0, 0, 0.6);
+    opacity: 1;
+}
+.lightbox-nav-btn.left-4 { left: 1rem; }
+.lightbox-nav-btn.right-4 { right: 1rem; }
+/* === KẾT THÚC BỔ SUNG === */
 
 /* --- Giỏ Hàng & Form --- */
 .floating-cart-btn { position: fixed; bottom: 2rem; right: 2rem; z-index: 99; width: 60px; height: 60px; background: var(--primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 25px var(--glow-color); cursor: pointer; transition: transform 0.3s ease; animation: pulse 2.5s infinite cubic-bezier(0.4, 0, 0.6, 1); }
@@ -87,7 +262,21 @@ header.scrolled {
 .quantity-btn { width: 1.5rem; height: 1.5rem; border: none; background: none; color: white; cursor: pointer; }
 .cart-panel-footer { padding: 1.5rem; border-top: 1px solid var(--border-color); background-color: #050510; flex-shrink: 0; }
 .form-label { display: block; font-size: 0.875rem; color: var(--primary); margin-bottom: 0.5rem; }
-.form-input { width: 100%; background-color: rgba(255,255,255,0.1); border: 1px solid var(--border-color); color: white; padding: 0.75rem; border-radius: 0.25rem; }
+.form-input { width: 100%; background-color: rgba(255,255,255,0.1); border: 1px solid var(--border-color); color: white; padding: 0.75rem; border-radius: 0.25rem; transition: all 0.2s; }
+
+/* === BỔ SUNG: Định dạng cho form khi có lỗi === */
+.form-input.invalid {
+    border-color: var(--error-color);
+    box-shadow: 0 0 8px rgba(255, 107, 107, 0.5);
+}
+.form-error {
+    color: var(--error-color);
+    font-size: 0.8rem;
+    margin-top: 0.35rem;
+    height: 1em; /* Giữ chiều cao ổn định */
+}
+/* === KẾT THÚC BỔ SUNG === */
+
 
 /* === BỔ SUNG & THAY ĐỔI: ĐỊNH DẠNG RIÊNG CHO NÚT GỬI YÊU CẦU === */
 .submit-btn-styling {
