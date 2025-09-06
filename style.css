@@ -83,7 +83,7 @@ header.scrolled {
 .section-glow { width: 100px; height: 2px; background: var(--primary); margin: 1rem auto; border-radius: 1px; box-shadow: 0 0 10px var(--glow-color); }
 
 /* --- Hiệu ứng thẻ Dịch Vụ & Dự Án --- */
-.service-card, .project-card {
+.service-card {
     background: var(--card-bg);
     border: 1px solid var(--border-color);
     position: relative;
@@ -93,11 +93,11 @@ header.scrolled {
     border-radius: 0.5rem;
     backdrop-filter: blur(3px); /* Thêm hiệu ứng blur nhẹ để nổi bật trên nền động */
 }
-.service-card::before, .project-card::before {
+.service-card::before {
     content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0; border-radius: 0.5rem; border: 2px solid transparent; background: linear-gradient(var(--primary), var(--secondary)) border-box; -webkit-mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0); -webkit-mask-composite: destination-out; mask-composite: exclude; opacity: 0; transition: opacity 0.3s ease-in-out; z-index: -1;
 }
-.service-card:hover::before, .project-card:hover::before { opacity: 1; }
-.service-card:hover, .project-card:hover { box-shadow: 0 0 30px rgba(0, 255, 255, 0.3); }
+.service-card:hover::before { opacity: 1; }
+.service-card:hover { box-shadow: 0 0 30px rgba(0, 255, 255, 0.3); }
 
 /* --- Modal Chi Tiết Dịch Vụ --- */
 .modal-container { position: fixed; inset: 0; z-index: 100; display: flex; align-items: center; justify-content: center; background-color: rgba(0, 0, 0, 0.7); backdrop-filter: blur(5px); opacity: 0; pointer-events: none; transition: opacity 0.3s ease-in-out; }
@@ -281,6 +281,54 @@ header.scrolled {
 }
 /* === KẾT THÚC BỔ SUNG === */
 
+/* --- BỔ SUNG: Định dạng cho Gallery Dự án Tiêu biểu --- */
+.project-gallery {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    grid-auto-rows: 200px; /* Tăng chiều cao cơ bản của mỗi hàng */
+    grid-auto-flow: dense; /* Lấp đầy các khoảng trống một cách thông minh */
+    gap: 1rem; /* 16px */
+}
+
+.project-item {
+    overflow: hidden;
+    border-radius: 0.5rem; /* 8px */
+    position: relative;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+    transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1), box-shadow 0.4s ease;
+}
+
+.project-item:hover {
+    transform: scale(1.05);
+    box-shadow: 0 10px 30px rgba(0, 255, 255, 0.4);
+    z-index: 10;
+}
+
+.project-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.4s ease;
+}
+
+.project-item:hover img {
+    transform: scale(1.1);
+}
+
+/* Các kích thước chênh lệch để tạo bố cục masonry */
+.project-item-wide {
+    grid-column: span 2;
+}
+
+.project-item-tall {
+    grid-row: span 2;
+}
+
+.project-item-large {
+    grid-column: span 2;
+    grid-row: span 2;
+}
+/* --- KẾT THÚC BỔ SUNG --- */
 
 /* --- Giỏ Hàng & Form --- */
 .floating-cart-btn { position: fixed; bottom: 2rem; right: 2rem; z-index: 99; width: 60px; height: 60px; background: var(--primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 25px var(--glow-color); cursor: pointer; transition: transform 0.3s ease; animation: pulse 2.5s infinite cubic-bezier(0.4, 0, 0.6, 1); }

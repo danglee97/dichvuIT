@@ -4,8 +4,9 @@
 // ===================================================================
 
 document.addEventListener('DOMContentLoaded', () => {
-    initCoreEffects();
-    initServiceAndCart();
+    // THAY ĐỔI: Bắt lại observer để truyền cho các hàm khác
+    const observer = initCoreEffects();
+    initServiceAndCart(observer);
 });
 
 // ===================================================================
@@ -61,6 +62,7 @@ function initCoreEffects() {
 
     const container = document.getElementById('hero-canvas');
     if (container && window.THREE) {
+        // ... (Phần code Three.js không thay đổi, giữ nguyên)
         let scene, camera, renderer, particles, lines, mouseX = 0, mouseY = 0;
         let windowHalfX = window.innerWidth / 2, windowHalfY = window.innerHeight / 2;
         scene = new THREE.Scene();
@@ -121,12 +123,15 @@ function initCoreEffects() {
         });
         animate();
     }
+    
+    // THAY ĐỔI: Trả về observer để các hàm khác có thể sử dụng
+    return observer;
 }
 
 // ===================================================================
 //  MODULE 2: DỊCH VỤ, GIỎ HÀNG VÀ FORM
 // ===================================================================
-async function initServiceAndCart() {
+async function initServiceAndCart(observer) { // THAY ĐỔI: Nhận observer làm tham số
     const appsScriptUrl = 'https://script.google.com/macros/s/AKfycbyIremqvgCwYcVxsf09X-LbR1JRHZipuUr3xq9z-ZrGzaeXqgjxogkd3QyqKx_fYmQv/exec';
     let servicesData = [], cart = JSON.parse(localStorage.getItem('minhdangCart')) || [];
     let currentServiceInModal = null;
@@ -136,8 +141,9 @@ async function initServiceAndCart() {
     let currentImages = [];
 
     const serviceList = document.getElementById('service-list');
-    const serviceLoader = document.getElementById('service-loader'); // THAY ĐỔI: Thêm hằng số cho loader
+    const serviceLoader = document.getElementById('service-loader');
     const modal = document.getElementById('service-modal');
+    // ... (các hằng số khác không thay đổi)
     const closeModalBtn = document.getElementById('close-modal-btn');
     const cartIconContainer = document.getElementById('cart-icon-container');
     const cartPanel = document.getElementById('cart-panel-container');
@@ -154,13 +160,61 @@ async function initServiceAndCart() {
     const nameError = document.getElementById('nameError');
     const phoneError = document.getElementById('phoneError');
     const modalSubservicesList = document.getElementById('modal-subservices-list');
-    
     const lightbox = document.getElementById('image-lightbox');
     const lightboxImg = document.getElementById('lightbox-img');
     const closeLightboxBtn = document.getElementById('close-lightbox-btn');
     const zoomBtn = document.getElementById('zoom-image-btn');
     const prevLightboxBtn = document.getElementById('prev-lightbox-btn');
     const nextLightboxBtn = document.getElementById('next-lightbox-btn');
+
+
+    // BỔ SUNG: Hàm render gallery ảnh dự án
+    function renderProjectsGallery() {
+        if (!servicesData || servicesData.length === 0) return;
+
+        const galleryContainer = document.getElementById('project-gallery-container');
+        if (!galleryContainer) return;
+
+        // 1. Thu thập tất cả URL ảnh từ các dịch vụ con và loại bỏ ảnh trùng lặp
+        const allImages = [...new Set(servicesData.flatMap(service =>
+            service.subServices.flatMap(sub => sub.images || [])
+        ).filter(Boolean))];
+
+        if (allImages.length === 0) {
+            galleryContainer.innerHTML = '<p class="text-center col-span-full">Chưa có hình ảnh dự án nào.</p>';
+            return;
+        }
+
+        // 2. Xáo trộn thứ tự các ảnh
+        for (let i = allImages.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [allImages[i], allImages[j]] = [allImages[j], allImages[i]];
+        }
+
+        // 3. Chọn ra 9 ảnh và xác định bố cục cho từng ảnh để tạo sự cân đối
+        const imageCount = Math.min(allImages.length, 9);
+        const selectedImages = allImages.slice(0, imageCount);
+        
+        const layoutPatterns = [
+            'project-item-large', 'project-item-normal', 'project-item-tall',
+            'project-item-normal', 'project-item-wide', 'project-item-normal',
+            'project-item-tall', 'project-item-normal', 'project-item-wide'
+        ];
+
+        // 4. Tạo và chèn HTML cho gallery
+        galleryContainer.innerHTML = selectedImages.map((imgUrl, index) => {
+            const layoutClass = layoutPatterns[index % layoutPatterns.length];
+            return `
+                <div class="project-item ${layoutClass} fade-in">
+                    <img src="${imgUrl}" alt="Dự án tiêu biểu ${index + 1}" loading="lazy">
+                </div>
+            `;
+        }).join('');
+
+        // 5. Kích hoạt hiệu ứng fade-in cho các ảnh vừa được thêm vào
+        galleryContainer.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+    }
+
 
     try {
         const response = await fetch(appsScriptUrl);
@@ -171,12 +225,14 @@ async function initServiceAndCart() {
         console.error("Lỗi khi tải dữ liệu:", error);
         serviceList.innerHTML = `<p class="text-center text-red-400 col-span-full">Không thể tải dữ liệu.</p>`;
     } finally {
-        // THAY ĐỔI: Luôn ẩn loader sau khi tải xong (thành công hoặc thất bại)
         if (serviceLoader) {
             serviceLoader.classList.add('is-hidden');
         }
+        // THAY ĐỔI: Gọi hàm render gallery dự án sau khi có dữ liệu
+        renderProjectsGallery();
     }
 
+    // ... (Toàn bộ các hàm còn lại: validateForm, renderCart, openModal, v.v... không thay đổi)
     function validateForm() {
         const phoneRegex = /^0\d{9}$/;
         const nameRegex = /^[a-zA-ZàáâãèéêìíòóôõùúăđĩũơưăạảấầẩẫậắằẳẵặẹẻẽếềểễệỉịọỏốồổỗộớờởỡợụủứừửữựỳýỵỷỹĐ\s]+$/;
