@@ -1,171 +1,147 @@
+/* ======================================================
+   STYLE.CSS - PHIÊN BẢN HOÀN CHỈNH
+   Bao gồm style gốc và các cập nhật mới.
+   ====================================================== */
+
+/* --- Biến màu và Font chữ --- */
 :root {
     --dark-bg: #0a0a1a;
     --primary: #00ffff; /* Cyan */
     --secondary: #ff00ff; /* Magenta */
     --glow-color: rgba(0, 255, 255, 0.75);
     --card-bg: rgba(10, 10, 26, 0.5);
+    --border-color: rgba(0, 255, 255, 0.2);
 }
+
+/* === BỔ SUNG: TĂNG CỠ CHỮ TOÀN TRANG === */
+html {
+    font-size: 105%; /* Tăng cỡ chữ gốc lên 5%, ảnh hưởng đến tất cả các đơn vị rem */
+}
+/* === KẾT THÚC BỔ SUNG === */
 
 body {
     font-family: 'Roboto', sans-serif;
-    background-color: var(--dark-bg);
+    background-color: var(--dark-bg); /* Giữ màu nền gốc làm fallback */
     color: #E0E0E0;
     overflow-x: hidden;
 }
-
-/* Custom scrollbar for a techy feel */
-::-webkit-scrollbar {
-    width: 8px;
-}
-::-webkit-scrollbar-track {
-    background: var(--dark-bg);
-}
-::-webkit-scrollbar-thumb {
-    background: var(--primary);
-    border-radius: 4px;
-}
-::-webkit-scrollbar-thumb:hover {
-    background: #fff;
-}
-
-/* Updated font with Vietnamese support */
 h1, h2, h3, .font-tech {
     font-family: 'Exo 2', sans-serif;
     text-shadow: 0 0 5px var(--glow-color);
 }
 
-.header-glass {
-    background: rgba(10, 10, 26, 0.5);
+/* --- Các thành phần chung --- */
+header.scrolled {
+    background: rgba(10, 10, 26, 0.8);
     backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border-bottom: 1px solid rgba(0, 255, 255, 0.2);
+    border-bottom: 1px solid var(--border-color);
 }
+.hero-section { position: relative; height: 100vh; display: flex; align-items: center; justify-content: center; text-align: center; overflow: hidden; background: transparent; }
+.fade-in { opacity: 0; transform: translateY(20px); transition: opacity 0.6s ease-out, transform 0.6s ease-out; }
+.fade-in.visible { opacity: 1; transform: translateY(0); }
+.section-glow { width: 100px; height: 2px; background: var(--primary); margin: 1rem auto; border-radius: 1px; box-shadow: 0 0 10px var(--glow-color); }
 
-/* Hero Section Interactive Background */
-#hero-canvas {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    z-index: 0;
-}
-
-.hero-section {
-    position: relative;
-    height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    overflow: hidden;
-    background-image: radial-gradient(circle, rgba(0, 255, 255, 0.1) 0%, transparent 70%);
-}
-
-.hero-content {
-    position: relative;
-    z-index: 10;
-}
-
-.typing-cursor {
-    display: inline-block;
-    width: 3px;
-    height: 1em;
-    background-color: var(--primary);
-    animation: blink 0.7s infinite;
-    vertical-align: middle;
-}
-
-@keyframes blink {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0; }
-}
-
-.cta-button {
-    background: linear-gradient(45deg, var(--primary), var(--secondary));
-    border: none;
-    color: var(--dark-bg);
-    text-shadow: none;
-    position: relative;
-    overflow: hidden;
-    transition: all 0.3s ease;
-}
-.cta-button:hover {
-    transform: scale(1.05) translateY(-3px);
-    box-shadow: 0 0 25px var(--glow-color);
-}
-
-/* Modern Service Cards with 3D Tilt Effect */
-.service-card {
+/* --- Hiệu ứng thẻ Dịch Vụ & Dự Án --- */
+.service-card, .project-card {
     background: var(--card-bg);
-    border: 1px solid rgba(0, 255, 255, 0.2);
-    backdrop-filter: blur(5px);
-    -webkit-backdrop-filter: blur(5px);
+    border: 1px solid var(--border-color);
     position: relative;
     z-index: 1;
     transition: all 0.3s ease-out;
-    will-change: transform; /* Performance optimization */
+    will-change: transform;
+    border-radius: 0.5rem;
+    backdrop-filter: blur(3px); /* Thêm hiệu ứng blur nhẹ để nổi bật trên nền động */
+}
+.service-card::before, .project-card::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0; border-radius: 0.5rem; border: 2px solid transparent; background: linear-gradient(var(--primary), var(--secondary)) border-box; -webkit-mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0); -webkit-mask-composite: destination-out; mask-composite: exclude; opacity: 0; transition: opacity 0.3s ease-in-out; z-index: -1;
+}
+.service-card:hover::before, .project-card:hover::before { opacity: 1; }
+.service-card:hover, .project-card:hover { box-shadow: 0 0 30px rgba(0, 255, 255, 0.3); }
+
+/* --- Modal Chi Tiết Dịch Vụ --- */
+.modal-container { position: fixed; inset: 0; z-index: 100; display: flex; align-items: center; justify-content: center; background-color: rgba(0, 0, 0, 0.7); backdrop-filter: blur(5px); opacity: 0; pointer-events: none; transition: opacity 0.3s ease-in-out; }
+.modal-container.visible { opacity: 1; pointer-events: auto; }
+.modal-content { position: relative; width: 90%; max-width: 56rem; background: var(--dark-bg); border-radius: 0.5rem; padding: 2rem; transform: scale(0.95); transition: transform 0.3s ease-in-out; }
+.modal-container.visible .modal-content { transform: scale(1); }
+.modal-close-btn { position: absolute; top: -1rem; right: -1rem; width: 2.5rem; height: 2.5rem; background-color: var(--primary); color: black; border-radius: 9999px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; line-height: 1; border: none; cursor: pointer; }
+.modal-loader { text-align: center; padding: 4rem 0; color: white; }
+.modal-thumbnail { width: 80px; height: 50px; object-cover; border-radius: 4px; cursor: pointer; border: 2px solid transparent; transition: border-color 0.2s; }
+.modal-thumbnail.active, .modal-thumbnail:hover { border-color: var(--primary); }
+.subservice-item { display: flex; justify-content: space-between; align-items: center; padding: 1rem 0; border-bottom: 1px solid var(--border-color); }
+.subservice-info { flex-grow: 1; padding-right: 1rem; }
+.subservice-action { text-align: right; flex-shrink: 0; }
+.add-to-cart-btn { background-color: var(--primary); color: black; font-weight: bold; padding: 0.5rem 1rem; border-radius: 9999px; border: none; cursor: pointer; transition: background-color 0.2s; margin-top: 0.5rem; }
+.add-to-cart-btn:hover { background-color: var(--secondary); }
+
+/* --- Giỏ Hàng & Form --- */
+.floating-cart-btn { position: fixed; bottom: 2rem; right: 2rem; z-index: 99; width: 60px; height: 60px; background: var(--primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 25px var(--glow-color); cursor: pointer; transition: transform 0.3s ease; animation: pulse 2.5s infinite cubic-bezier(0.4, 0, 0.6, 1); }
+.floating-cart-btn:hover { transform: scale(1.1); animation-play-state: paused; }
+#cart-count { top: -4px; right: -4px; }
+.cart-panel-container { position: fixed; top: 0; right: 0; height: 100%; width: 100%; max-width: 400px; z-index: 110; background-color: #050510; transform: translateX(100%); transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1); display: flex; flex-direction: column; border-left: 1px solid var(--border-color); }
+.cart-panel-container.visible { transform: translateX(0); }
+.cart-panel-header { display: flex; justify-content: space-between; align-items: center; padding: 1.5rem; border-bottom: 1px solid var(--border-color); flex-shrink: 0; }
+.cart-panel-body { padding: 1.5rem; flex-grow: 1; overflow-y: auto; }
+.cart-item { display: flex; gap: 1rem; align-items: center; margin-bottom: 1rem; }
+.cart-item-info { flex-grow: 1; }
+.cart-item-quantity { display: flex; align-items: center; gap: 0.5rem; background-color: rgba(255,255,255,0.1); padding: 0.25rem; border-radius: 99px; }
+.quantity-btn { width: 1.5rem; height: 1.5rem; border: none; background: none; color: white; cursor: pointer; }
+.cart-panel-footer { padding: 1.5rem; border-top: 1px solid var(--border-color); background-color: #050510; flex-shrink: 0; }
+.form-label { display: block; font-size: 0.875rem; color: var(--primary); margin-bottom: 0.5rem; }
+.form-input { width: 100%; background-color: rgba(255,255,255,0.1); border: 1px solid var(--border-color); color: white; padding: 0.75rem; border-radius: 0.25rem; }
+
+/* === BỔ SUNG & THAY ĐỔI: ĐỊNH DẠNG RIÊNG CHO NÚT GỬI YÊU CẦU === */
+.submit-btn-styling {
+    background: linear-gradient(90deg, var(--primary), var(--secondary));
+    color: black;
+    font-weight: 700; /* bold */
+    padding-top: 0.85rem;
+    padding-bottom: 0.85rem;
+    border-radius: 9999px; /* pill shape */
+    border: none;
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    box-shadow: 0 0 15px var(--glow-color), 0 0 25px var(--glow-color);
+    transition: all 0.3s ease-in-out;
 }
 
-.service-card::before {
-    content: '';
-    position: absolute;
+.submit-btn-styling:hover {
+    transform: scale(1.05) translateY(-2px);
+    box-shadow: 0 0 20px var(--secondary), 0 0 35px var(--secondary);
+}
+
+.submit-btn-styling:disabled {
+    background: #4a5568;
+    color: #a0aec0;
+    cursor: not-allowed;
+    box-shadow: none;
+    transform: none;
+}
+/* === KẾT THÚC BỔ SUNG === */
+
+/* --- Các lớp tiện ích và hiệu ứng động --- */
+.is-hidden { display: none !important; }
+.flying-img { position: fixed; z-index: 9999; border-radius: 0.25rem; object-fit: cover; transition: all 0.6s cubic-bezier(0.55, 0, 1, 0.45); opacity: 1; transform: scale(1); }
+@keyframes shake { 10%, 90% { transform: translate3d(-1px, 0, 0); } 20%, 80% { transform: translate3d(2px, 0, 0); } 30%, 50%, 70% { transform: translate3d(-3px, 0, 0); } 40%, 60% { transform: translate3d(3px, 0, 0); } }
+.shake { animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both; }
+@keyframes pulse { 0%, 100% { transform: scale(1); box-shadow: 0 0 25px var(--glow-color); } 50% { transform: scale(1.05); box-shadow: 0 0 40px var(--secondary); } }
+
+/* ======================================================
+   CẬP NHẬT: HIỆU ỨNG NỀN TOÀN TRANG
+   ====================================================== */
+#hero-canvas {
+    position: fixed; /* Cố định canvas với khung nhìn */
     top: 0;
     left: 0;
-    right: 0;
-    bottom: 0;
-    border-radius: 0.5rem;
-    border: 2px solid transparent;
-    background: linear-gradient(var(--primary), var(--secondary)) border-box;
-    -webkit-mask: 
-        linear-gradient(#fff 0 0) padding-box, 
-        linear-gradient(#fff 0 0);
-    -webkit-mask-composite: destination-out;
-    mask-composite: exclude;
-    opacity: 0;
-    transition: opacity 0.3s ease-in-out;
+    width: 100vw;
+    height: 100vh;
+    z-index: -1; /* Đưa canvas xuống lớp dưới cùng */
 }
 
-.service-card:hover::before {
-    opacity: 1;
-}
-.service-card:hover {
-     box-shadow: 0 0 30px rgba(0, 255, 255, 0.3);
-}
-
-.section-glow {
-    width: 100px;
-    height: 2px;
-    background: var(--primary);
-    margin: 1rem auto;
-    border-radius: 1px;
-    box-shadow: 0 0 10px var(--glow-color);
+/* Các section nội dung cần có nền bán trong suốt để thấy hiệu ứng bên dưới */
+#services, #projects, #contact, footer {
+    background-color: rgba(10, 10, 26, 0.95); /* Màu nền gốc với 95% độ mờ */
+    position: relative; /* Cần thiết để z-index hoạt động đúng */
+    z-index: 1; /* Đảm bảo các section này nằm trên canvas */
 }
 
-/* Project Image Hover Effect */
-.project-card .overlay {
-    background: linear-gradient(to top, rgba(10, 10, 26, 0.95) 0%, transparent 100%);
-    opacity: 0;
-    transition: opacity 0.4s ease;
-}
-.project-card:hover .overlay {
-    opacity: 1;
-}
-.project-card img {
-    transition: transform 0.4s ease;
-}
-.project-card:hover img {
-    transform: scale(1.1);
-}
-
-/* Fade-in animation */
-.fade-in {
-    opacity: 0;
-    transform: translateY(30px);
-    transition: opacity 0.6s ease-out, transform 0.6s ease-out;
-}
-
-.fade-in.visible {
-    opacity: 1;
-    transform: translateY(0);
-}

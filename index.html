@@ -4,264 +4,161 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
-    <!-- ================== SEO NÂNG CAO (Updated Domain) ================== -->
+    <!-- SEO & Metadata -->
     <title>Minh Đăng IT - Dịch Vụ IT & PC Chuyên Nghiệp Tại Vĩnh Long</title>
-    <meta name="description" content="Minh Đăng IT cung cấp dịch vụ sửa chữa máy tính, lắp ráp PC Gaming, lắp đặt camera an ninh và giải pháp mạng chuyên nghiệp, uy tín tại Càng Long, Vĩnh Long. Hỗ trợ nhanh chóng, giá cả hợp lý.">
-    <meta name="keywords" content="sửa máy tính vĩnh long, lắp pc càng long, camera vĩnh long, dịch vụ it vĩnh long, máy tính minh đăng, an ninh mạng, thiết kế web chuyên nghiệp">
-    <meta name="author" content="Minh Đăng IT">
+    <meta name="description" content="Minh Đăng IT cung cấp dịch vụ sửa chữa máy tính, lắp ráp PC Gaming, lắp đặt camera an ninh và giải pháp mạng chuyên nghiệp, uy tín tại Càng Long, Vĩnh Long.">
+    <meta name="keywords" content="sửa máy tính vĩnh long, lắp pc càng long, camera vĩnh long, dịch vụ it vĩnh long, máy tính minh đăng">
     <link rel="canonical" href="https://dichvu.leminhdang.com/">
+    <link rel="icon" href="img/favicon.png">
 
-    <!-- Open Graph Meta Tags (cho Facebook, Zalo...) -->
-    <meta property="og:title" content="Minh Đăng IT - Dịch Vụ IT & PC Chuyên Nghiệp Tại Vĩnh Long">
-    <meta property="og:description" content="Giải pháp công nghệ toàn diện: Sửa chữa PC, lắp đặt camera, an ninh mạng và hơn thế nữa.">
-    <meta property="og:image" content="img/hero-bg.jpg">
-    <meta property="og:url" content="https://dichvu.leminhdang.com/">
-    <meta property="og:type" content="website">
-    <meta property="og:locale" content="vi_VN">
-
-    <!-- Twitter Card Meta Tags -->
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Minh Đăng IT - Dịch Vụ IT & PC Chuyên Nghiệp Tại Vĩnh Long">
-    <meta name="twitter:description" content="Giải pháp công nghệ toàn diện: Sửa chữa PC, lắp đặt camera, an ninh mạng và hơn thế nữa.">
-    <meta name="twitter:image" content="img/hero-bg.jpg">
-    
-    <!-- ================== END SEO ================== -->
-
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- Google Fonts -->
+    <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@700;900&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@500;700;900&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
     
-    <!-- Favicon -->
-    <link rel="icon" href="img/favicon.png">
-    
-    <!-- External CSS -->
-    <link rel="stylesheet" href="style.css">
-    
-    <!-- Three.js Library -->
+    <!-- Libraries & CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-
-    <!-- JSON-LD Structured Data for Google (Updated) -->
-    <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "LocalBusiness",
-      "name": "Minh Đăng IT",
-      "image": "img/logo.jpg",
-      "@id": "https://dichvu.leminhdang.com/",
-      "url": "https://dichvu.leminhdang.com/",
-      "telephone": "0899977870",
-      "priceRange": "$$",
-      "address": {
-        "@type": "PostalAddress",
-        "streetAddress": "Càng Long",
-        "addressLocality": "Càng Long",
-        "addressRegion": "Vĩnh Long",
-        "postalCode": "89000",
-        "addressCountry": "VN"
-      },
-      "geo": {
-        "@type": "GeoCoordinates",
-        "latitude": 10.1245,
-        "longitude": 106.2235
-      },
-      "openingHoursSpecification": {
-        "@type": "OpeningHoursSpecification",
-        "dayOfWeek": [
-          "Monday",
-          "Tuesday",
-          "Wednesday",
-          "Thursday",
-          "Friday",
-          "Saturday",
-          "Sunday"
-        ],
-        "opens": "08:00",
-        "closes": "20:00"
-      },
-      "sameAs": [
-        "https://www.facebook.com/your-facebook-page" // Thay link Facebook của bạn vào đây
-      ] 
-    }
-    </script>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body class="bg-dark-bg text-gray-200">
 
     <!-- Header -->
-    <header id="header" class="fixed top-0 left-0 w-full z-50 p-4 transition-all duration-300">
-        <div class="container mx-auto flex justify-between items-center">
-            <a href="#home" class="block" aria-label="Trang chủ Minh Đăng IT">
-                <img src="img/logo.jpg" alt="Logo Minh Đăng IT" class="h-12 w-auto">
+    <header id="header" class="fixed top-0 left-0 w-full z-50 transition-all duration-300">
+        <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <a href="#" aria-label="Trang chủ">
+                <img src="img/logo.jpg" alt="Logo Minh Đăng IT" class="h-10">
             </a>
-            <nav class="hidden lg:flex space-x-8">
-                <a href="#services" class="text-white hover:text-primary transition-colors duration-300 font-medium">Dịch Vụ</a>
-                <a href="#about" class="text-white hover:text-primary transition-colors duration-300 font-medium">Giới Thiệu</a>
-                <a href="#projects" class="text-white hover:text-primary transition-colors duration-300 font-medium">Dự Án</a>
-                <a href="#contact" class="text-white hover:text-primary transition-colors duration-300 font-medium">Liên Hệ</a>
-            </nav>
-            <button id="mobile-menu-button" class="lg:hidden text-white focus:outline-none" aria-label="Mở menu">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
-            </button>
-        </div>
+            <div class="hidden md:flex items-center space-x-8">
+                <a href="#services" class="hover:text-primary transition-colors">Dịch Vụ</a>
+                <a href="#projects" class="hover:text-primary transition-colors">Dự Án</a>
+                <a href="#contact" class="hover:text-primary transition-colors">Liên Hệ</a>
+            </div>
+            <div class="md:hidden"></div> <!-- Placeholder for layout -->
+        </nav>
     </header>
 
-    <!-- Mobile Menu -->
-    <div id="mobile-menu" class="hidden lg:hidden fixed top-0 left-0 w-full h-full bg-dark-bg bg-opacity-95 z-40 flex flex-col items-center justify-center space-y-8">
-        <a href="#services" class="text-2xl text-white hover:text-primary transition-colors duration-300 font-tech">Dịch Vụ</a>
-        <a href="#about" class="text-2xl text-white hover:text-primary transition-colors duration-300 font-tech">Giới Thiệu</a>
-        <a href="#projects" class="text-2xl text-white hover:text-primary transition-colors duration-300 font-tech">Dự Án</a>
-        <a href="#contact" class="text-2xl text-white hover:text-primary transition-colors duration-300 font-tech">Liên Hệ</a>
-    </div>
+    <main>
+        <!-- Hero Section -->
+        <section class="hero-section">
+            <div id="hero-canvas" class="absolute inset-0 z-0"></div>
+            <div class="relative z-10 p-6 text-center">
+                <h1 id="main-title" class="text-4xl md:text-6xl font-black text-white uppercase tracking-wider mb-4"></h1>
+                <h2 id="sub-title" class="text-xl md:text-2xl font-semibold text-primary"></h2>
+            </div>
+        </section>
 
-    <!-- Hero Section -->
-    <section id="home" class="hero-section text-white">
-        <canvas id="hero-canvas"></canvas>
-        <div class="hero-content p-6">
-            <h1 id="hero-title" class="text-4xl md:text-6xl lg:text-7xl font-extrabold leading-tight tracking-wider uppercase">
-                <span class="typing-text"></span><span class="typing-cursor"></span>
-            </h1>
-            <p class="mt-4 text-lg md:text-xl text-gray-400 max-w-2xl mx-auto">
-                Đối tác công nghệ đáng tin cậy, mang đến giải pháp IT toàn diện và tương lai.
-            </p>
-            <a href="#services" class="cta-button mt-8 inline-block px-10 py-4 rounded-full font-bold text-lg transition-transform duration-300 shadow-lg">
-                Khám Phá Ngay
-            </a>
-        </div>
-    </section>
+        <!-- Services Section -->
+        <section id="services" class="py-24">
+            <div class="container mx-auto px-6">
+                <div class="text-center mb-16 fade-in">
+                    <h2 class="text-4xl md:text-5xl font-extrabold text-white">Dịch Vụ Cốt Lõi</h2>
+                    <div class="section-glow"></div>
+                </div>
+                <div id="service-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <!-- Các thẻ dịch vụ sẽ được JavaScript chèn vào đây -->
+                </div>
+            </div>
+        </section>
 
-    <!-- Services Section -->
-    <section id="services" class="py-24 bg-dark-bg">
-        <div class="container mx-auto px-6">
-            <div class="text-center mb-16 fade-in">
-                <h2 class="text-4xl md:text-5xl font-extrabold text-white">Dịch Vụ Cốt Lõi</h2>
-                <div class="section-glow"></div>
-                <p class="text-gray-400 max-w-3xl mx-auto mt-4 text-lg">
-                    Chúng tôi biến những thách thức công nghệ thành lợi thế cạnh tranh cho bạn.
-                </p>
-            </div>
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                 <div class="service-card rounded-lg p-8 flex flex-col items-center text-center fade-in">
-                    <div class="p-4 bg-black bg-opacity-20 rounded-full mb-4">
-                       <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-primary"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 0 2l-.15.08a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.38a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1 0-2l.15-.08a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path><circle cx="12" cy="12" r="3"></circle></svg>
-                    </div>
-                    <h3 class="text-xl font-bold text-white mt-2">Sửa Chữa & Tối Ưu PC</h3>
-                    <p class="mt-2 text-gray-400">Khắc phục sự cố, nâng cấp phần cứng và tối ưu hiệu suất máy tính của bạn.</p>
+        <!-- Projects Section -->
+        <section id="projects" class="py-24 bg-dark-bg">
+            <div class="container mx-auto px-6">
+                <div class="text-center mb-16 fade-in">
+                    <h2 class="text-4xl md:text-5xl font-extrabold text-white">Dự Án Tiêu Biểu</h2>
+                    <div class="section-glow"></div>
                 </div>
-                <div class="service-card rounded-lg p-8 flex flex-col items-center text-center fade-in" style="transition-delay: 100ms;">
-                    <div class="p-4 bg-black bg-opacity-20 rounded-full mb-4">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-primary"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"></path><path d="m14 14-4-4"></path><path d="m14 10-4 4"></path></svg>
-                    </div>
-                    <h3 class="text-xl font-bold text-white mt-2">Xây Dựng Cấu Hình PC</h3>
-                    <p class="mt-2 text-gray-400">Tư vấn và lắp ráp PC Gaming, đồ họa, văn phòng theo yêu cầu và ngân sách.</p>
-                </div>
-                <div class="service-card rounded-lg p-8 flex flex-col items-center text-center fade-in" style="transition-delay: 200ms;">
-                    <div class="p-4 bg-black bg-opacity-20 rounded-full mb-4">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-primary"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"></path><circle cx="12" cy="12" r="3"></circle></svg>
-                    </div>
-                    <h3 class="text-xl font-bold text-white mt-2">Camera & Smarthome</h3>
-                    <p class="mt-2 text-gray-400">Giải pháp an ninh giám sát và nhà thông minh, hiện đại và tiện nghi.</p>
-                </div>
-                 <div class="service-card rounded-lg p-8 flex flex-col items-center text-center fade-in" style="transition-delay: 300ms;">
-                    <div class="p-4 bg-black bg-opacity-20 rounded-full mb-4">
-                       <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-primary"><path d="M18 6a4 4 0 0 0-4-4h-4a4 4 0 0 0-4 4v12a4 4 0 0 0 4 4h4a4 4 0 0 0 4-4Z"></path><path d="M6 18h.01"></path><path d="M6 14h.01"></path><path d="M6 10h.01"></path><path d="M6 6h.01"></path></svg>
-                    </div>
-                    <h3 class="text-xl font-bold text-white mt-2">Hệ Thống Mạng & Server</h3>
-                    <p class="mt-2 text-gray-400">Thiết kế, triển khai hạ tầng mạng và server cho doanh nghiệp, đảm bảo ổn định.</p>
-                </div>
-                <div class="service-card rounded-lg p-8 flex flex-col items-center text-center fade-in" style="transition-delay: 400ms;">
-                     <div class="p-4 bg-black bg-opacity-20 rounded-full mb-4">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-primary"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"></path></svg>
-                    </div>
-                    <h3 class="text-xl font-bold text-white mt-2">An Ninh Mạng</h3>
-                    <p class="mt-2 text-gray-400">Bảo vệ dữ liệu và hệ thống của bạn trước các mối đe dọa từ không gian mạng.</p>
-                </div>
-                <div class="service-card rounded-lg p-8 flex flex-col items-center text-center fade-in" style="transition-delay: 500ms;">
-                    <div class="p-4 bg-black bg-opacity-20 rounded-full mb-4">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-primary"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
-                    </div>
-                    <h3 class="text-xl font-bold text-white mt-2">Thiết Kế Web & App</h3>
-                    <p class="mt-2 text-gray-400">Xây dựng website và ứng dụng di động hiện đại, chuẩn UI/UX và tối ưu SEO.</p>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                     <div class="project-card fade-in" data-tilt-card><img src="img/pc-gaming.jpg" alt="Dự án PC Gaming" class="w-full h-full object-cover"></div>
+                     <div class="project-card fade-in" data-tilt-card><img src="img/camera.jpg" alt="Dự án Camera an ninh" class="w-full h-full object-cover"></div>
+                     <div class="project-card fade-in" data-tilt-card><img src="img/mangvanphong.jpg" alt="Dự án mạng văn phòng" class="w-full h-full object-cover"></div>
                 </div>
             </div>
-        </div>
-    </section>
-    
-    <!-- Projects Section -->
-    <section id="projects" class="py-24 bg-dark-bg">
-        <div class="container mx-auto px-6">
-            <div class="text-center mb-16 fade-in">
-                <h2 class="text-4xl md:text-5xl font-extrabold text-white">Dự Án Tiêu Biểu</h2>
-                <div class="section-glow"></div>
-            </div>
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-                <div class="project-card group relative rounded-lg overflow-hidden fade-in shadow-2xl">
-                    <img src="img/pc-gaming.jpg" alt="Dự án lắp ráp PC Gaming cấu hình cao tại Minh Đăng IT" class="w-full h-full object-cover rounded-lg">
-                    <div class="overlay absolute inset-0 flex flex-col justify-end p-6">
-                        <h3 class="text-2xl font-bold text-white font-tech">PC Gaming RGB</h3>
-                        <p class="text-gray-300">Hệ thống PC Gaming cao cấp với tản nhiệt nước custom.</p>
-                    </div>
+        </section>
+        
+        <!-- Contact Section -->
+        <section id="contact" class="py-24">
+            <div class="container mx-auto px-6">
+                <div class="text-center mb-16 fade-in">
+                    <h2 class="text-4xl md:text-5xl font-extrabold text-white">Kết Nối Với Chúng Tôi</h2>
+                    <div class="section-glow"></div>
                 </div>
-                <div class="project-card group relative rounded-lg overflow-hidden fade-in shadow-2xl" style="transition-delay: 100ms;">
-                    <img src="img/camera.jpg" alt="Dự án lắp đặt hệ thống camera an ninh AI cho biệt thự" class="w-full h-full object-cover rounded-lg">
-                     <div class="overlay absolute inset-0 flex flex-col justify-end p-6">
-                        <h3 class="text-2xl font-bold text-white font-tech">Hệ Thống Camera AI</h3>
-                        <p class="text-gray-300">Triển khai hệ thống camera an ninh tích hợp AI cho biệt thự.</p>
-                    </div>
-                </div>
-                <div class="project-card group relative rounded-lg overflow-hidden fade-in shadow-2xl" style="transition-delay: 200ms;">
-                    <img src="img/mangvanphong.jpg" alt="Dự án thi công hạ tầng mạng cho văn phòng công ty" class="w-full h-full object-cover rounded-lg">
-                     <div class="overlay absolute inset-0 flex flex-col justify-end p-6">
-                        <h3 class="text-2xl font-bold text-white font-tech">Mạng Văn Phòng</h3>
-                        <p class="text-gray-300">Thiết kế và thi công hạ tầng mạng cho văn phòng 50 nhân sự.</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Contact Section (Updated) -->
-    <section id="contact" class="py-24 bg-dark-bg">
-        <div class="container mx-auto px-6">
-             <div class="text-center mb-16 fade-in">
-                <h2 class="text-4xl md:text-5xl font-extrabold text-white">Kết Nối Với Chúng Tôi</h2>
-                <div class="section-glow"></div>
-            </div>
-            <div class="max-w-4xl mx-auto service-card p-8 md:p-12 rounded-lg fade-in">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
-                    <div>
-                        <h3 class="text-3xl font-bold text-white mb-6 font-tech">Thông Tin Liên Hệ</h3>
-                        <div class="space-y-4 text-gray-300">
-                             <p class="flex items-start">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6 mr-3 text-primary mt-1 shrink-0"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"></path><circle cx="12" cy="10" r="3"></circle></svg>
-                                <span>Càng Long, Vĩnh Long</span>
-                            </p>
-                            <p class="flex items-center">
-                               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6 mr-3 text-primary shrink-0"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
-                                <a href="tel:0899977870" class="hover:text-primary transition-colors duration-300">089 99 77 870</a>
-                            </p>
-                            <p class="flex items-center">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6 mr-3 text-primary shrink-0"><rect x="2" y="4" width="20" height="16" rx="2"></rect><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"></path></svg>
-                                <a href="mailto:danglee@leminhdang.com" class="hover:text-primary transition-colors duration-300">danglee@leminhdang.com</a>
-                            </p>
+                <div class="max-w-4xl mx-auto service-card p-8 md:p-12 rounded-lg fade-in" data-tilt-card>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+                        <div>
+                            <h3 class="text-3xl font-bold text-white mb-6 font-tech">Thông Tin Liên Hệ</h3>
+                            <div class="space-y-4 text-gray-300">
+                                <p>Càng Long, Vĩnh Long</p>
+                                <p>089 99 77 870</p>
+                                <p>danglee@leminhdang.com</p>
+                            </div>
+                        </div>
+                        <div>
+                            <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d31487.89201993426!2d106.1824416!3d10.0253504!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x31a0117d33267d63%3A0x370f6c2f32dcfe09!2zQ8OgbmcgTG9uZywgVsSpbmggTG9uZywgVmnhu4d0IE5hbQ!5e0!3m2!1svi!2s!4v1628888888888!5m2!1svi!2s" width="100%" height="300" style="border:0;" allowfullscreen="" loading="lazy" class="rounded-lg" title="Bản đồ đến Minh Đăng IT"></iframe>
                         </div>
                     </div>
-                     <div class="w-full h-80 rounded-lg overflow-hidden">
-                        <iframe title="Bản đồ vị trí Minh Đăng IT tại Càng Long, Vĩnh Long" src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d62845.00587461196!2d106.18341604328359!3d10.126027000000004!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x31a00f1e00000001%3A0x880295175a325055!2zQ8OgbmcgTG9uZywgVsSpbmggTG9uZywgVmlldG5hbQ!5e0!3m2!1svi!2s!4v1662308655091!5m2!1svi!2s" width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="py-8 border-t border-gray-800">
+        <p class="text-center text-gray-500">&copy; 2025 Minh Đăng IT. All Rights Reserved.</p>
+    </footer>
+
+    <!-- Floating Cart Button -->
+    <div id="cart-icon-container" class="floating-cart-btn is-hidden">
+        <svg id="cart-icon" xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 text-black" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+        </svg>
+        <span id="cart-count" class="absolute -top-1 -right-1 bg-secondary text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center border-2 border-primary">0</span>
+    </div>
+
+    <!-- Service Detail Modal -->
+    <div id="service-modal" class="modal-container">
+        <div class="modal-content">
+            <button id="close-modal-btn" class="modal-close-btn" aria-label="Đóng">&times;</button>
+            <div id="modal-loader" class="modal-loader">Đang tải dữ liệu...</div>
+            <div id="modal-data" class="hidden">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div>
+                        <img id="modal-main-img" src="" alt="Hình ảnh dịch vụ" class="w-full h-auto object-cover rounded-lg aspect-video mb-4">
+                        <div id="modal-thumbnail-container" class="flex gap-2 flex-wrap"></div>
+                    </div>
+                    <div>
+                        <h3 id="modal-title" class="font-tech text-3xl font-bold text-white mb-4"></h3>
+                        <div id="modal-subservices-list" class="space-y-4 max-h-[60vh] overflow-y-auto pr-2"></div>
                     </div>
                 </div>
             </div>
         </div>
-    </section>
+    </div>
 
-    <!-- Footer -->
-    <footer class="bg-[#050510] py-6 text-center text-gray-500">
-        <p>&copy; 2025 Minh Đăng IT. All Rights Reserved. Designed for the Future.</p>
-    </footer>
+    <!-- Cart Panel -->
+    <div id="cart-panel-container" class="cart-panel-container">
+        <div class="cart-panel-header">
+            <h3 class="font-tech text-2xl text-white">Yêu Cầu Dịch Vụ</h3>
+            <button id="close-cart-btn" class="text-2xl text-white hover:text-primary" aria-label="Đóng giỏ hàng">&times;</button>
+        </div>
+        <div class="cart-panel-body">
+            <div id="cart-items-container"></div>
+            <div id="customer-form-container" class="mt-6 pt-6 border-t border-gray-700 is-hidden">
+                <form id="order-form" class="space-y-4">
+                     <div><label for="customerName" class="form-label">Họ và Tên</label><input type="text" id="customerName" name="customerName" class="form-input" required></div>
+                     <div><label for="customerPhone" class="form-label">Số Điện Thoại</label><input type="tel" id="customerPhone" name="customerPhone" class="form-input" required></div>
+                     <div><label for="customerNotes" class="form-label">Ghi Chú Thêm</label><textarea id="customerNotes" name="customerNotes" rows="3" class="form-input"></textarea></div>
+                </form>
+            </div>
+        </div>
+        <div class="cart-panel-footer">
+            <div class="flex justify-between items-center text-lg mb-4"><span>Tổng Cộng:</span><span id="cart-total" class="font-bold text-primary">0 VNĐ</span></div>
+            <button id="submit-order-btn" type="submit" form="order-form" class="submit-btn-styling w-full is-hidden">Gửi Yêu Cầu</button>
+            <div id="form-message" class="text-center mt-4"></div>
+        </div>
+    </div>
+    </div>
+    <div id="cart-overlay" class="fixed inset-0 bg-black bg-opacity-70 z-[90] opacity-0 pointer-events-none transition-opacity duration-300"></div>
 
-    <!-- External JS -->
     <script src="script.js"></script>
 </body>
 </html>
