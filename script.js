@@ -4,7 +4,6 @@
 // ===================================================================
 
 document.addEventListener('DOMContentLoaded', () => {
-    // THAY ĐỔI: Bắt lại observer để truyền cho các hàm khác
     const observer = initCoreEffects();
     initServiceAndCart(observer);
 });
@@ -13,6 +12,10 @@ document.addEventListener('DOMContentLoaded', () => {
 //  MODULE 1: CÁC HIỆU ỨNG GỐC VÀ GIAO DIỆN
 // ===================================================================
 function init3DTiltEffect() {
+    // Tắt hiệu ứng tilt trên mobile để tránh xung đột và cải thiện hiệu năng
+    const isMobile = window.matchMedia("(max-width: 768px)").matches;
+    if (isMobile) return;
+
     document.querySelectorAll('[data-tilt-card]').forEach(card => {
         if (card.dataset.tiltInitialized) return;
         card.dataset.tiltInitialized = 'true';
@@ -60,9 +63,35 @@ function initCoreEffects() {
 
     init3DTiltEffect();
 
+    // BỔ SUNG: Logic cho Menu Mobile
+    const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+    const mobileMenuPanel = document.getElementById('mobile-menu-panel');
+    const openIcon = document.getElementById('menu-open-icon');
+    const closeIcon = document.getElementById('menu-close-icon');
+    const mobileNavLinks = document.querySelectorAll('.mobile-nav-link');
+
+    if (mobileMenuBtn && mobileMenuPanel) {
+        mobileMenuBtn.addEventListener('click', () => {
+            mobileMenuPanel.classList.toggle('is-open');
+            document.body.classList.toggle('menu-open');
+            openIcon.classList.toggle('hidden');
+            closeIcon.classList.toggle('hidden');
+        });
+
+        // Đóng menu khi nhấn vào một link
+        mobileNavLinks.forEach(link => {
+            link.addEventListener('click', () => {
+                mobileMenuPanel.classList.remove('is-open');
+                document.body.classList.remove('menu-open');
+                openIcon.classList.remove('hidden');
+                closeIcon.classList.add('hidden');
+            });
+        });
+    }
+
+
     const container = document.getElementById('hero-canvas');
     if (container && window.THREE) {
-        // ... (Phần code Three.js không thay đổi, giữ nguyên)
         let scene, camera, renderer, particles, lines, mouseX = 0, mouseY = 0;
         let windowHalfX = window.innerWidth / 2, windowHalfY = window.innerHeight / 2;
         scene = new THREE.Scene();
@@ -124,14 +153,13 @@ function initCoreEffects() {
         animate();
     }
     
-    // THAY ĐỔI: Trả về observer để các hàm khác có thể sử dụng
     return observer;
 }
 
 // ===================================================================
 //  MODULE 2: DỊCH VỤ, GIỎ HÀNG VÀ FORM
 // ===================================================================
-async function initServiceAndCart(observer) { // THAY ĐỔI: Nhận observer làm tham số
+async function initServiceAndCart(observer) { 
     const appsScriptUrl = 'https://script.google.com/macros/s/AKfycbyIremqvgCwYcVxsf09X-LbR1JRHZipuUr3xq9z-ZrGzaeXqgjxogkd3QyqKx_fYmQv/exec';
     let servicesData = [], cart = JSON.parse(localStorage.getItem('minhdangCart')) || [];
     let currentServiceInModal = null;
@@ -143,7 +171,6 @@ async function initServiceAndCart(observer) { // THAY ĐỔI: Nhận observer l�
     const serviceList = document.getElementById('service-list');
     const serviceLoader = document.getElementById('service-loader');
     const modal = document.getElementById('service-modal');
-    // ... (các hằng số khác không thay đổi)
     const closeModalBtn = document.getElementById('close-modal-btn');
     const cartIconContainer = document.getElementById('cart-icon-container');
     const cartPanel = document.getElementById('cart-panel-container');
@@ -167,20 +194,17 @@ async function initServiceAndCart(observer) { // THAY ĐỔI: Nhận observer l�
     const prevLightboxBtn = document.getElementById('prev-lightbox-btn');
     const nextLightboxBtn = document.getElementById('next-lightbox-btn');
     
-    // BỔ SUNG: Các hằng số cho form liên hệ mới
     const contactForm = document.getElementById('contact-form');
     const submitContactBtn = document.getElementById('submit-contact-btn');
     const contactFormMessage = document.getElementById('contact-form-message');
 
 
-    // BỔ SUNG: Hàm render gallery ảnh dự án
     function renderProjectsGallery() {
         if (!servicesData || servicesData.length === 0) return;
 
         const galleryContainer = document.getElementById('project-gallery-container');
         if (!galleryContainer) return;
 
-        // 1. Thu thập tất cả URL ảnh từ các dịch vụ con và loại bỏ ảnh trùng lặp
         const allImages = [...new Set(servicesData.flatMap(service =>
             service.subServices.flatMap(sub => sub.images || [])
         ).filter(Boolean))];
@@ -190,13 +214,11 @@ async function initServiceAndCart(observer) { // THAY ĐỔI: Nhận observer l�
             return;
         }
 
-        // 2. Xáo trộn thứ tự các ảnh
         for (let i = allImages.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
             [allImages[i], allImages[j]] = [allImages[j], allImages[i]];
         }
 
-        // 3. Chọn ra 9 ảnh và xác định bố cục cho từng ảnh để tạo sự cân đối
         const imageCount = Math.min(allImages.length, 9);
         const selectedImages = allImages.slice(0, imageCount);
         
@@ -206,7 +228,6 @@ async function initServiceAndCart(observer) { // THAY ĐỔI: Nhận observer l�
             'project-item-tall', 'project-item-normal', 'project-item-wide'
         ];
 
-        // 4. Tạo và chèn HTML cho gallery
         galleryContainer.innerHTML = selectedImages.map((imgUrl, index) => {
             const layoutClass = layoutPatterns[index % layoutPatterns.length];
             return `
@@ -216,7 +237,6 @@ async function initServiceAndCart(observer) { // THAY ĐỔI: Nhận observer l�
             `;
         }).join('');
 
-        // 5. Kích hoạt hiệu ứng fade-in cho các ảnh vừa được thêm vào
         galleryContainer.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
     }
 
@@ -234,11 +254,9 @@ async function initServiceAndCart(observer) { // THAY ĐỔI: Nhận observer l�
         if (serviceLoader) {
             serviceLoader.classList.add('is-hidden');
         }
-        // THAY ĐỔI: Gọi hàm render gallery dự án sau khi có dữ liệu
         renderProjectsGallery();
     }
 
-    // ... (Toàn bộ các hàm còn lại: validateForm, renderCart, openModal, v.v... không thay đổi)
     function validateForm() {
         const phoneRegex = /^0\d{9}$/;
         const nameRegex = /^[a-zA-ZàáâãèéêìíòóôõùúăđĩũơưăạảấầẩẫậắằẳẵặẹẻẽếềểễệỉịọỏốồổỗộớờởỡợụủứừửữựỳýỵỷỹĐ\s]+$/;
@@ -318,6 +336,7 @@ async function initServiceAndCart(observer) { // THAY ĐỔI: Nhận observer l�
         const cartCount = document.getElementById('cart-count');
         const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
         cartCount.textContent = totalItems;
+        // Giữ icon giỏ hàng luôn hiển thị nhưng ẩn số đếm
         cartIconContainer.classList.toggle('is-hidden', totalItems === 0);
     }
     
@@ -432,12 +451,14 @@ async function initServiceAndCart(observer) { // THAY ĐỔI: Nhận observer l�
         document.getElementById('modal-loader').style.display = 'none';
         document.getElementById('modal-data').classList.remove('hidden');
         modal.classList.add('visible');
+        document.body.classList.add('menu-open'); // Chặn cuộn khi modal mở
     }
 
     function closeModal() {
         closeLightbox();
         stopSlideshow();
         modal.classList.remove('visible');
+        document.body.classList.remove('menu-open'); // Cho phép cuộn lại
         currentServiceInModal = null;
         setTimeout(() => {
             document.getElementById('modal-data').classList.add('hidden');
@@ -478,9 +499,10 @@ async function initServiceAndCart(observer) { // THAY ĐỔI: Nhận observer l�
     }
 
     function toggleCartPanel() {
-        cartPanel.classList.toggle('visible');
+        const isOpen = cartPanel.classList.toggle('visible');
         cartOverlay.classList.toggle('opacity-0');
         cartOverlay.classList.toggle('pointer-events-none');
+        document.body.classList.toggle('menu-open', isOpen); // Chặn cuộn
     }
 
     async function handleOrderSubmit(event) {
@@ -511,7 +533,6 @@ async function initServiceAndCart(observer) { // THAY ĐỔI: Nhận observer l�
         }
     }
 
-    // BỔ SUNG: Hàm xử lý gửi form liên hệ
     async function handleContactSubmit(event) {
         event.preventDefault();
         
@@ -529,19 +550,17 @@ async function initServiceAndCart(observer) { // THAY ĐỔI: Nhận observer l�
         submitContactBtn.textContent = 'Đang gửi...';
         contactFormMessage.textContent = '';
 
-        // Tái sử dụng logic gửi đơn hàng, nhưng với dữ liệu khác
         const payload = {
             customer: {
                 name: name,
-                phone: info, // Gửi cả email/sđt vào trường phone
+                phone: info,
                 notes: message,
             },
-            cart: [], // Giỏ hàng trống
-            total: "Yêu cầu từ Form Liên Hệ" // Ghi chú đặc biệt
+            cart: [],
+            total: "Yêu cầu từ Form Liên Hệ"
         };
         
         try {
-            // Gửi đến cùng 1 endpoint
             await fetch(appsScriptUrl, {
                 method: 'POST',
                 mode: 'no-cors',
@@ -550,7 +569,7 @@ async function initServiceAndCart(observer) { // THAY ĐỔI: Nhận observer l�
             });
 
             contactFormMessage.textContent = 'Gửi tin nhắn thành công!';
-            contactFormMessage.style.color = '#2ecc71'; // Green color
+            contactFormMessage.style.color = '#2ecc71';
             contactForm.reset();
         } catch (error) {
             contactFormMessage.textContent = 'Có lỗi xảy ra, vui lòng thử lại.';
@@ -616,7 +635,6 @@ async function initServiceAndCart(observer) { // THAY ĐỔI: Nhận observer l�
         if (btn) handleQuantityChange(btn.dataset.subId, parseInt(btn.dataset.change));
     });
     orderForm.addEventListener('submit', handleOrderSubmit);
-    // BỔ SUNG: Gán sự kiện cho form liên hệ
     if(contactForm) {
         contactForm.addEventListener('submit', handleContactSubmit);
     }

@@ -29,30 +29,46 @@
             <a href="#" aria-label="Trang chủ">
                 <img src="img/logo.jpg" alt="Logo Minh Đăng IT" class="h-10">
             </a>
+            <!-- Desktop Menu -->
             <div class="hidden md:flex items-center space-x-2">
                 <a href="#services" class="nav-link">Dịch Vụ</a>
                 <a href="#projects" class="nav-link">Dự Án</a>
                 <a href="#contact" class="nav-link">Liên Hệ</a>
             </div>
-            <div class="md:hidden"></div> <!-- Placeholder for layout -->
+            <!-- Mobile Menu Button (Hamburger) -->
+            <button id="mobile-menu-btn" class="md:hidden z-[101] text-white p-2">
+                <svg id="menu-open-icon" class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-8 6h8"></path></svg>
+                <svg id="menu-close-icon" class="w-7 h-7 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
         </nav>
     </header>
+
+    <!-- Mobile Menu Panel -->
+    <div id="mobile-menu-panel" class="mobile-menu">
+        <nav class="flex flex-col items-center justify-center h-full space-y-8">
+            <a href="#services" class="mobile-nav-link">Dịch Vụ</a>
+            <a href="#projects" class="mobile-nav-link">Dự Án</a>
+            <a href="#contact" class="mobile-nav-link">Liên Hệ</a>
+        </nav>
+    </div>
+
 
     <main>
         <!-- Hero Section -->
         <section class="hero-section">
             <div id="hero-canvas" class="absolute inset-0 z-0"></div>
             <div class="relative z-10 p-6 text-center">
-                <h1 id="main-title" class="text-4xl md:text-6xl font-black text-white uppercase tracking-wider mb-4"></h1>
-                <h2 id="sub-title" class="text-xl md:text-2xl font-semibold text-primary"></h2>
+                <!-- THAY ĐỔI: Tối ưu kích thước chữ cho mobile -->
+                <h1 id="main-title" class="text-4xl sm:text-5xl md:text-6xl font-black text-white uppercase tracking-wider mb-4"></h1>
+                <h2 id="sub-title" class="text-lg md:text-xl font-semibold text-primary"></h2>
             </div>
         </section>
 
         <!-- Services Section -->
-        <section id="services" class="py-24">
+        <section id="services" class="py-16 md:py-24">
             <div class="container mx-auto px-6">
-                <div class="text-center mb-16 fade-in">
-                    <h2 class="text-4xl md:text-5xl font-extrabold text-white">Dịch Vụ Cốt Lõi</h2>
+                <div class="text-center mb-12 md:mb-16 fade-in">
+                    <h2 class="text-3xl sm:text-4xl md:text-5xl font-extrabold text-white">Dịch Vụ Cốt Lõi</h2>
                     <div class="section-glow"></div>
                 </div>
                 <div id="service-loader" class="service-loader-container">
@@ -66,10 +82,10 @@
         </section>
 
         <!-- Projects Section -->
-        <section id="projects" class="py-24 bg-dark-bg">
+        <section id="projects" class="py-16 md:py-24 bg-dark-bg">
             <div class="container mx-auto px-6">
-                <div class="text-center mb-16 fade-in">
-                    <h2 class="text-4xl md:text-5xl font-extrabold text-white">Dự Án Tiêu Biểu</h2>
+                <div class="text-center mb-12 md:mb-16 fade-in">
+                    <h2 class="text-3xl sm:text-4xl md:text-5xl font-extrabold text-white">Dự Án Tiêu Biểu</h2>
                     <div class="section-glow"></div>
                 </div>
                 <div id="project-gallery-container" class="project-gallery">
@@ -79,22 +95,20 @@
         </section>
         
         <!-- Contact Section -->
-        <section id="contact" class="py-24">
+        <section id="contact" class="py-16 md:py-24">
             <div class="container mx-auto px-6">
-                <div class="text-center mb-16 fade-in">
-                    <h2 class="text-4xl md:text-5xl font-extrabold text-white">Kết Nối Với Chúng Tôi</h2>
+                <div class="text-center mb-12 md:mb-16 fade-in">
+                    <h2 class="text-3xl sm:text-4xl md:text-5xl font-extrabold text-white">Kết Nối Với Chúng Tôi</h2>
                     <div class="section-glow"></div>
-                    <!-- THAY ĐỔI: Thêm mô tả kêu gọi hành động -->
                     <p class="mt-4 max-w-2xl mx-auto text-gray-400">
                         Sẵn sàng bắt đầu dự án của bạn? Gửi tin nhắn cho chúng tôi hoặc kết nối qua các kênh bên dưới.
                     </p>
                 </div>
-                <div class="max-w-6xl mx-auto service-card p-8 md:p-12 rounded-lg fade-in" data-tilt-card>
-                    <!-- THAY ĐỔI: Bố cục mới cho phần liên hệ -->
+                <div class="max-w-6xl mx-auto service-card p-6 sm:p-8 md:p-12 rounded-lg fade-in" data-tilt-card>
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
                         <!-- Cột 1: Form Liên Hệ -->
                         <div>
-                            <h3 class="text-3xl font-bold text-white mb-6 font-tech">Gửi Tin Nhắn Nhanh</h3>
+                            <h3 class="text-2xl md:text-3xl font-bold text-white mb-6 font-tech">Gửi Tin Nhắn Nhanh</h3>
                             <form id="contact-form" class="space-y-4">
                                 <div>
                                     <label for="contactName" class="form-label">Họ và Tên</label>
@@ -115,7 +129,7 @@
                         <!-- Cột 2: Thông tin, Mạng xã hội & Bản đồ -->
                         <div class="space-y-10">
                             <div>
-                                <h3 class="text-3xl font-bold text-white mb-6 font-tech">Thông Tin Trực Tiếp</h3>
+                                <h3 class="text-2xl md:text-3xl font-bold text-white mb-6 font-tech">Thông Tin Trực Tiếp</h3>
                                 <div class="space-y-4">
                                     <div class="contact-info-item">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
@@ -132,7 +146,7 @@
                                 </div>
                             </div>
                             <div>
-                                <h3 class="text-3xl font-bold text-white mb-6 font-tech">Mạng Xã Hội</h3>
+                                <h3 class="text-2xl md:text-3xl font-bold text-white mb-6 font-tech">Mạng Xã Hội</h3>
                                 <div class="social-links">
                                     <a href="#" aria-label="Facebook"><svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Facebook</title><path d="M22.675 0h-21.35C.582 0 0 .582 0 1.299v21.352C0 23.418.582 24 1.299 24H12.82v-9.294H9.692v-3.622h3.128V8.413c0-3.1 1.893-4.788 4.659-4.788 1.325 0 2.463.099 2.795.143v3.24l-1.918.001c-1.504 0-1.795.715-1.795 1.763v2.313h3.587l-.467 3.622h-3.12V24h5.719c.717 0 1.299-.582 1.299-1.299V1.299C24 .582 23.418 0 22.675 0z"/></svg></a>
                                     <a href="#" aria-label="Zalo"><svg role="img" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg"><path d="M24.847 43.195c-12.016 0-21.78-9.765-21.78-21.78S12.83 9.635 24.847 9.635c12.015 0 21.78 9.765 21.78 21.78.001 12.015-9.764 21.78-21.78 21.78zm0-39.54c-9.805 0-17.76 7.955-17.76 17.76s7.955 17.76 17.76 17.76 17.76-7.955 17.76-17.76S34.652 3.655 24.847 3.655zm-7.64 12.18h4.515c.67 0 1.215.545 1.215 1.215v6.52c0 .67-.545 1.215-1.215 1.215h-1.488v4.6c0 .67-.545 1.215-1.215 1.215H17.2c-.67 0-1.215-.545-1.215-1.215v-5.815h-1.92c-.67 0-1.215-.545-1.215-1.215v-4.515c0-.67.545-1.215 1.215-1.215zm10.74 13.55h2.82c.67 0 1.215-.545 1.215-1.215v-8.15c0-3.65-2.58-5.32-5.18-5.32h-3.95c-.67 0-1.215.545-1.215 1.215v12.25c0 .67.545 1.215 1.215 1.215h2.82c.67 0 1.215-.545 1.215-1.215V22.28h1.215c1.4 0 1.84.925 1.84 2.855v4.25c.001.67.546 1.215 1.215 1.215z"/></svg></a>
@@ -153,7 +167,7 @@
     </footer>
 
     <!-- Floating Cart Button -->
-    <div id="cart-icon-container" class="floating-cart-btn is-hidden">
+    <div id="cart-icon-container" class="floating-cart-btn">
         <svg id="cart-icon" xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 text-black" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
         </svg>
@@ -166,8 +180,9 @@
             <button id="close-modal-btn" class="modal-close-btn" aria-label="Đóng">&times;</button>
             <div id="modal-loader" class="modal-loader">Đang tải dữ liệu...</div>
             <div id="modal-data" class="hidden">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    <div id="modal-image-container" class="relative group">
+                <!-- THAY ĐỔI: Chuyển sang flex-col trên mobile -->
+                <div class="flex flex-col md:flex-row gap-8">
+                    <div id="modal-image-container" class="relative group w-full md:w-1/2">
                         <img id="modal-main-img" src="" alt="Hình ảnh dịch vụ" class="w-full h-auto object-cover rounded-lg aspect-video mb-4">
                         <button id="zoom-image-btn" class="modal-zoom-btn" aria-label="Phóng to ảnh">
                             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>
@@ -176,9 +191,9 @@
                         <button id="next-image-btn" class="modal-nav-btn right-2 is-hidden" aria-label="Ảnh kế tiếp">&#10095;</button>
                         <div id="modal-thumbnail-container" class="flex gap-2 flex-wrap"></div>
                     </div>
-                    <div>
-                        <h3 id="modal-title" class="font-tech text-3xl font-bold text-white mb-4"></h3>
-                        <div id="modal-subservices-list" class="space-y-4 max-h-[60vh] overflow-y-auto pr-2"></div>
+                    <div class="w-full md:w-1/2">
+                        <h3 id="modal-title" class="font-tech text-2xl md:text-3xl font-bold text-white mb-4"></h3>
+                        <div id="modal-subservices-list" class="space-y-4 max-h-[50vh] md:max-h-[60vh] overflow-y-auto pr-2"></div>
                     </div>
                 </div>
             </div>
