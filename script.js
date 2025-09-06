@@ -166,6 +166,11 @@ async function initServiceAndCart(observer) { // THAY ĐỔI: Nhận observer l�
     const zoomBtn = document.getElementById('zoom-image-btn');
     const prevLightboxBtn = document.getElementById('prev-lightbox-btn');
     const nextLightboxBtn = document.getElementById('next-lightbox-btn');
+    
+    // BỔ SUNG: Các hằng số cho form liên hệ mới
+    const contactForm = document.getElementById('contact-form');
+    const submitContactBtn = document.getElementById('submit-contact-btn');
+    const contactFormMessage = document.getElementById('contact-form-message');
 
 
     // BỔ SUNG: Hàm render gallery ảnh dự án
@@ -221,7 +226,8 @@ async function initServiceAndCart(observer) { // THAY ĐỔI: Nhận observer l�
         if (!response.ok) throw new Error('Network error');
         servicesData = await response.json();
         renderServiceCards();
-    } catch (error) {
+    } catch (error)
+    {
         console.error("Lỗi khi tải dữ liệu:", error);
         serviceList.innerHTML = `<p class="text-center text-red-400 col-span-full">Không thể tải dữ liệu.</p>`;
     } finally {
@@ -505,6 +511,57 @@ async function initServiceAndCart(observer) { // THAY ĐỔI: Nhận observer l�
         }
     }
 
+    // BỔ SUNG: Hàm xử lý gửi form liên hệ
+    async function handleContactSubmit(event) {
+        event.preventDefault();
+        
+        const name = contactForm.contactName.value.trim();
+        const info = contactForm.contactInfo.value.trim();
+        const message = contactForm.contactMessage.value.trim();
+
+        if (!name || !info || !message) {
+            contactFormMessage.textContent = 'Vui lòng điền đủ các trường.';
+            contactFormMessage.style.color = 'var(--error-color)';
+            return;
+        }
+
+        submitContactBtn.disabled = true;
+        submitContactBtn.textContent = 'Đang gửi...';
+        contactFormMessage.textContent = '';
+
+        // Tái sử dụng logic gửi đơn hàng, nhưng với dữ liệu khác
+        const payload = {
+            customer: {
+                name: name,
+                phone: info, // Gửi cả email/sđt vào trường phone
+                notes: message,
+            },
+            cart: [], // Giỏ hàng trống
+            total: "Yêu cầu từ Form Liên Hệ" // Ghi chú đặc biệt
+        };
+        
+        try {
+            // Gửi đến cùng 1 endpoint
+            await fetch(appsScriptUrl, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            contactFormMessage.textContent = 'Gửi tin nhắn thành công!';
+            contactFormMessage.style.color = '#2ecc71'; // Green color
+            contactForm.reset();
+        } catch (error) {
+            contactFormMessage.textContent = 'Có lỗi xảy ra, vui lòng thử lại.';
+            contactFormMessage.style.color = 'var(--error-color)';
+        } finally {
+            submitContactBtn.disabled = false;
+            submitContactBtn.textContent = 'Gửi Đi';
+        }
+    }
+
+
     function flyToCart(imgSrc, buttonElement) {
         const cartIcon = document.getElementById('cart-icon');
         const flyingImg = document.createElement('img');
@@ -559,6 +616,10 @@ async function initServiceAndCart(observer) { // THAY ĐỔI: Nhận observer l�
         if (btn) handleQuantityChange(btn.dataset.subId, parseInt(btn.dataset.change));
     });
     orderForm.addEventListener('submit', handleOrderSubmit);
+    // BỔ SUNG: Gán sự kiện cho form liên hệ
+    if(contactForm) {
+        contactForm.addEventListener('submit', handleContactSubmit);
+    }
     
     customerNameInput.addEventListener('input', validateForm);
     customerPhoneInput.addEventListener('input', validateForm);

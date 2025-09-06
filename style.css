@@ -330,6 +330,42 @@ header.scrolled {
 }
 /* --- KẾT THÚC BỔ SUNG --- */
 
+/* --- BỔ SUNG: Định dạng cho khu vực Liên Hệ mới --- */
+.contact-info-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem; /* 16px */
+    color: #E0E0E0;
+    font-size: 1rem;
+}
+.contact-info-item svg {
+    flex-shrink: 0;
+    color: var(--primary);
+}
+
+.social-links {
+    display: flex;
+    gap: 1.5rem; /* 24px */
+}
+
+.social-links a {
+    color: #E0E0E0;
+    transition: all 0.3s ease;
+}
+
+.social-links a:hover {
+    color: var(--primary);
+    transform: translateY(-4px) scale(1.1);
+}
+
+.social-links svg {
+    width: 32px;
+    height: 32px;
+    fill: currentColor;
+}
+/* --- KẾT THÚC BỔ SUNG --- */
+
+
 /* --- Giỏ Hàng & Form --- */
 .floating-cart-btn { position: fixed; bottom: 2rem; right: 2rem; z-index: 99; width: 60px; height: 60px; background: var(--primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 25px var(--glow-color); cursor: pointer; transition: transform 0.3s ease; animation: pulse 2.5s infinite cubic-bezier(0.4, 0, 0.6, 1); }
 .floating-cart-btn:hover { transform: scale(1.1); animation-play-state: paused; }
