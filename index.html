@@ -55,6 +55,11 @@
                     <h2 class="text-4xl md:text-5xl font-extrabold text-white">Dịch Vụ Cốt Lõi</h2>
                     <div class="section-glow"></div>
                 </div>
+                <!-- THAY ĐỔI: Thêm khối HTML cho hiệu ứng tải dữ liệu -->
+                <div id="service-loader" class="service-loader-container">
+                    <img src="img/logo.jpg" alt="Đang tải..." class="loader-logo">
+                    <p class="loader-text">Đang tải dữ liệu, vui lòng chờ...</p>
+                </div>
                 <div id="service-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                     <!-- Các thẻ dịch vụ sẽ được JavaScript chèn vào đây -->
                 </div>
@@ -174,7 +179,6 @@
     </div>
     <div id="cart-overlay" class="fixed inset-0 bg-black bg-opacity-70 z-[90] opacity-0 pointer-events-none transition-opacity duration-300"></div>
 
-    <!-- THAY ĐỔI: Bổ sung nút điều khiển cho Lightbox -->
     <div id="image-lightbox" class="lightbox-container">
         <span id="close-lightbox-btn" class="lightbox-close-btn">&times;</span>
         <button id="prev-lightbox-btn" class="lightbox-nav-btn left-4 is-hidden" aria-label="Ảnh trước đó">&#10094;</button>

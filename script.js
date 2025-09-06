@@ -136,6 +136,7 @@ async function initServiceAndCart() {
     let currentImages = [];
 
     const serviceList = document.getElementById('service-list');
+    const serviceLoader = document.getElementById('service-loader'); // THAY ĐỔI: Thêm hằng số cho loader
     const modal = document.getElementById('service-modal');
     const closeModalBtn = document.getElementById('close-modal-btn');
     const cartIconContainer = document.getElementById('cart-icon-container');
@@ -158,10 +159,8 @@ async function initServiceAndCart() {
     const lightboxImg = document.getElementById('lightbox-img');
     const closeLightboxBtn = document.getElementById('close-lightbox-btn');
     const zoomBtn = document.getElementById('zoom-image-btn');
-    // === BỔ SUNG: Thêm hằng số cho nút điều khiển lightbox ===
     const prevLightboxBtn = document.getElementById('prev-lightbox-btn');
     const nextLightboxBtn = document.getElementById('next-lightbox-btn');
-    // === KẾT THÚC BỔ SUNG ===
 
     try {
         const response = await fetch(appsScriptUrl);
@@ -171,6 +170,11 @@ async function initServiceAndCart() {
     } catch (error) {
         console.error("Lỗi khi tải dữ liệu:", error);
         serviceList.innerHTML = `<p class="text-center text-red-400 col-span-full">Không thể tải dữ liệu.</p>`;
+    } finally {
+        // THAY ĐỔI: Luôn ẩn loader sau khi tải xong (thành công hoặc thất bại)
+        if (serviceLoader) {
+            serviceLoader.classList.add('is-hidden');
+        }
     }
 
     function validateForm() {
@@ -299,7 +303,6 @@ async function initServiceAndCart() {
             lightbox.classList.add('visible');
             stopSlideshow();
 
-            // Bổ sung: Hiển thị/ẩn nút điều khiển lightbox
             const showButtons = currentImages.length > 1;
             prevLightboxBtn.classList.toggle('is-hidden', !showButtons);
             nextLightboxBtn.classList.toggle('is-hidden', !showButtons);
@@ -536,11 +539,10 @@ async function initServiceAndCart() {
         }
     });
 
-    // === BỔ SUNG: Gán sự kiện cho nút điều khiển lightbox ===
     prevLightboxBtn.addEventListener('click', (e) => {
         e.stopPropagation();
-        prevImage(); // Hàm này đã cập nhật index và ảnh trong modal
-        lightboxImg.src = currentImages[currentImageIndex]; // Chỉ cần cập nhật ảnh lightbox theo index mới
+        prevImage();
+        lightboxImg.src = currentImages[currentImageIndex];
     });
 
     nextLightboxBtn.addEventListener('click', (e) => {
@@ -548,7 +550,6 @@ async function initServiceAndCart() {
         nextImage();
         lightboxImg.src = currentImages[currentImageIndex];
     });
-    // === KẾT THÚC BỔ SUNG ===
 
     renderCart();
 }
