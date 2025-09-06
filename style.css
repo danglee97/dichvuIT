@@ -11,22 +11,20 @@
     --glow-color: rgba(0, 255, 255, 0.75);
     --card-bg: rgba(10, 10, 26, 0.5);
     --border-color: rgba(0, 255, 255, 0.2);
-    --error-color: #ff6b6b; /* Thêm màu cho thông báo lỗi */
+    --error-color: #ff6b6b;
 }
 
-/* === BỔ SUNG: TĂNG CỠ CHỮ TOÀN TRANG === */
 html {
-    font-size: 105%; /* Tăng cỡ chữ gốc lên 5%, ảnh hưởng đến tất cả các đơn vị rem */
+    font-size: 105%;
 }
-/* === KẾT THÚC BỔ SUNG === */
 
 body {
     font-family: 'Roboto', sans-serif;
-    background-color: var(--dark-bg); /* Giữ màu nền gốc làm fallback */
+    background-color: var(--dark-bg);
     color: #E0E0E0;
     overflow-x: hidden;
 }
-/* BỔ SUNG: Chặn cuộn khi menu mobile mở */
+
 body.menu-open {
     overflow: hidden;
 }
@@ -43,22 +41,17 @@ header.scrolled {
     border-bottom: 1px solid var(--border-color);
 }
 
-/* === THÊM MỚI: Xử lý header khi menu mobile mở === */
 body.menu-open header {
-    /* Nâng z-index của header lên trên menu để nút X có thể bấm được */
     z-index: 101;
-    /* Làm nền header trong suốt để không che menu */
     background: transparent;
     border-bottom-color: transparent;
     box-shadow: none;
 }
-/* === KẾT THÚC THÊM MỚI === */
 
-/* === BỔ SUNG: LÀM NỔI BẬT THANH ĐIỀU HƯỚNG (MENU) === */
 .nav-link {
-    padding: 0.5rem 1rem; /* 8px 16px */
+    padding: 0.5rem 1rem;
     border: 1px solid transparent;
-    border-radius: 9999px; /* Dạng viên thuốc */
+    border-radius: 9999px;
     transition: all 0.3s ease;
     font-weight: 500;
     color: #E0E0E0;
@@ -70,9 +63,7 @@ body.menu-open header {
     border-color: var(--primary);
     box-shadow: 0 0 10px var(--glow-color);
 }
-/* === KẾT THÚC BỔ SUNG === */
 
-/* === BỔ SUNG: Menu cho Mobile === */
 .mobile-menu {
     position: fixed;
     top: 0;
@@ -98,7 +89,7 @@ body.menu-open header {
 .mobile-nav-link {
     color: white;
     font-family: 'Exo 2', sans-serif;
-    font-size: 2rem; /* 32px */
+    font-size: 2rem;
     font-weight: 700;
     text-transform: uppercase;
     transition: color 0.3s, text-shadow 0.3s;
@@ -107,11 +98,9 @@ body.menu-open header {
     color: var(--primary);
     text-shadow: 0 0 15px var(--glow-color);
 }
-
 #mobile-menu-btn {
     transition: transform 0.4s cubic-bezier(0.23, 1, 0.32, 1);
 }
-
 body.menu-open #mobile-menu-btn {
     position: fixed;
     top: 1rem;    
@@ -119,8 +108,15 @@ body.menu-open #mobile-menu-btn {
     transform: rotate(180deg);
 }
 
-
-.hero-section { position: relative; height: 100vh; display: flex; align-items: center; justify-content: center; text-align: center; overflow: hidden; background: transparent; }
+.hero-section { 
+    position: relative; 
+    height: 100vh; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    text-align: center; 
+    overflow: hidden;
+}
 
 .hero-section > .relative::before {
     content: '';
@@ -137,11 +133,43 @@ body.menu-open #mobile-menu-btn {
     pointer-events: none;
 }
 
+/* === NÂNG CẤP: Hiệu ứng ảnh bay lồng vào nền === */
+#floating-images-container {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    z-index: -3; /* Đưa xuống dưới canvas */
+    pointer-events: none;
+}
+.floating-image {
+    position: absolute;
+    border: 1px solid rgba(0, 255, 255, 0.1);
+    border-radius: 0.5rem;
+    box-shadow: none;
+    animation-name: float, fade-in-float; /* Kết hợp animation */
+    animation-iteration-count: infinite;
+    animation-timing-function: ease-in-out;
+    animation-direction: alternate;
+    opacity: 0;
+    animation-fill-mode: forwards;
+    filter: blur(2px); /* Làm mờ ảnh để chìm vào nền */
+    mix-blend-mode: screen; /* Hoà trộn màu sắc với background */
+}
+/* Animation để ảnh hiện ra */
+@keyframes fade-in-float {
+    to { opacity: 0.15; } /* Giảm độ mờ để hiệu ứng tinh tế hơn */
+}
+
+/* Animation cho ảnh bay lơ lửng */
+@keyframes float {
+    from { transform: translateY(0px) rotate(-5deg); }
+    to { transform: translateY(-20px) rotate(5deg); }
+}
+
 .fade-in { opacity: 0; transform: translateY(20px); transition: opacity 0.6s ease-out, transform 0.6s ease-out; }
 .fade-in.visible { opacity: 1; transform: translateY(0); }
 .section-glow { width: 100px; height: 2px; background: var(--primary); margin: 1rem auto; border-radius: 1px; box-shadow: 0 0 10px var(--glow-color); }
 
-/* --- Hiệu ứng thẻ Dịch Vụ & Dự Án --- */
 .service-card {
     background: var(--card-bg);
     border: 1px solid var(--border-color);
@@ -158,7 +186,6 @@ body.menu-open #mobile-menu-btn {
 .service-card:hover::before { opacity: 1; }
 .service-card:hover { box-shadow: 0 0 30px rgba(0, 255, 255, 0.3); }
 
-/* --- Modal Chi Tiết Dịch Vụ --- */
 .modal-container { position: fixed; inset: 0; z-index: 100; display: flex; align-items: center; justify-content: center; background-color: rgba(0, 0, 0, 0.7); backdrop-filter: blur(5px); opacity: 0; pointer-events: none; transition: opacity 0.3s ease-in-out; }
 .modal-container.visible { opacity: 1; pointer-events: auto; }
 .modal-content { position: relative; width: 90%; max-width: 56rem; background: var(--dark-bg); border-radius: 0.5rem; padding: 1.5rem; transform: scale(0.95); transition: transform 0.3s ease-in-out; }
@@ -172,13 +199,10 @@ body.menu-open #mobile-menu-btn {
 
 .subservice-item { display: flex; flex-direction: column; align-items: start; justify-content: space-between; padding: 1rem; border-bottom: 1px solid var(--border-color); transition: background-color 0.2s ease-in-out; border-radius: 0.25rem; margin-bottom: 0.25rem; cursor: pointer;}
 @media (min-width: 640px) { .subservice-item { flex-direction: row; align-items: center; } }
-
 .subservice-info { flex-grow: 1; padding-right: 1rem; margin-bottom: 0.5rem; }
 @media (min-width: 640px) { .subservice-info { margin-bottom: 0; } }
-
 .subservice-action { text-align: left; flex-shrink: 0; width: 100%;}
 @media (min-width: 640px) { .subservice-action { text-align: right; width: auto; } }
-
 .add-to-cart-btn { background-color: var(--primary); color: black; font-weight: bold; padding: 0.5rem 1rem; border-radius: 9999px; border: none; cursor: pointer; transition: background-color 0.2s; margin-top: 0.5rem; }
 .add-to-cart-btn:hover { background-color: var(--secondary); }
 .subservice-item.highlighted {
@@ -286,7 +310,6 @@ body.menu-open #mobile-menu-btn {
 .lightbox-close-btn:hover {
     color: var(--primary);
 }
-
 .lightbox-nav-btn {
     position: absolute;
     top: 50%;
@@ -369,7 +392,6 @@ body.menu-open #mobile-menu-btn {
         gap: 1rem;
     }
 }
-
 .project-item {
     overflow: hidden;
     border-radius: 0.5rem;
@@ -377,33 +399,27 @@ body.menu-open #mobile-menu-btn {
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
     transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1), box-shadow 0.4s ease;
 }
-
 .project-item:hover {
     transform: scale(1.05);
     box-shadow: 0 10px 30px rgba(0, 255, 255, 0.4);
     z-index: 10;
 }
-
 .project-item img {
     width: 100%;
     height: 100%;
     object-fit: cover;
     transition: transform 0.4s ease;
 }
-
 .project-item:hover img {
     transform: scale(1.1);
 }
-
 @media (min-width: 768px) {
     .project-item-wide {
         grid-column: span 2;
     }
-
     .project-item-tall {
         grid-row: span 2;
     }
-
     .project-item-large {
         grid-column: span 2;
         grid-row: span 2;
@@ -426,25 +442,20 @@ body.menu-open #mobile-menu-btn {
     display: flex;
     gap: 1.5rem;
 }
-
 .social-links a {
     color: #E0E0E0;
     transition: all 0.3s ease;
 }
-
 .social-links a:hover {
     color: var(--primary);
     transform: translateY(-4px) scale(1.1);
 }
-
 .social-links svg {
     width: 32px;
     height: 32px;
     fill: currentColor;
 }
 
-
-/* --- Giỏ Hàng & Form --- */
 .floating-cart-btn { 
     position: fixed; 
     bottom: 1rem;
@@ -464,7 +475,6 @@ body.menu-open #mobile-menu-btn {
         height: 60px;
     }
 }
-
 .floating-cart-btn:hover { transform: scale(1.1); animation-play-state: paused; }
 #cart-count { top: -4px; right: -4px; }
 .cart-panel-container { 
@@ -485,7 +495,6 @@ body.menu-open #mobile-menu-btn {
 .cart-panel-footer { padding: 1.5rem; border-top: 1px solid var(--border-color); background-color: #050510; flex-shrink: 0; }
 .form-label { display: block; font-size: 0.875rem; color: var(--primary); margin-bottom: 0.5rem; }
 .form-input { width: 100%; background-color: rgba(255,255,255,0.1); border: 1px solid var(--border-color); color: white; padding: 0.75rem; border-radius: 0.25rem; transition: all 0.2s; }
-
 .form-input.invalid {
     border-color: var(--error-color);
     box-shadow: 0 0 8px rgba(255, 107, 107, 0.5);
@@ -511,12 +520,10 @@ body.menu-open #mobile-menu-btn {
     box-shadow: 0 0 15px var(--glow-color), 0 0 25px var(--glow-color);
     transition: all 0.3s ease-in-out;
 }
-
 .submit-btn-styling:hover {
     transform: scale(1.05) translateY(-2px);
     box-shadow: 0 0 20px var(--secondary), 0 0 35px var(--secondary);
 }
-
 .submit-btn-styling:disabled {
     background: #4a5568;
     color: #a0aec0;
@@ -525,11 +532,10 @@ body.menu-open #mobile-menu-btn {
     transform: none;
 }
 
-/* === BỔ SUNG: Nút cuộn lên đầu trang === */
 .scroll-to-top-btn {
     position: fixed;
-    bottom: 1rem; /* cách lề dưới */
-    right: 1rem; /* cách lề phải */
+    bottom: 1rem;
+    right: 1rem;
     width: 55px;
     height: 55px;
     background-color: var(--primary);
@@ -540,7 +546,7 @@ body.menu-open #mobile-menu-btn {
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    z-index: 98; /* Nằm dưới giỏ hàng 1 bậc */
+    z-index: 98;
     box-shadow: 0 0 15px var(--glow-color);
     opacity: 0;
     transform: translateY(20px);
@@ -555,30 +561,23 @@ body.menu-open #mobile-menu-btn {
         right: 2rem;
     }
 }
-
-
 .scroll-to-top-btn.visible {
     opacity: 1;
     transform: translateY(0);
     pointer-events: auto;
 }
-
 .scroll-to-top-btn:hover {
     background: var(--secondary);
     box-shadow: 0 0 20px var(--secondary);
 }
-
-/* Thay đổi vị trí khi có giỏ hàng */
 body.cart-is-visible .scroll-to-top-btn {
-    bottom: 5.5rem; /* 88px, đẩy lên trên nút giỏ hàng */
+    bottom: 5.5rem;
 }
 @media (min-width: 768px) {
     body.cart-is-visible .scroll-to-top-btn {
-        bottom: 6.5rem; /* 104px */
+        bottom: 6.5rem;
     }
 }
-/* === KẾT THÚC BỔ SUNG === */
-
 
 .is-hidden { display: none !important; }
 .flying-img { position: fixed; z-index: 9999; border-radius: 0.25rem; object-fit: cover; transition: all 0.6s cubic-bezier(0.55, 0, 1, 0.45); opacity: 1; transform: scale(1); }
@@ -586,21 +585,21 @@ body.cart-is-visible .scroll-to-top-btn {
 .shake { animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both; }
 @keyframes pulse { 0%, 100% { transform: scale(1); box-shadow: 0 0 25px var(--glow-color); } 50% { transform: scale(1.05); box-shadow: 0 0 40px var(--secondary); } }
 
-/* ======================================================
-   CẬP NHẬT: HIỆU ỨNG NỀN TOÀN TRANG
-   ====================================================== */
+
+/* === NÂNG CẤP: Hiệu ứng nền toàn trang === */
 #hero-canvas {
     position: fixed;
     top: 0;
     left: 0;
     width: 100vw;
     height: 100vh;
-    z-index: -1;
+    z-index: -2; /* Canvas nằm trên ảnh bay */
 }
 
+/* Các section cần có nền mờ để thấy background */
 #services, #projects, #contact, footer {
     background-color: rgba(10, 10, 26, 0.95);
     position: relative;
-    z-index: 1;
+    z-index: 1; /* Nằm trên canvas */
 }
 

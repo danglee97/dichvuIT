@@ -22,12 +22,16 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body class="bg-dark-bg text-gray-200">
+    <!-- Canvas background cho toàn trang -->
+    <div id="hero-canvas"></div>
 
     <!-- Header -->
     <header id="header" class="fixed top-0 left-0 w-full z-50 transition-all duration-300">
         <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
-            <a href="#" aria-label="Trang chủ">
-                <img src="img/logo.jpg" alt="Logo Minh Đăng IT" class="h-10 rounded-full">
+            <!-- Logo và Tên Thương Hiệu -->
+            <a href="#" aria-label="Trang chủ" class="flex items-center gap-3">
+                <img src="img/logo.jpg" alt="Logo Minh Đăng IT" class="h-10 w-10 object-cover">
+                <span class="font-tech text-xl font-bold text-white hidden sm:block">Vi Tính Minh Đăng</span>
             </a>
             <!-- Desktop Menu -->
             <div class="hidden md:flex items-center space-x-2">
@@ -60,8 +64,9 @@
     <main>
         <!-- Hero Section -->
         <section class="hero-section">
-            <div id="hero-canvas" class="absolute inset-0 z-0"></div>
             <div class="relative z-10 p-6 text-center">
+                <!-- Container cho hiệu ứng ảnh bay -->
+                <div id="floating-images-container"></div>
                 <h1 id="main-title" class="text-4xl md:text-6xl font-black text-white uppercase tracking-wider mb-4"></h1>
                 <h2 id="sub-title" class="text-xl md:text-2xl font-semibold text-primary"></h2>
             </div>
@@ -86,7 +91,7 @@
         </section>
 
         <!-- Projects Section -->
-        <section id="projects" class="py-16 md:py-24 bg-dark-bg">
+        <section id="projects" class="py-16 md:py-24">
             <div class="container mx-auto px-6">
                 <div class="text-center mb-12 md:mb-16 fade-in">
                     <h2 class="text-4xl md:text-5xl font-extrabold text-white">Dự Án Tiêu Biểu</h2>

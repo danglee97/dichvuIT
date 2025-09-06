@@ -4,7 +4,6 @@
 // ===================================================================
 
 document.addEventListener('DOMContentLoaded', () => {
-    // Sửa đổi: Lấy observer trả về và truyền đi để theo dõi các phần tử động
     const observer = initCoreEffects();
     initServiceAndCart(observer);
 });
@@ -13,7 +12,6 @@ document.addEventListener('DOMContentLoaded', () => {
 //  MODULE 1: CÁC HIỆU ỨNG GỐC VÀ GIAO DIỆN
 // ===================================================================
 function init3DTiltEffect() {
-    // Tối ưu: Tắt hiệu ứng tilt trên mobile để tránh xung đột và cải thiện hiệu năng
     const isMobile = window.matchMedia("(max-width: 768px)").matches;
     if (isMobile) return;
 
@@ -68,7 +66,6 @@ function initCoreEffects() {
         typeMain();
     }
 
-    // Sửa đổi: Tạo và trả về observer
     const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
@@ -77,7 +74,6 @@ function initCoreEffects() {
         });
     }, { threshold: 0.1 });
 
-    // Quan sát các phần tử fade-in tĩnh có sẵn trong HTML
     document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
     
     init3DTiltEffect();
@@ -168,23 +164,20 @@ function initCoreEffects() {
         animate();
     }
 
-    return observer; // Trả về observer để sử dụng cho các phần tử động
+    return observer;
 }
 
 // ===================================================================
 //  MODULE 2: DỊCH VỤ, GIỎ HÀNG VÀ FORM
 // ===================================================================
-// Sửa đổi: Nhận observer làm tham số
 async function initServiceAndCart(observer) {
     const appsScriptUrl = 'https://script.google.com/macros/s/AKfycbyIremqvgCwYcVxsf09X-LbR1JRHZipuUr3xq9z-ZrGzaeXqgjxogkd3QyqKx_fYmQv/exec';
     let servicesData = [], cart = JSON.parse(localStorage.getItem('minhdangCart')) || [];
 
-    // Lấy các element trên trang
     const serviceList = document.getElementById('service-list');
     const serviceLoader = document.getElementById('service-loader');
     const projectGallery = document.getElementById('project-gallery');
     
-    // Modal elements
     const modal = document.getElementById('service-modal');
     const closeModalBtn = document.getElementById('close-modal-btn');
     const modalMainImg = document.getElementById('modal-main-img');
@@ -197,14 +190,12 @@ async function initServiceAndCart(observer) {
     const modalNextBtn = document.getElementById('modal-next-btn');
     const modalZoomBtn = document.getElementById('modal-zoom-btn');
     
-    // Lightbox elements
     const lightbox = document.getElementById('lightbox');
     const lightboxImg = document.getElementById('lightbox-img');
     const lightboxClose = document.getElementById('lightbox-close');
     const lightboxPrev = document.getElementById('lightbox-prev');
     const lightboxNext = document.getElementById('lightbox-next');
 
-    // Cart elements
     const cartIconContainer = document.getElementById('cart-icon-container');
     const cartPanel = document.getElementById('cart-panel-container');
     const closeCartBtn = document.getElementById('close-cart-btn');
@@ -212,7 +203,6 @@ async function initServiceAndCart(observer) {
     const cartItemsContainer = document.getElementById('cart-items-container');
     const cartTotalEl = document.getElementById('cart-total');
 
-    // Order Form elements
     const orderForm = document.getElementById('order-form');
     const submitOrderBtn = document.getElementById('submit-order-btn');
     const formContainer = document.getElementById('customer-form-container');
@@ -222,7 +212,6 @@ async function initServiceAndCart(observer) {
     const nameError = document.getElementById('name-error');
     const phoneError = document.getElementById('phone-error');
     
-    // Contact Form elements
     const contactForm = document.getElementById('contact-form');
     const submitContactBtn = document.getElementById('submit-contact-btn');
     const contactFormMessage = document.getElementById('contact-form-message');
@@ -231,6 +220,40 @@ async function initServiceAndCart(observer) {
     let currentImageIndex = 0;
     let currentSubServiceImages = [];
     
+    // === BỔ SUNG: Hàm khởi tạo hiệu ứng ảnh bay ===
+    function initFloatingImages(data) {
+        const container = document.getElementById('floating-images-container');
+        if (!container) return;
+
+        const allImages = data.flatMap(s => s.subServices.flatMap(sub => sub.images));
+        const uniqueImages = [...new Set(allImages)].filter(img => img); // Lọc bỏ link rỗng
+
+        if (uniqueImages.length === 0) return;
+
+        const imageCount = Math.min(uniqueImages.length, 7); // Tối đa 7 ảnh
+
+        for (let i = 0; i < imageCount; i++) {
+            const img = document.createElement('img');
+            img.src = uniqueImages[i % uniqueImages.length];
+            img.className = 'floating-image';
+            
+            // Random thuộc tính
+            const size = Math.random() * (120 - 60) + 60; // Kích thước từ 60-120px
+            img.style.width = `${size}px`;
+            img.style.height = 'auto';
+            img.style.top = `${Math.random() * 80 + 10}%`; // Vị trí top từ 10-90%
+            img.style.left = `${Math.random() * 80 + 10}%`; // Vị trí left từ 10-90%
+            img.style.animationDuration = `${Math.random() * 10 + 10}s`; // Thời gian bay 10-20s
+            img.style.animationDelay = `${Math.random() * 5}s`; // Delay xuất hiện
+            
+            // Animation để ảnh hiện ra
+            img.style.animationName = `float, fade-in-float`;
+            
+            container.appendChild(img);
+        }
+    }
+
+
     try {
         const response = await fetch(appsScriptUrl);
         if (!response.ok) throw new Error('Network error');
@@ -239,6 +262,7 @@ async function initServiceAndCart(observer) {
         serviceLoader.style.display = 'none';
         renderServiceCards();
         renderProjectGallery();
+        initFloatingImages(servicesData); // Khởi tạo ảnh bay sau khi có dữ liệu
         
     } catch (error) {
         console.error("Lỗi khi tải dữ liệu:", error);
@@ -258,7 +282,6 @@ async function initServiceAndCart(observer) {
                 </div>
             </div>`).join('');
         
-        // Sửa lỗi: Sau khi render, yêu cầu observer quan sát các thẻ mới
         serviceList.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
         init3DTiltEffect();
     }
@@ -279,7 +302,6 @@ async function initServiceAndCart(observer) {
             `;
         }).join('');
         
-        // Sửa lỗi: Quan sát các ảnh mới trong gallery
         projectGallery.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
     }
 
@@ -322,7 +344,7 @@ async function initServiceAndCart(observer) {
     
     function startSlideshow() {
         clearInterval(modalSlideshowInterval);
-        if (currentSubServiceImages.length <= 1) return; // Không chạy slideshow nếu chỉ có 1 ảnh
+        if (currentSubServiceImages.length <= 1) return;
         modalSlideshowInterval = setInterval(() => {
             currentImageIndex = (currentImageIndex + 1) % currentSubServiceImages.length;
             updateModalGallery(true);
@@ -330,7 +352,10 @@ async function initServiceAndCart(observer) {
     }
 
     function updateModalGallery(isAuto = false) {
-        if (currentSubServiceImages.length === 0) return;
+        if (currentSubServiceImages.length === 0) {
+            modalMainImg.src = 'img/placeholder.png'; // Ảnh mặc định
+            return;
+        };
         
         modalMainImg.style.opacity = '0';
 
@@ -352,14 +377,8 @@ async function initServiceAndCart(observer) {
         currentSubServiceImages = subService.images || [];
         currentImageIndex = 0;
         
-        if (currentSubServiceImages.length > 0) {
-            updateModalGallery();
-            startSlideshow();
-        } else {
-            modalMainImg.src = 'img/placeholder.png';
-            clearInterval(modalSlideshowInterval);
-            updateModalGallery(); // Cập nhật để ẩn nút
-        }
+        updateModalGallery();
+        startSlideshow();
         
         modalThumbnailContainer.innerHTML = currentSubServiceImages.map((img, index) =>
             `<img src="${img}" alt="Thumbnail ${index+1}" class="modal-thumbnail ${index === 0 ? 'active' : ''}" data-index="${index}">`
@@ -386,6 +405,8 @@ async function initServiceAndCart(observer) {
         if (service.subServices.length > 0) {
             updateModalContent(service.subServices[0]);
             modalSubservicesList.querySelector('.subservice-item').classList.add('highlighted');
+        } else {
+             updateModalContent({ images: [] }); // Trường hợp không có subservice
         }
         
         modalLoader.style.display = 'none';
