@@ -485,6 +485,10 @@ body.menu-open #mobile-menu-btn {
     max-width: 400px; 
     z-index: 110; background-color: #050510; transform: translateX(100%); transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1); display: flex; flex-direction: column; border-left: 1px solid var(--border-color); 
 }
+
+#cart-panel {
+    z-index: 1001 !important;
+}
 .cart-panel-container.visible { transform: translateX(0); }
 .cart-panel-header { display: flex; justify-content: space-between; align-items: center; padding: 1.5rem; border-bottom: 1px solid var(--border-color); flex-shrink: 0; }
 .cart-panel-body { padding: 1.5rem; flex-grow: 1; overflow-y: auto; }
