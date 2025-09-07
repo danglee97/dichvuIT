@@ -170,9 +170,12 @@ function initCoreEffects() {
 // ===================================================================
 //  MODULE 2: DỊCH VỤ, GIỎ HÀNG VÀ FORM (NÂNG CẤP)
 // ===================================================================
+// Tạo biến toàn cục để ai_engine.js có thể truy cập
+let servicesData = [], pcComponentsData = [], cart = [];
+
 async function initServiceAndCart(observer) {
     const appsScriptUrl = 'https://script.google.com/macros/s/AKfycbyIremqvgCwYcVxsf09X-LbR1JRHZipuUr3xq9z-ZrGzaeXqgjxogkd3QyqKx_fYmQv/exec';
-    let servicesData = [], pcComponentsData = [], cart = JSON.parse(localStorage.getItem('minhdangCart')) || [];
+    cart = JSON.parse(localStorage.getItem('minhdangCart')) || [];
 
     const serviceList = document.getElementById('service-list');
     const serviceLoader = document.getElementById('service-loader');
@@ -248,7 +251,6 @@ async function initServiceAndCart(observer) {
     }
 
     try {
-        // NÂNG CẤP: Tải đồng thời cả dữ liệu dịch vụ và linh kiện
         const [servicesResponse, componentsResponse] = await Promise.all([
             fetch(appsScriptUrl + '?action=getServices'),
             fetch(appsScriptUrl + '?action=getComponents')
@@ -261,13 +263,15 @@ async function initServiceAndCart(observer) {
         servicesData = await servicesResponse.json();
         pcComponentsData = await componentsResponse.json();
 
-        // Log dữ liệu linh kiện để kiểm tra. Dữ liệu này sẽ được dùng cho AI ở bước sau.
         console.log("Dữ liệu Linh kiện PC đã được tải thành công:", pcComponentsData);
         
         serviceLoader.style.display = 'none';
         renderServiceCards();
         renderProjectGallery();
         initFloatingImages(servicesData);
+
+        // Kích hoạt sự kiện tùy chỉnh để báo cho ai_engine.js rằng dữ liệu đã sẵn sàng
+        document.dispatchEvent(new CustomEvent('dataLoaded'));
         
     } catch (error) {
         console.error("Lỗi khi tải dữ liệu:", error);
@@ -322,9 +326,9 @@ async function initServiceAndCart(observer) {
                         <p class="font-tech text-primary text-xs">${isNaN(item.price) ? item.price : new Intl.NumberFormat('vi-VN').format(item.price) + ' VNĐ'}</p>
                     </div>
                     <div class="cart-item-quantity">
-                        <button class="quantity-btn" data-sub-id="${item.subId || item.id}" data-change="-1">-</button>
+                        <button class="quantity-btn" data-id="${item.subId || item.id}" data-change="-1">-</button>
                         <span>${item.quantity}</span>
-                        <button class="quantity-btn" data-sub-id="${item.subId || item.id}" data-change="1">+</button>
+                        <button class="quantity-btn" data-id="${item.subId || item.id}" data-change="1">+</button>
                     </div>
                 </div>`).join('');
         }
@@ -333,6 +337,7 @@ async function initServiceAndCart(observer) {
         formContainer.classList.toggle('is-hidden', cart.length === 0);
         validateForm();
     }
+    window.renderCart = renderCart; // Expose to global scope for ai_engine
 
     function updateCartTotal() {
         const total = cart.reduce((sum, item) => sum + (isNaN(item.price) ? 0 : Number(item.price) * item.quantity), 0);
@@ -473,11 +478,11 @@ async function initServiceAndCart(observer) {
         }
     }
 
-    function handleQuantityChange(subId, change) {
-        const item = cart.find(i => (i.subId || i.id) === subId);
+    function handleQuantityChange(id, change) {
+        const item = cart.find(i => (i.subId || i.id) === id);
         if (item) {
             item.quantity += change;
-            if (item.quantity <= 0) cart = cart.filter(i => (i.subId || i.id) !== subId);
+            if (item.quantity <= 0) cart = cart.filter(i => (i.subId || i.id) !== id);
         }
         saveCartAndRender();
     }
@@ -492,6 +497,7 @@ async function initServiceAndCart(observer) {
         cartOverlay.classList.toggle('opacity-0');
         cartOverlay.classList.toggle('pointer-events-none');
     }
+    window.toggleCartPanel = toggleCartPanel; // Expose to global scope for ai_engine
     
     function validateForm() {
         const nameValue = customerNameInput.value.trim();
@@ -675,7 +681,7 @@ async function initServiceAndCart(observer) {
     cartOverlay.addEventListener('click', toggleCartPanel);
     cartItemsContainer.addEventListener('click', e => {
         const btn = e.target.closest('.quantity-btn');
-        if (btn) handleQuantityChange(btn.dataset.subId, parseInt(btn.dataset.change));
+        if (btn) handleQuantityChange(btn.dataset.id, parseInt(btn.dataset.change));
     });
     orderForm.addEventListener('submit', handleOrderSubmit);
     contactForm.addEventListener('submit', handleContactFormSubmit);
@@ -685,3 +691,4 @@ async function initServiceAndCart(observer) {
 
     renderCart();
 }
+
