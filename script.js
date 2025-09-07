@@ -1,5 +1,5 @@
 // ===================================================================
-//  SCRIPT.JS - PHIÊN BẢN 6.0 (Tích hợp Bác Sĩ AI)
+//  SCRIPT.JS - PHIÊN BẢN 7.0 (Nâng cấp Project Gallery)
 // ===================================================================
 
 // --- KHỞI CHẠY KHI TÀI LIỆU SẴN SÀNG ---
@@ -15,7 +15,7 @@ const appsScriptUrl = 'https://script.google.com/macros/s/AKfycbyIremqvgCwYcVxsf
  * Hàm khởi tạo chính, điều phối toàn bộ ứng dụng
  */
 async function initializeApp() {
-    const observer = initCoreEffects();
+    initCoreEffects();
     initInteractiveModules();
 
     try {
@@ -31,11 +31,10 @@ async function initializeApp() {
         pcComponentsData = components;
         
         renderServiceCards();
-        renderProjectGallery();
+        renderProjectGallery(); // Sẽ được cập nhật
         initFloatingImages();
 
         if (typeof initializeAIAssistant === 'function') {
-            // NÂNG CẤP: Cung cấp cả dữ liệu dịch vụ cho AI
             initializeAIAssistant(pcComponentsData, servicesData);
         } else {
             console.error("Lỗi: Không tìm thấy hàm initializeAIAssistant từ ai_engine.js");
@@ -62,7 +61,7 @@ function disableAIButton(message) {
 }
 
 // ===================================================================
-//  MODULE 1: HIỆU ỨNG GIAO DIỆN CỐT LÕI (Không thay đổi)
+//  MODULE 1: HIỆU ỨNG GIAO DIỆN CỐT LÕI 
 // ===================================================================
 function initCoreEffects() {
     const header = document.getElementById('header');
@@ -168,7 +167,6 @@ function initCoreEffects() {
         });
         animate();
     }
-    return observer;
 }
 
 // ===================================================================
@@ -298,7 +296,7 @@ function initInteractiveModules() {
 }
 
 // ===================================================================
-//  MODULE 3: CÁC HÀM RENDER & TIỆN ÍCH (Giữ nguyên)
+//  MODULE 3: CÁC HÀM RENDER & TIỆN ÍCH
 // ===================================================================
 function renderServiceCards() {
     const serviceList = document.getElementById('service-list');
@@ -320,22 +318,32 @@ function renderServiceCards() {
         </div>`).join('');
     serviceList.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
 }
+
 function renderProjectGallery() {
     const projectGallery = document.getElementById('project-gallery');
+    if (!projectGallery) return;
+
     const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
-            if (entry.isIntersecting) entry.target.classList.add('visible');
+            if (entry.isIntersecting) {
+                 entry.target.classList.add('visible');
+            }
         });
     }, { threshold: 0.1 });
-    const allImages = servicesData.flatMap(s => s.subServices.flatMap(sub => sub.images));
+
+    const allImages = servicesData.flatMap(s => s.subServices.flatMap(sub => sub.images)).filter(img => img);
     const shuffledImages = allImages.sort(() => 0.5 - Math.random());
-    projectGallery.innerHTML = shuffledImages.slice(0, 9).map((imgUrl, index) => `
-        <div class="project-item fade-in" style="transition-delay: ${index * 100}ms">
+    
+    // NÂNG CẤP: Bỏ các class kích thước, chỉ cần item và ảnh
+    projectGallery.innerHTML = shuffledImages.slice(0, 12).map((imgUrl, index) => `
+        <div class="project-item fade-in" style="transition-delay: ${index * 50}ms">
             <img src="${imgUrl}" alt="Ảnh dự án ${index + 1}" loading="lazy">
         </div>
     `).join('');
+
     projectGallery.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
 }
+
 function initFloatingImages() {
     const container = document.getElementById('floating-images-container');
     const allImages = servicesData.flatMap(s => s.subServices.flatMap(sub => sub.images));
@@ -390,8 +398,6 @@ function addToCart(subId, buttonElement) {
     const flyImgSrc = service.images && service.images.length > 0 ? service.images[0] : 'https://placehold.co/100x100/0a0a1a/00ffff?text=ITEM';
     flyToCart(flyImgSrc, buttonElement);
 }
-
-// --- HÀM MỚI: Thêm nhiều dịch vụ vào giỏ hàng từ AI ---
 function addServicesToCartFromAI(servicesToAdd) {
     servicesToAdd.forEach(service => {
         const existingItem = cart.find(item => item.subId === service.subId);
@@ -402,15 +408,12 @@ function addServicesToCartFromAI(servicesToAdd) {
         }
     });
     saveCartAndRender();
-    // Tự động mở giỏ hàng
     const cartPanel = document.getElementById('cart-panel-container');
     if (!cartPanel.classList.contains('visible')) {
         cartPanel.classList.add('visible');
         document.getElementById('cart-overlay').classList.remove('opacity-0', 'pointer-events-none');
     }
 }
-
-// --- HÀM MỚI: Thêm cấu hình PC vào giỏ hàng từ AI ---
 function addBuildToCartFromAI(build) {
     build.forEach(component => {
         const itemInCart = {
