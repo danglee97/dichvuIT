@@ -72,15 +72,14 @@
             </div>
         </section>
 
-        <!-- AI Assistant CTA Section -->
-        <section id="ai-cta" class="py-12 md:py-16 text-center">
-            <div class="container mx-auto px-6">
-                <h2 class="text-2xl md:text-3xl font-bold text-white mb-4 fade-in">Không Chắc Bắt Đầu Từ Đâu?</h2>
-                <p class="text-gray-400 max-w-2xl mx-auto mb-8 fade-in" style="transition-delay: 150ms;">
-                    Hãy để Trợ lý AI của chúng tôi lắng nghe nhu cầu và ngân sách của bạn để đưa ra gợi ý dịch vụ hoặc cấu hình PC tối ưu nhất.
-                </p>
-                <button id="ai-assistant-btn" class="submit-btn-styling fade-in" style="transition-delay: 300ms;">
-                    <span class="text-xl">🤖</span> Bắt Đầu Với Trợ Lý AI
+        <!-- AI Call to Action -->
+        <section id="ai-cta" class="py-16 md:py-20 text-center bg-dark-bg relative z-10">
+            <div class="container mx-auto px-6 fade-in">
+                <h2 class="text-3xl md:text-4xl font-extrabold text-white mb-4">Chưa Biết Bắt Đầu Từ Đâu?</h2>
+                <p class="text-lg md:text-xl text-gray-300 max-w-3xl mx-auto mb-8">Hãy để Trợ lý AI của chúng tôi lắng nghe nhu cầu và xây dựng cấu hình PC hoàn hảo dành riêng cho bạn chỉ trong vài cú nhấp chuột.</p>
+                <button id="ai-assistant-btn" class="submit-btn-styling px-8 py-4 text-lg inline-flex items-center gap-3">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
+                    Bắt Đầu Với Trợ Lý AI
                 </button>
             </div>
         </section>
@@ -173,25 +172,6 @@
         <p class="text-center text-gray-500">&copy; 2025 Minh Đăng IT. All Rights Reserved.</p>
     </footer>
 
-    <!-- AI Assistant Modal -->
-    <div id="ai-assistant-modal" class="modal-container">
-        <div class="ai-modal-content">
-            <div class="ai-modal-header">
-                <h3 class="font-tech text-2xl text-white flex items-center gap-3">
-                    <span class="text-3xl">🤖</span>
-                    Trợ Lý AI Minh Đăng
-                </h3>
-                <button id="ai-close-modal-btn" class="modal-close-btn" aria-label="Đóng">&times;</button>
-            </div>
-            <div id="ai-chat-log" class="ai-chat-log">
-                <!-- Tin nhắn của AI và lựa chọn của người dùng sẽ hiện ở đây -->
-            </div>
-            <div id="ai-options-container" class="ai-options-container">
-                <!-- Các nút lựa chọn sẽ hiện ở đây -->
-            </div>
-        </div>
-    </div>
-
     <!-- Floating Cart Button -->
     <div id="cart-icon-container" class="floating-cart-btn is-hidden">
         <svg id="cart-icon" xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 text-black" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -279,8 +259,24 @@
     </div>
     <div id="cart-overlay" class="fixed inset-0 bg-black bg-opacity-70 z-[90] opacity-0 pointer-events-none transition-opacity duration-300"></div>
 
+    <!-- AI Assistant Modal -->
+    <div id="ai-modal" class="modal-container">
+        <div class="ai-modal-content">
+            <div class="ai-modal-header">
+                <h3 class="font-tech text-xl text-white">Trợ Lý AI Minh Đăng IT</h3>
+                <button id="close-ai-modal-btn" class="modal-close-btn" aria-label="Đóng">&times;</button>
+            </div>
+            <div id="ai-chat-log" class="ai-chat-log">
+                <!-- Tin nhắn của AI sẽ được chèn vào đây -->
+            </div>
+            <div id="ai-options-container" class="ai-options-container">
+                <!-- Các nút lựa chọn của AI -->
+            </div>
+        </div>
+    </div>
+
     <script src="script.js"></script>
-    <script src="ai_engine.js" defer></script>
+    <script src="ai_engine.js"></script>
 </body>
 </html>
 

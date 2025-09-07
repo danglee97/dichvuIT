@@ -1,54 +1,89 @@
 // ===================================================================
-//  SCRIPT.JS - PHIÊN BẢN TỔNG HỢP HOÀN CHỈNH
-//  Tái cấu trúc và sửa lỗi để đảm bảo tính ổn định.
+//  SCRIPT.JS - PHIÊN BẢN 5.0 (ĐẠI TU & GIA CỐ TOÀN DIỆN)
 // ===================================================================
 
-document.addEventListener('DOMContentLoaded', () => {
+// --- KHỞI CHẠY KHI TÀI LIỆU SẴN SÀNG ---
+document.addEventListener('DOMContentLoaded', initializeApp);
+
+// --- BIẾN TOÀN CỤC ---
+let servicesData = [];
+let pcComponentsData = [];
+let cart = JSON.parse(localStorage.getItem('minhdangCart')) || [];
+const appsScriptUrl = 'https://script.google.com/macros/s/AKfycbyIremqvgCwYcVxsf09X-LbR1JRHZipuUr3xq9z-ZrGzaeXqgjxogkd3QyqKx_fYmQv/exec';
+
+/**
+ * Hàm khởi tạo chính, điều phối toàn bộ ứng dụng
+ */
+async function initializeApp() {
+    // 1. Khởi tạo các hiệu ứng giao diện cốt lõi không phụ thuộc dữ liệu
     const observer = initCoreEffects();
-    initServiceAndCart(observer);
-});
 
-// ===================================================================
-//  MODULE 1: CÁC HIỆU ỨNG GỐC VÀ GIAO DIỆN
-// ===================================================================
-function init3DTiltEffect() {
-    const isMobile = window.matchMedia("(max-width: 768px)").matches;
-    if (isMobile) return;
+    // 2. Khởi tạo các module tương tác (giỏ hàng, modal, form)
+    initInteractiveModules(observer);
 
-    document.querySelectorAll('[data-tilt-card]').forEach(card => {
-        if (card.dataset.tiltInitialized) return;
-        card.dataset.tiltInitialized = 'true';
-        card.addEventListener('mousemove', (e) => {
-            const { left, top, width, height } = card.getBoundingClientRect();
-            const x = (e.clientX - left) / width - 0.5;
-            const y = (e.clientY - top) / height - 0.5;
-            card.style.transform = `perspective(1000px) rotateX(${y * -10}deg) rotateY(${x * 10}deg) scale(1.02)`;
-            card.style.transition = 'transform 0.1s ease-out';
-        });
-        card.addEventListener('mouseleave', () => {
-            card.style.transform = 'perspective(1000px) rotateX(0) rotateY(0) scale(1)';
-            card.style.transition = 'transform 0.5s cubic-bezier(0.23, 1, 0.32, 1)';
-        });
-    });
+    // 3. Tải tất cả dữ liệu cần thiết từ backend
+    try {
+        // Sử dụng Promise.all để tải đồng thời, tăng hiệu suất
+        const [services, components] = await Promise.all([
+            fetch(appsScriptUrl + '?action=getServices').then(res => res.json()),
+            fetch(appsScriptUrl + '?action=getComponents').then(res => res.json())
+        ]);
+
+        // Kiểm tra lỗi trả về từ Google Apps Script
+        if (services.error) throw new Error(`Lỗi tải dịch vụ: ${services.error}`);
+        if (components.error) throw new Error(`Lỗi tải linh kiện: ${components.error}`);
+
+        // 4. Gán dữ liệu và render giao diện
+        servicesData = services;
+        pcComponentsData = components;
+        
+        renderServiceCards();
+        renderProjectGallery();
+        initFloatingImages();
+
+        // 5. Khởi tạo Trợ lý AI sau khi đã có đủ dữ liệu
+        if (typeof initializeAIAssistant === 'function') {
+            initializeAIAssistant(pcComponentsData);
+        } else {
+            console.error("Lỗi: Không tìm thấy hàm initializeAIAssistant từ ai_engine.js");
+            disableAIButton("Trợ lý AI đang bảo trì");
+        }
+        
+        // Ẩn loader khi mọi thứ hoàn tất
+        document.getElementById('service-loader').style.display = 'none';
+
+    } catch (error) {
+        // Xử lý lỗi nghiêm trọng khi không tải được dữ liệu
+        console.error("Lỗi nghiêm trọng khi khởi tạo ứng dụng:", error);
+        const serviceLoader = document.getElementById('service-loader');
+        serviceLoader.innerHTML = `<p class="text-center text-red-400 col-span-full">Không thể tải dữ liệu từ máy chủ. Vui lòng thử lại sau.</p>`;
+        disableAIButton("Trợ lý AI không sẵn sàng");
+    }
 }
 
+function disableAIButton(message) {
+    const aiBtn = document.getElementById('ai-assistant-btn');
+    if (aiBtn) {
+        aiBtn.textContent = message;
+        aiBtn.disabled = true;
+        aiBtn.classList.add('opacity-50', 'cursor-not-allowed');
+    }
+}
+
+// ===================================================================
+//  MODULE 1: HIỆU ỨNG GIAO DIỆN CỐT LÕI
+// ===================================================================
 function initCoreEffects() {
+    // Header & Scroll-to-top
     const header = document.getElementById('header');
     const scrollToTopBtn = document.getElementById('scroll-to-top');
-
     window.addEventListener('scroll', () => {
         header.classList.toggle('scrolled', window.scrollY > 50);
-        if (scrollToTopBtn) {
-            scrollToTopBtn.classList.toggle('visible', window.scrollY > 300);
-        }
+        scrollToTopBtn?.classList.toggle('visible', window.scrollY > 300);
     });
+    scrollToTopBtn?.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
 
-    if (scrollToTopBtn) {
-        scrollToTopBtn.addEventListener('click', () => {
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        });
-    }
-
+    // Hiệu ứng gõ chữ
     const mainTitle = document.getElementById('main-title');
     const subTitle = document.getElementById('sub-title');
     if (mainTitle && subTitle) {
@@ -66,44 +101,50 @@ function initCoreEffects() {
         typeMain();
     }
 
+    // Intersection Observer cho hiệu ứng fade-in
     const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                entry.target.classList.add('visible');
-            }
+            if (entry.isIntersecting) entry.target.classList.add('visible');
         });
     }, { threshold: 0.1 });
-
     document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
     
-    init3DTiltEffect();
-    
-    const mobileMenuBtn = document.getElementById('mobile-menu-btn');
-    const mobileMenu = document.getElementById('mobile-menu');
-    const menuIconOpen = document.getElementById('menu-icon-open');
-    const menuIconClose = document.getElementById('menu-icon-close');
-
-    if (mobileMenuBtn && mobileMenu) {
-        mobileMenuBtn.addEventListener('click', () => {
-            const isOpen = mobileMenu.classList.toggle('is-open');
-            document.body.classList.toggle('menu-open', isOpen);
-            menuIconOpen.classList.toggle('hidden', isOpen);
-            menuIconClose.classList.toggle('hidden', !isOpen);
-        });
-
-        mobileMenu.querySelectorAll('a').forEach(link => {
-            link.addEventListener('click', () => {
-                mobileMenu.classList.remove('is-open');
-                document.body.classList.remove('menu-open');
-                menuIconOpen.classList.remove('hidden');
-                menuIconClose.classList.add('hidden');
+    // Hiệu ứng 3D Tilt
+    if (!window.matchMedia("(max-width: 768px)").matches) {
+        document.querySelectorAll('[data-tilt-card]').forEach(card => {
+            card.addEventListener('mousemove', (e) => {
+                const { left, top, width, height } = card.getBoundingClientRect();
+                const x = (e.clientX - left) / width - 0.5;
+                const y = (e.clientY - top) / height - 0.5;
+                card.style.transform = `perspective(1000px) rotateX(${y * -10}deg) rotateY(${x * 10}deg) scale(1.02)`;
+            });
+            card.addEventListener('mouseleave', () => {
+                card.style.transform = 'perspective(1000px) rotateX(0) rotateY(0) scale(1)';
             });
         });
     }
 
+    // Menu mobile
+    const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+    const mobileMenu = document.getElementById('mobile-menu');
+    const menuIconOpen = document.getElementById('menu-icon-open');
+    const menuIconClose = document.getElementById('menu-icon-close');
+    if (mobileMenuBtn && mobileMenu) {
+        const toggleMenu = () => {
+            const isOpen = mobileMenu.classList.toggle('is-open');
+            document.body.classList.toggle('menu-open', isOpen);
+            menuIconOpen.classList.toggle('hidden', isOpen);
+            menuIconClose.classList.toggle('hidden', !isOpen);
+        };
+        mobileMenuBtn.addEventListener('click', toggleMenu);
+        mobileMenu.querySelectorAll('a').forEach(link => link.addEventListener('click', toggleMenu));
+    }
+
+    // Nền Three.js
     const container = document.getElementById('hero-canvas');
     if (container && window.THREE) {
-        let scene, camera, renderer, particles, lines, mouseX = 0, mouseY = 0;
+        // ... (Code Three.js giữ nguyên, không cần thay đổi)
+        let scene, camera, renderer, particles, mouseX = 0, mouseY = 0;
         let windowHalfX = window.innerWidth / 2, windowHalfY = window.innerHeight / 2;
         scene = new THREE.Scene();
         camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 1000);
@@ -120,35 +161,20 @@ function initCoreEffects() {
             velocities.push(new THREE.Vector3((Math.random() - 0.5) * 0.2, (Math.random() - 0.5) * 0.2, (Math.random() - 0.5) * 0.2));
         }
         const pGeom = new THREE.BufferGeometry();
-        pGeom.setAttribute('position', new THREE.BufferAttribute(positions, 3).setUsage(THREE.DynamicDrawUsage));
+        pGeom.setAttribute('position', new THREE.BufferAttribute(positions, 3));
         pGeom.velocities = velocities;
         particles = new THREE.Points(pGeom, new THREE.PointsMaterial({ color: 0x00ffff, size: 1.5, blending: THREE.AdditiveBlending, transparent: true }));
         scene.add(particles);
-        const lGeom = new THREE.BufferGeometry();
-        lGeom.setAttribute('position', new THREE.BufferAttribute(new Float32Array(pCount * pCount * 3), 3).setUsage(THREE.DynamicDrawUsage));
-        lines = new THREE.LineSegments(lGeom, new THREE.LineBasicMaterial({ color: 0xffffff, blending: THREE.AdditiveBlending, transparent: true, opacity: 0.1 }));
-        scene.add(lines);
         function animate() {
             requestAnimationFrame(animate);
-            const pArray = particles.geometry.attributes.position.array, vArray = particles.geometry.velocities, lArray = lines.geometry.attributes.position.array;
-            let lVtxIdx = 0;
+            const pArray = particles.geometry.attributes.position.array, vArray = particles.geometry.velocities;
             for (let i = 0; i < pCount; i++) {
                 const i3 = i * 3;
                 pArray[i3] += vArray[i].x; pArray[i3 + 1] += vArray[i].y; pArray[i3 + 2] += vArray[i].z;
                 if (pArray[i3] < -200 || pArray[i3] > 200) vArray[i].x *= -1;
                 if (pArray[i3 + 1] < -200 || pArray[i3 + 1] > 200) vArray[i].y *= -1;
                 if (pArray[i3 + 2] < -200 || pArray[i3 + 2] > 200) vArray[i].z *= -1;
-                for (let j = i + 1; j < pCount; j++) {
-                    const j3 = j * 3;
-                    const dist = Math.sqrt(Math.pow(pArray[i3] - pArray[j3], 2) + Math.pow(pArray[i3 + 1] - pArray[j3 + 1], 2) + Math.pow(pArray[i3 + 2] - pArray[j3 + 2], 2));
-                    if (dist < 40) {
-                        lArray[lVtxIdx++] = pArray[i3]; lArray[lVtxIdx++] = pArray[i3 + 1]; lArray[lVtxIdx++] = pArray[i3 + 2];
-                        lArray[lVtxIdx++] = pArray[j3]; lArray[lVtxIdx++] = pArray[j3 + 1]; lArray[lVtxIdx++] = pArray[j3 + 2];
-                    }
-                }
             }
-            lines.geometry.setDrawRange(0, lVtxIdx / 3);
-            lines.geometry.attributes.position.needsUpdate = true;
             particles.geometry.attributes.position.needsUpdate = true;
             camera.position.x += (mouseX - camera.position.x) * 0.05;
             camera.position.y += (-mouseY - camera.position.y) * 0.05;
@@ -163,532 +189,375 @@ function initCoreEffects() {
         });
         animate();
     }
-
     return observer;
 }
 
 // ===================================================================
-//  MODULE 2: DỊCH VỤ, GIỎ HÀNG VÀ FORM (NÂNG CẤP)
+//  MODULE 2: CÁC MODULE TƯƠNG TÁC (GIỎ HÀNG, MODAL, FORM)
 // ===================================================================
-// Tạo biến toàn cục để ai_engine.js có thể truy cập
-let servicesData = [], pcComponentsData = [], cart = [];
-
-async function initServiceAndCart(observer) {
-    const appsScriptUrl = 'https://script.google.com/macros/s/AKfycbyIremqvgCwYcVxsf09X-LbR1JRHZipuUr3xq9z-ZrGzaeXqgjxogkd3QyqKx_fYmQv/exec';
-    cart = JSON.parse(localStorage.getItem('minhdangCart')) || [];
-
+function initInteractiveModules(observer) {
+    // --- Lấy các element cần thiết ---
     const serviceList = document.getElementById('service-list');
-    const serviceLoader = document.getElementById('service-loader');
-    const projectGallery = document.getElementById('project-gallery');
-    
     const modal = document.getElementById('service-modal');
     const closeModalBtn = document.getElementById('close-modal-btn');
+    const cartIconContainer = document.getElementById('cart-icon-container');
+    const cartPanel = document.getElementById('cart-panel-container');
+    const closeCartBtn = document.getElementById('close-cart-btn');
+    const cartOverlay = document.getElementById('cart-overlay');
+    const orderForm = document.getElementById('order-form');
+    const contactForm = document.getElementById('contact-form');
+    
+    // --- Logic cho Service Modal ---
+    let modalSlideshowInterval, currentImageIndex = 0, currentSubServiceImages = [];
     const modalMainImg = document.getElementById('modal-main-img');
     const modalThumbnailContainer = document.getElementById('modal-thumbnail-container');
     const modalTitle = document.getElementById('modal-title');
     const modalSubservicesList = document.getElementById('modal-subservices-list');
     const modalLoader = document.getElementById('modal-loader');
     const modalData = document.getElementById('modal-data');
-    const modalPrevBtn = document.getElementById('modal-prev-btn');
-    const modalNextBtn = document.getElementById('modal-next-btn');
-    const modalZoomBtn = document.getElementById('modal-zoom-btn');
-    
-    const lightbox = document.getElementById('lightbox');
-    const lightboxImg = document.getElementById('lightbox-img');
-    const lightboxClose = document.getElementById('lightbox-close');
-    const lightboxPrev = document.getElementById('lightbox-prev');
-    const lightboxNext = document.getElementById('lightbox-next');
 
-    const cartIconContainer = document.getElementById('cart-icon-container');
-    const cartPanel = document.getElementById('cart-panel-container');
-    const closeCartBtn = document.getElementById('close-cart-btn');
-    const cartOverlay = document.getElementById('cart-overlay');
-    const cartItemsContainer = document.getElementById('cart-items-container');
-    const cartTotalEl = document.getElementById('cart-total');
-
-    const orderForm = document.getElementById('order-form');
-    const submitOrderBtn = document.getElementById('submit-order-btn');
-    const formContainer = document.getElementById('customer-form-container');
-    const formMessage = document.getElementById('form-message');
-    const customerNameInput = document.getElementById('customerName');
-    const customerPhoneInput = document.getElementById('customerPhone');
-    const nameError = document.getElementById('name-error');
-    const phoneError = document.getElementById('phone-error');
-    
-    const contactForm = document.getElementById('contact-form');
-    const submitContactBtn = document.getElementById('submit-contact-btn');
-    const contactFormMessage = document.getElementById('contact-form-message');
-    
-    let modalSlideshowInterval;
-    let currentImageIndex = 0;
-    let currentSubServiceImages = [];
-    
-    function initFloatingImages(data) {
-        const container = document.getElementById('floating-images-container');
-        if (!container) return;
-
-        const allImages = data.flatMap(s => s.subServices.flatMap(sub => sub.images));
-        const uniqueImages = [...new Set(allImages)].filter(img => img);
-        if (uniqueImages.length === 0) return;
-        const imageCount = Math.min(uniqueImages.length, 7);
-
-        for (let i = 0; i < imageCount; i++) {
-            const img = document.createElement('img');
-            img.src = uniqueImages[i % uniqueImages.length];
-            img.className = 'floating-image';
-            
-            const size = Math.random() * (120 - 60) + 60;
-            img.style.width = `${size}px`;
-            img.style.height = 'auto';
-            img.style.top = `${Math.random() * 80 + 10}%`;
-            img.style.left = `${Math.random() * 80 + 10}%`;
-            img.style.animationDuration = `${Math.random() * 10 + 10}s`;
-            img.style.animationDelay = `${Math.random() * 5}s`;
-            img.style.animationName = `float, fade-in-float`;
-            
-            container.appendChild(img);
-        }
-    }
-
-    try {
-        const [servicesResponse, componentsResponse] = await Promise.all([
-            fetch(appsScriptUrl + '?action=getServices'),
-            fetch(appsScriptUrl + '?action=getComponents')
-        ]);
-
-        if (!servicesResponse.ok || !componentsResponse.ok) {
-            throw new Error('Lỗi mạng khi đang tải dữ liệu.');
-        }
-
-        servicesData = await servicesResponse.json();
-        pcComponentsData = await componentsResponse.json();
-
-        console.log("Dữ liệu Linh kiện PC đã được tải thành công:", pcComponentsData);
-        
-        serviceLoader.style.display = 'none';
-        renderServiceCards();
-        renderProjectGallery();
-        initFloatingImages(servicesData);
-
-        // Kích hoạt sự kiện tùy chỉnh để báo cho ai_engine.js rằng dữ liệu đã sẵn sàng
-        document.dispatchEvent(new CustomEvent('dataLoaded'));
-        
-    } catch (error) {
-        console.error("Lỗi khi tải dữ liệu:", error);
-        serviceLoader.innerHTML = `<p class="text-center text-red-400 col-span-full">Không thể tải dữ liệu. Vui lòng thử lại sau.</p>`;
-    }
-
-    function renderServiceCards() {
-        serviceList.innerHTML = servicesData.map(service => `
-            <div class="service-card group fade-in" data-tilt-card data-service-id="${service.id}">
-                <div class="relative overflow-hidden rounded-t-lg">
-                    <img src="${service.image}" alt="${service.name}" class="w-full h-48 object-cover transition-transform duration-300 group-hover:scale-110">
-                </div>
-                <div class="p-6">
-                    <h3 class="font-tech text-xl font-bold text-white mb-2">${service.name}</h3>
-                    <p class="text-gray-400 text-sm mb-4 h-12 overflow-hidden">${service.description}</p>
-                    <button class="font-semibold text-primary text-sm hover:text-secondary transition-colors">Xem Chi Tiết &rarr;</button>
-                </div>
-            </div>`).join('');
-        
-        serviceList.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
-        init3DTiltEffect();
-    }
-
-    function renderProjectGallery() {
-        if (!projectGallery) return;
-        const allImages = servicesData.flatMap(s => s.subServices.flatMap(sub => sub.images));
-        const shuffledImages = allImages.sort(() => 0.5 - Math.random());
-        const selectedImages = shuffledImages.slice(0, 9);
-
-        projectGallery.innerHTML = selectedImages.map((imgUrl, index) => {
-            const sizeClasses = ['project-item-wide', 'project-item-tall', 'project-item-large', ''];
-            const randomSize = sizeClasses[Math.floor(Math.random() * sizeClasses.length)];
-            return `
-                <div class="project-item fade-in ${randomSize}" style="transition-delay: ${index * 100}ms">
-                    <img src="${imgUrl}" alt="Ảnh dự án ${index + 1}" loading="lazy">
-                </div>
-            `;
-        }).join('');
-        
-        projectGallery.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
-    }
-
-    function renderCart() {
-        if (cart.length === 0) {
-            cartItemsContainer.innerHTML = '<p class="text-gray-400 text-center p-8">Giỏ hàng của bạn đang trống.</p>';
-        } else {
-            cartItemsContainer.innerHTML = cart.map(item => `
-                <div class="cart-item">
-                    <img src="${(item.images && item.images.length > 0) ? item.images[0] : (item.image || 'img/placeholder.png')}" alt="${item.name}" class="w-16 h-16 object-cover rounded-md flex-shrink-0">
-                    <div class="cart-item-info">
-                        <p class="font-bold text-white text-sm">${item.name}</p>
-                        <p class="font-tech text-primary text-xs">${isNaN(item.price) ? item.price : new Intl.NumberFormat('vi-VN').format(item.price) + ' VNĐ'}</p>
-                    </div>
-                    <div class="cart-item-quantity">
-                        <button class="quantity-btn" data-id="${item.subId || item.id}" data-change="-1">-</button>
-                        <span>${item.quantity}</span>
-                        <button class="quantity-btn" data-id="${item.subId || item.id}" data-change="1">+</button>
-                    </div>
-                </div>`).join('');
-        }
-        updateCartTotal();
-        updateCartIcon();
-        formContainer.classList.toggle('is-hidden', cart.length === 0);
-        validateForm();
-    }
-    window.renderCart = renderCart; // Expose to global scope for ai_engine
-
-    function updateCartTotal() {
-        const total = cart.reduce((sum, item) => sum + (isNaN(item.price) ? 0 : Number(item.price) * item.quantity), 0);
-        cartTotalEl.textContent = new Intl.NumberFormat('vi-VN').format(total) + ' VNĐ';
-    }
-
-    function updateCartIcon() {
-        const cartCount = document.getElementById('cart-count');
-        const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
-        cartCount.textContent = totalItems;
-        cartIconContainer.classList.toggle('is-hidden', totalItems === 0);
-        document.body.classList.toggle('cart-is-visible', totalItems > 0);
-    }
-    
-    function startSlideshow() {
-        clearInterval(modalSlideshowInterval);
-        if (currentSubServiceImages.length <= 1) return;
-        modalSlideshowInterval = setInterval(() => {
-            currentImageIndex = (currentImageIndex + 1) % currentSubServiceImages.length;
-            updateModalGallery(true);
-        }, 3000);
-    }
-
-    function updateModalGallery(isAuto = false) {
-        if (currentSubServiceImages.length === 0) {
-            modalMainImg.src = 'img/placeholder.png';
-            return;
-        };
-        
-        modalMainImg.style.opacity = '0';
-
-        setTimeout(() => {
-            modalMainImg.src = currentSubServiceImages[currentImageIndex];
-             modalMainImg.style.opacity = '1';
-        }, 300);
-
-        modalThumbnailContainer.querySelectorAll('.modal-thumbnail').forEach((thumb, index) => {
-            thumb.classList.toggle('active', index === currentImageIndex);
-        });
-        
-        const hasMultipleImages = currentSubServiceImages.length > 1;
-        modalPrevBtn.style.display = hasMultipleImages ? 'flex' : 'none';
-        modalNextBtn.style.display = hasMultipleImages ? 'flex' : 'none';
-    }
-    
-    function updateModalContent(subService) {
-        currentSubServiceImages = subService.images || [];
-        currentImageIndex = 0;
-        
-        updateModalGallery();
-        startSlideshow();
-        
-        modalThumbnailContainer.innerHTML = currentSubServiceImages.map((img, index) =>
-            `<img src="${img}" alt="Thumbnail ${index+1}" class="modal-thumbnail ${index === 0 ? 'active' : ''}" data-index="${index}">`
-        ).join('');
-    }
-
-    function openModal(serviceId) {
+    const openModal = (serviceId) => {
         const service = servicesData.find(s => s.id === serviceId);
         if (!service) return;
-        
+
+        modalLoader.style.display = 'block';
+        modalData.classList.add('hidden');
+        modal.classList.add('visible');
+
         modalTitle.textContent = service.name;
-        modalSubservicesList.innerHTML = service.subServices.map((sub, index) => `
+        modalSubservicesList.innerHTML = service.subServices.map(sub => `
             <div class="subservice-item" data-sub-id="${sub.subId}">
-                <div class="subservice-info">
-                    <h4 class="font-bold text-white">${sub.name}</h4>
-                    <p class="text-sm text-gray-400">${sub.details}</p>
-                </div>
-                <div class="subservice-action">
-                    <span class="font-tech text-lg text-primary">${isNaN(sub.price) ? sub.price : new Intl.NumberFormat('vi-VN').format(sub.price) + ' VNĐ'}</span>
-                    <button class="add-to-cart-btn" data-sub-id="${sub.subId}">Thêm +</button>
-                </div>
+                <div class="subservice-info"><h4>${sub.name}</h4><p>${sub.details}</p></div>
+                <div class="subservice-action"><span>${isNaN(sub.price) ? sub.price : new Intl.NumberFormat('vi-VN').format(sub.price) + ' VNĐ'}</span><button class="add-to-cart-btn" data-sub-id="${sub.subId}">Thêm +</button></div>
             </div>`).join('');
         
         if (service.subServices.length > 0) {
             updateModalContent(service.subServices[0]);
             modalSubservicesList.querySelector('.subservice-item').classList.add('highlighted');
         } else {
-             updateModalContent({ images: [] });
+            updateModalContent({ images: [] });
         }
         
         modalLoader.style.display = 'none';
         modalData.classList.remove('hidden');
-        modal.classList.add('visible');
-    }
+    };
 
-    function closeModal() {
-        modal.classList.remove('visible');
+    const updateModalContent = (subService) => {
+        currentSubServiceImages = subService.images || [];
+        currentImageIndex = 0;
+        modalThumbnailContainer.innerHTML = currentSubServiceImages.map((img, i) => `<img src="${img}" class="modal-thumbnail ${i === 0 ? 'active' : ''}" data-index="${i}">`).join('');
+        updateModalGallery();
+        startSlideshow();
+    };
+
+    const updateModalGallery = () => {
+        if (currentSubServiceImages.length === 0) {
+            modalMainImg.src = 'https://placehold.co/600x400/0a0a1a/00ffff?text=Minh+Dang+IT';
+            return;
+        };
+        modalMainImg.src = currentSubServiceImages[currentImageIndex];
+        modalThumbnailContainer.querySelectorAll('.modal-thumbnail').forEach((thumb, i) => thumb.classList.toggle('active', i === currentImageIndex));
+    };
+
+    const startSlideshow = () => {
         clearInterval(modalSlideshowInterval);
-        setTimeout(() => {
-            modalData.classList.add('hidden');
-            modalLoader.style.display = 'block';
-        }, 300);
-    }
+        if (currentSubServiceImages.length <= 1) return;
+        modalSlideshowInterval = setInterval(() => {
+            currentImageIndex = (currentImageIndex + 1) % currentSubServiceImages.length;
+            updateModalGallery();
+        }, 3000);
+    };
     
-    function showLightbox(imageIndex) {
-        currentImageIndex = imageIndex;
-        lightboxImg.src = currentSubServiceImages[currentImageIndex];
-        lightbox.classList.add('visible');
-        
-        const hasMultipleImages = currentSubServiceImages.length > 1;
-        lightboxPrev.style.display = hasMultipleImages ? 'flex' : 'none';
-        lightboxNext.style.display = hasMultipleImages ? 'flex' : 'none';
-    }
-
-    function closeLightbox() {
-        lightbox.classList.remove('visible');
-    }
-    
-    function navigateLightbox(direction) {
-        const newIndex = currentImageIndex + direction;
-        const totalImages = currentSubServiceImages.length;
-        currentImageIndex = (newIndex + totalImages) % totalImages;
-        lightboxImg.style.opacity = '0';
-        setTimeout(() => {
+    // --- Logic cho Lightbox ---
+    const lightbox = document.getElementById('lightbox');
+    const lightboxImg = document.getElementById('lightbox-img');
+    const showLightbox = (index) => {
+        currentImageIndex = index;
+        if (currentSubServiceImages.length > 0) {
             lightboxImg.src = currentSubServiceImages[currentImageIndex];
-            lightboxImg.style.opacity = '1';
-        }, 150);
-    }
-
-    function addToCart(subId, buttonElement) {
-        let service;
-        for (const s of servicesData) {
-            const foundSub = s.subServices.find(sub => sub.subId === subId);
-            if (foundSub) {
-                service = foundSub;
-                break;
-            }
+            lightbox.classList.add('visible');
         }
-        
-        if (!service) return;
-        const existingItem = cart.find(item => item.subId === subId);
-        if (existingItem) existingItem.quantity++;
-        else cart.push({ ...service, quantity: 1 });
-        saveCartAndRender();
-        if (service.images && service.images.length > 0) {
-            flyToCart(service.images[0], buttonElement);
-        }
-    }
-
-    function handleQuantityChange(id, change) {
-        const item = cart.find(i => (i.subId || i.id) === id);
-        if (item) {
-            item.quantity += change;
-            if (item.quantity <= 0) cart = cart.filter(i => (i.subId || i.id) !== id);
-        }
-        saveCartAndRender();
-    }
-
-    function saveCartAndRender() {
-        localStorage.setItem('minhdangCart', JSON.stringify(cart));
-        renderCart();
-    }
-
-    function toggleCartPanel() {
+    };
+    const navigateLightbox = (direction) => {
+        currentImageIndex = (currentImageIndex + direction + currentSubServiceImages.length) % currentSubServiceImages.length;
+        lightboxImg.src = currentSubServiceImages[currentImageIndex];
+    };
+    
+    // --- Logic cho Giỏ hàng & Form ---
+    const toggleCartPanel = () => {
         cartPanel.classList.toggle('visible');
         cartOverlay.classList.toggle('opacity-0');
         cartOverlay.classList.toggle('pointer-events-none');
-    }
-    window.toggleCartPanel = toggleCartPanel; // Expose to global scope for ai_engine
-    
-    function validateForm() {
-        const nameValue = customerNameInput.value.trim();
-        const phoneValue = customerPhoneInput.value.trim();
-        
-        const isNameValid = /^[a-zA-ZÀÁÂÃÈÉÊÌÍÒÓÔÕÙÚĂĐĨŨƠàáâãèéêìíòóôõùúăđĩũơƯĂẠẢẤẦẨẪẬẮẰẲẴẶẸẺẼỀỀỂưăạảấầẩẫậắằẳẵặẹẻẽềềểỄỆỈỊỌỎỐỒỔỖỘỚỜỞỠỢỤỦỨỪễệỉịọỏốồổỗộớờởỡợụủứừỬỮỰỲỴÝỶỸửữựỳỵỷỹ\s]+$/.test(nameValue);
-        const isPhoneValid = /^0\d{9}$/.test(phoneValue);
+    };
 
-        if (nameValue && !isNameValid) {
-            nameError.textContent = 'Họ tên không hợp lệ.';
-            customerNameInput.classList.add('invalid');
-        } else {
-            nameError.textContent = '';
-            customerNameInput.classList.remove('invalid');
+    const handleQuantityChange = (subId, change) => {
+        const item = cart.find(i => i.subId === subId);
+        if (item) {
+            item.quantity += change;
+            if (item.quantity <= 0) cart = cart.filter(i => i.subId !== subId);
         }
+        saveCartAndRender();
+    };
 
-        if (phoneValue && !isPhoneValid) {
-            phoneError.textContent = 'SĐT phải là 10 số, bắt đầu từ 0.';
-            customerPhoneInput.classList.add('invalid');
-        } else {
-            phoneError.textContent = '';
-            customerPhoneInput.classList.remove('invalid');
-        }
-        
-        const isFormValid = nameValue !== '' && phoneValue !== '' && isNameValid && isPhoneValid;
-        submitOrderBtn.disabled = !isFormValid;
-        submitOrderBtn.classList.toggle('is-hidden', !isFormValid || cart.length === 0);
-        
-        return isFormValid;
-    }
-
-    async function handleOrderSubmit(event) {
-        event.preventDefault();
-        if (!validateForm()) return;
-        
-        submitOrderBtn.disabled = true; submitOrderBtn.textContent = 'ĐANG GỬI...'; formMessage.textContent = '';
-        try {
-            await fetch(appsScriptUrl, {
-                method: 'POST', mode: 'no-cors',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    customer: { 
-                        name: customerNameInput.value, 
-                        phone: customerPhoneInput.value, 
-                        notes: orderForm.customerNotes.value 
-                    },
-                    cart: cart, 
-                    total: cartTotalEl.textContent
-                })
-            });
-            formMessage.textContent = 'Yêu cầu đã gửi thành công!'; formMessage.className = 'text-green-400 text-center mt-4';
-            cart = []; saveCartAndRender(); orderForm.reset();
-            setTimeout(() => {
-                toggleCartPanel();
-                formMessage.textContent = '';
-            }, 2500);
-        } catch (error) {
-            formMessage.textContent = 'Có lỗi xảy ra, vui lòng thử lại.'; formMessage.className = 'text-red-400 text-center mt-4';
-        } finally {
-            submitOrderBtn.disabled = false; submitOrderBtn.textContent = 'Gửi Yêu Cầu';
-        }
-    }
-    
-    async function handleContactFormSubmit(event) {
-        event.preventDefault();
-        submitContactBtn.disabled = true;
-        submitContactBtn.textContent = 'ĐANG GỬI...';
-        contactFormMessage.textContent = '';
-        
-        const formData = {
-            customer: {
-                name: contactForm.contactName.value,
-                email: contactForm.contactEmail.value,
-                notes: contactForm.contactMessage.value
-            },
-            cart: [],
-            total: 'Tin nhắn từ Form Liên Hệ'
-        };
-
-        try {
-            await fetch(appsScriptUrl, {
-                method: 'POST', mode: 'no-cors',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(formData)
-            });
-            contactFormMessage.textContent = 'Đã gửi tin nhắn thành công!';
-            contactFormMessage.className = 'text-green-400 text-center mt-4';
-            contactForm.reset();
-        } catch (error) {
-            contactFormMessage.textContent = 'Có lỗi xảy ra, vui lòng thử lại.';
-            contactFormMessage.className = 'text-red-400 text-center mt-4';
-        } finally {
-            submitContactBtn.disabled = false;
-            submitContactBtn.textContent = 'Gửi Tin Nhắn';
-        }
-    }
-
-    function flyToCart(imgSrc, buttonElement) {
-        const cartIcon = document.getElementById('cart-icon');
-        const flyingImg = document.createElement('img');
-        flyingImg.src = imgSrc; flyingImg.className = 'flying-img';
-        document.body.appendChild(flyingImg);
-        const startRect = buttonElement.getBoundingClientRect();
-        const endRect = cartIcon.getBoundingClientRect();
-        flyingImg.style.left = `${startRect.left + startRect.width / 2}px`;
-        flyingImg.style.top = `${startRect.top + startRect.height / 2}px`;
-        requestAnimationFrame(() => {
-            flyingImg.style.left = `${endRect.left + endRect.width / 2}px`;
-            flyingImg.style.top = `${endRect.top + endRect.height / 2}px`;
-            flyingImg.style.transform = 'scale(0.1)'; flyingImg.style.opacity = '0';
-        });
-        flyingImg.addEventListener('transitionend', () => {
-            flyingImg.remove();
-            cartIconContainer.classList.add('shake');
-            setTimeout(() => cartIconContainer.classList.remove('shake'), 400);
-        });
-    }
-
-    // Gán các sự kiện
+    // --- Gắn Event Listeners ---
     serviceList.addEventListener('click', e => {
         const card = e.target.closest('.service-card');
         if (card) openModal(card.dataset.serviceId);
     });
-    
-    closeModalBtn.addEventListener('click', closeModal);
-    modal.addEventListener('click', e => { if (e.target === modal) closeModal(); });
-    
-    modalPrevBtn.addEventListener('click', () => {
-        currentImageIndex = (currentImageIndex - 1 + currentSubServiceImages.length) % currentSubServiceImages.length;
-        updateModalGallery();
-        startSlideshow();
-    });
-    modalNextBtn.addEventListener('click', () => {
-        currentImageIndex = (currentImageIndex + 1) % currentSubServiceImages.length;
-        updateModalGallery();
-        startSlideshow();
-    });
-     modalThumbnailContainer.addEventListener('click', e => {
-        const thumb = e.target.closest('.modal-thumbnail');
-        if (thumb) {
-            currentImageIndex = parseInt(thumb.dataset.index);
-            updateModalGallery();
-            startSlideshow();
-        }
-    });
-    document.getElementById('modal-image-container').addEventListener('mouseenter', () => clearInterval(modalSlideshowInterval));
-    document.getElementById('modal-image-container').addEventListener('mouseleave', () => startSlideshow());
-    
-    modalZoomBtn.addEventListener('click', () => showLightbox(currentImageIndex));
-    lightboxClose.addEventListener('click', closeLightbox);
-    lightbox.addEventListener('click', e => { if (e.target === lightbox) closeLightbox(); });
-    lightboxPrev.addEventListener('click', () => navigateLightbox(-1));
-    lightboxNext.addEventListener('click', () => navigateLightbox(1));
+
+    closeModalBtn.addEventListener('click', () => modal.classList.remove('visible'));
+    modal.addEventListener('click', e => { if (e.target === modal) modal.classList.remove('visible'); });
     
     modalSubservicesList.addEventListener('click', e => {
-        const subItem = e.target.closest('.subservice-item');
-        if (!subItem) return;
-        
         const btn = e.target.closest('.add-to-cart-btn');
-        if (btn) {
-            addToCart(btn.dataset.subId, btn);
-            return;
-        }
+        if (btn) return addToCart(btn.dataset.subId, btn);
 
-        const subId = subItem.dataset.subId;
-        let subService;
-        for (const s of servicesData) {
-            const found = s.subServices.find(sub => sub.subId === subId);
-            if (found) { subService = found; break; }
-        }
-
-        if (subService) {
-            updateModalContent(subService);
-            modalSubservicesList.querySelectorAll('.subservice-item').forEach(item => item.classList.remove('highlighted'));
-            subItem.classList.add('highlighted');
+        const subItem = e.target.closest('.subservice-item');
+        if(subItem) {
+             const subService = servicesData.flatMap(s => s.subServices).find(sub => sub.subId === subItem.dataset.subId);
+             if (subService) {
+                updateModalContent(subService);
+                modalSubservicesList.querySelectorAll('.subservice-item').forEach(item => item.classList.remove('highlighted'));
+                subItem.classList.add('highlighted');
+             }
         }
     });
+
+    document.getElementById('modal-zoom-btn')?.addEventListener('click', () => showLightbox(currentImageIndex));
+    document.getElementById('lightbox-close')?.addEventListener('click', () => lightbox.classList.remove('visible'));
+    document.getElementById('lightbox-prev')?.addEventListener('click', () => navigateLightbox(-1));
+    document.getElementById('lightbox-next')?.addEventListener('click', () => navigateLightbox(1));
     
     cartIconContainer.addEventListener('click', toggleCartPanel);
     closeCartBtn.addEventListener('click', toggleCartPanel);
     cartOverlay.addEventListener('click', toggleCartPanel);
-    cartItemsContainer.addEventListener('click', e => {
-        const btn = e.target.closest('.quantity-btn');
-        if (btn) handleQuantityChange(btn.dataset.id, parseInt(btn.dataset.change));
-    });
-    orderForm.addEventListener('submit', handleOrderSubmit);
-    contactForm.addEventListener('submit', handleContactFormSubmit);
-    
-    customerNameInput.addEventListener('input', validateForm);
-    customerPhoneInput.addEventListener('input', validateForm);
 
+    document.getElementById('cart-items-container').addEventListener('click', e => {
+        const btn = e.target.closest('.quantity-btn');
+        if (btn) handleQuantityChange(btn.dataset.subId, parseInt(btn.dataset.change));
+    });
+
+    orderForm.addEventListener('submit', handleFormSubmit);
+    orderForm.addEventListener('input', validateOrderForm);
+    contactForm.addEventListener('submit', handleFormSubmit);
+
+    renderCart(); // Render giỏ hàng lần đầu
+}
+
+// ===================================================================
+//  MODULE 3: CÁC HÀM RENDER & TIỆN ÍCH
+// ===================================================================
+function renderServiceCards() {
+    const serviceList = document.getElementById('service-list');
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) entry.target.classList.add('visible');
+        });
+    }, { threshold: 0.1 });
+
+    serviceList.innerHTML = servicesData.map(service => `
+        <div class="service-card group fade-in" data-tilt-card data-service-id="${service.id}">
+            <div class="relative overflow-hidden rounded-t-lg">
+                <img src="${service.image}" alt="${service.name}" class="w-full h-48 object-cover transition-transform duration-300 group-hover:scale-110">
+            </div>
+            <div class="p-6">
+                <h3 class="font-tech text-xl font-bold text-white mb-2">${service.name}</h3>
+                <p class="text-gray-400 text-sm mb-4 h-12 overflow-hidden">${service.description}</p>
+                <button class="font-semibold text-primary text-sm hover:text-secondary transition-colors">Xem Chi Tiết &rarr;</button>
+            </div>
+        </div>`).join('');
+    serviceList.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+}
+
+function renderProjectGallery() {
+    const projectGallery = document.getElementById('project-gallery');
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) entry.target.classList.add('visible');
+        });
+    }, { threshold: 0.1 });
+
+    const allImages = servicesData.flatMap(s => s.subServices.flatMap(sub => sub.images));
+    const shuffledImages = allImages.sort(() => 0.5 - Math.random());
+    projectGallery.innerHTML = shuffledImages.slice(0, 9).map((imgUrl, index) => `
+        <div class="project-item fade-in" style="transition-delay: ${index * 100}ms">
+            <img src="${imgUrl}" alt="Ảnh dự án ${index + 1}" loading="lazy">
+        </div>
+    `).join('');
+    projectGallery.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+}
+
+function initFloatingImages() {
+    const container = document.getElementById('floating-images-container');
+    const allImages = servicesData.flatMap(s => s.subServices.flatMap(sub => sub.images));
+    const uniqueImages = [...new Set(allImages)].filter(img => img);
+    for (let i = 0; i < Math.min(uniqueImages.length, 7); i++) {
+        const img = document.createElement('img');
+        img.src = uniqueImages[i % uniqueImages.length];
+        img.className = 'floating-image';
+        img.style.width = `${Math.random() * (120 - 60) + 60}px`;
+        img.style.top = `${Math.random() * 80 + 10}%`;
+        img.style.left = `${Math.random() * 80 + 10}%`;
+        img.style.animationDuration = `${Math.random() * 10 + 10}s`;
+        img.style.animationDelay = `${Math.random() * 5}s`;
+        container.appendChild(img);
+    }
+}
+
+function renderCart() {
+    const cartItemsContainer = document.getElementById('cart-items-container');
+    const cartTotalEl = document.getElementById('cart-total');
+    const formContainer = document.getElementById('customer-form-container');
+    
+    if (cart.length === 0) {
+        cartItemsContainer.innerHTML = '<p class="text-gray-400 text-center p-8">Giỏ hàng của bạn đang trống.</p>';
+    } else {
+        cartItemsContainer.innerHTML = cart.map(item => `
+            <div class="cart-item">
+                <img src="${item.images[0] || 'img/placeholder.png'}" alt="${item.name}" class="w-16 h-16 object-cover rounded-md">
+                <div class="cart-item-info"><p class="font-bold">${item.name}</p><p class="text-primary text-xs">${isNaN(item.price) ? item.price : new Intl.NumberFormat('vi-VN').format(item.price) + ' VNĐ'}</p></div>
+                <div class="cart-item-quantity"><button class="quantity-btn" data-sub-id="${item.subId}" data-change="-1">-</button><span>${item.quantity}</span><button class="quantity-btn" data-sub-id="${item.subId}" data-change="1">+</button></div>
+            </div>`).join('');
+    }
+    const total = cart.reduce((sum, item) => sum + (isNaN(item.price) ? 0 : Number(item.price) * item.quantity), 0);
+    cartTotalEl.textContent = new Intl.NumberFormat('vi-VN').format(total) + ' VNĐ';
+    
+    const cartCount = document.getElementById('cart-count');
+    const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+    cartCount.textContent = totalItems;
+    document.getElementById('cart-icon-container').classList.toggle('is-hidden', totalItems === 0);
+    document.body.classList.toggle('cart-is-visible', totalItems > 0);
+    
+    formContainer.classList.toggle('is-hidden', cart.length === 0);
+    validateOrderForm();
+}
+
+function saveCartAndRender() {
+    localStorage.setItem('minhdangCart', JSON.stringify(cart));
     renderCart();
+}
+
+function addToCart(subId, buttonElement) {
+    const service = servicesData.flatMap(s => s.subServices).find(sub => sub.subId === subId);
+    if (!service) return;
+
+    const existingItem = cart.find(item => item.subId === subId);
+    if (existingItem) existingItem.quantity++;
+    else cart.push({ ...service, quantity: 1 });
+    saveCartAndRender();
+
+    const flyImgSrc = service.images && service.images.length > 0 ? service.images[0] : 'https://placehold.co/100x100/0a0a1a/00ffff?text=ITEM';
+    flyToCart(flyImgSrc, buttonElement);
+}
+
+function addToCartFromAI(build) {
+    build.forEach(component => {
+        const itemInCart = {
+            subId: component.id, name: component.name, price: component.price,
+            images: [component.image], quantity: 1
+        };
+        const existingItem = cart.find(item => item.subId === itemInCart.subId);
+        if (existingItem) existingItem.quantity++;
+        else cart.push(itemInCart);
+    });
+    saveCartAndRender();
+    
+    // Tự động mở giỏ hàng
+    const cartPanel = document.getElementById('cart-panel-container');
+    if (!cartPanel.classList.contains('visible')) {
+        cartPanel.classList.add('visible');
+        document.getElementById('cart-overlay').classList.remove('opacity-0', 'pointer-events-none');
+    }
+}
+
+function flyToCart(imgSrc, buttonElement) {
+    const cartIcon = document.getElementById('cart-icon');
+    const flyingImg = document.createElement('img');
+    flyingImg.src = imgSrc;
+    flyingImg.className = 'flying-img';
+    document.body.appendChild(flyingImg);
+    const startRect = buttonElement.getBoundingClientRect();
+    const endRect = cartIcon.getBoundingClientRect();
+    flyingImg.style.left = `${startRect.left + startRect.width / 2}px`;
+    flyingImg.style.top = `${startRect.top + startRect.height / 2}px`;
+    requestAnimationFrame(() => {
+        flyingImg.style.left = `${endRect.left + endRect.width / 2}px`;
+        flyingImg.style.top = `${endRect.top + endRect.height / 2}px`;
+        flyingImg.style.transform = 'scale(0.1)';
+        flyingImg.style.opacity = '0';
+    });
+    flyingImg.addEventListener('transitionend', () => {
+        flyingImg.remove();
+        document.getElementById('cart-icon-container').classList.add('shake');
+        setTimeout(() => document.getElementById('cart-icon-container').classList.remove('shake'), 400);
+    });
+}
+
+function validateOrderForm() {
+    const nameInput = document.getElementById('customerName');
+    const phoneInput = document.getElementById('customerPhone');
+    const nameError = document.getElementById('name-error');
+    const phoneError = document.getElementById('phone-error');
+    const submitBtn = document.getElementById('submit-order-btn');
+    
+    const isNameValid = /^[a-zA-ZÀÁÂÃÈÉÊÌÍÒÓÔÕÙÚĂĐĨŨƠàáâãèéêìíòóôõùúăđĩũơƯĂẠẢẤẦẨẪẬẮẰẲẴẶẸẺẼỀỀỂưăạảấầẩẫậắằẳẵặẹẻẽềềểỄỆỈỊỌỎỐỒỔỖỘỚỜỞỠỢỤỦỨỪễệỉịọỏốồổỗộớờởỡợụủứừỬỮỰỲỴÝỶỸửữựỳỵỷỹ\s]+$/.test(nameInput.value.trim());
+    const isPhoneValid = /^0\d{9}$/.test(phoneInput.value.trim());
+
+    nameError.textContent = (nameInput.value && !isNameValid) ? 'Họ tên không hợp lệ.' : '';
+    phoneError.textContent = (phoneInput.value && !isPhoneValid) ? 'SĐT phải là 10 số, bắt đầu từ 0.' : '';
+    
+    const isFormValid = nameInput.value.trim() && phoneInput.value.trim() && isNameValid && isPhoneValid;
+    submitBtn.disabled = !isFormValid;
+    submitBtn.classList.toggle('is-hidden', !isFormValid || cart.length === 0);
+    return isFormValid;
+}
+
+async function handleFormSubmit(event) {
+    event.preventDefault();
+    const form = event.target;
+    const isOrderForm = form.id === 'order-form';
+    const btn = isOrderForm ? document.getElementById('submit-order-btn') : document.getElementById('submit-contact-btn');
+    const msgEl = isOrderForm ? document.getElementById('form-message') : document.getElementById('contact-form-message');
+
+    if (isOrderForm && !validateOrderForm()) return;
+
+    btn.disabled = true;
+    btn.textContent = 'ĐANG GỬI...';
+    msgEl.textContent = '';
+    
+    let payload;
+    if (isOrderForm) {
+        payload = {
+            customer: { name: form.customerName.value, phone: form.customerPhone.value, notes: form.customerNotes.value },
+            cart: cart, total: document.getElementById('cart-total').textContent
+        };
+    } else { // Contact Form
+        payload = {
+            customer: { name: form.contactName.value, email: form.contactEmail.value, notes: form.contactMessage.value },
+            cart: [], total: 'Tin nhắn từ Form Liên Hệ'
+        };
+    }
+
+    try {
+        await fetch(appsScriptUrl, {
+            method: 'POST', mode: 'no-cors',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+        msgEl.textContent = 'Gửi yêu cầu thành công!';
+        msgEl.className = 'text-green-400 text-center mt-4';
+        form.reset();
+        if (isOrderForm) {
+            cart = [];
+            saveCartAndRender();
+            setTimeout(() => document.getElementById('cart-panel-container').classList.remove('visible'), 2500);
+        }
+    } catch (error) {
+        msgEl.textContent = 'Có lỗi xảy ra, vui lòng thử lại.';
+        msgEl.className = 'text-red-400 text-center mt-4';
+    } finally {
+        btn.disabled = false;
+        btn.textContent = isOrderForm ? 'Gửi Yêu Cầu' : 'Gửi Tin Nhắn';
+    }
 }
 

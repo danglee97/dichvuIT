@@ -1,369 +1,365 @@
-// ===================================================================
-//  AI_ENGINE.JS - MODULE TRỢ LÝ TƯ VẤN AI (PHIÊN BẢN HOÀN THIỆN)
-//  VERSION 2.1 - NÂNG CẤP GIAO DIỆN TRÌNH BÀY KẾT QUẢ
-// ===================================================================
+/**
+ * ai_engine.js - Bộ não xử lý logic cho Trợ lý AI
+ * Phiên bản: 5.0 (Hệ Thống Giám Sát Sự Kiện Trung Tâm)
+ */
 
-// --- ĐỊNH NGHĨA CÂY HỘI THOẠI VÀ LOGIC ---
-const conversationTree = {
-    start: {
-        text: "Chào bạn, tôi là Trợ lý AI của Minh Đăng IT. Tôi có thể giúp gì cho bạn hôm nay?",
-        options: [
-            { text: "Tư vấn lắp máy mới", next: "build_pc_purpose" },
-            { text: "Máy tính của tôi gặp sự cố", next: "diagnose_symptom" },
-            { text: "Tìm hiểu dịch vụ khác", next: "other_services" },
-        ]
-    },
-    // --- Luồng 1: Xây dựng PC ---
-    build_pc_purpose: {
-        text: "Tuyệt vời! Bạn muốn build máy với mục đích chính là gì?",
-        options: [
-            { text: "Gaming / Stream", value: "Gaming / Stream", next: "build_pc_budget" },
-            { text: "Đồ họa / Render Video", value: "Đồ họa / Render", next: "build_pc_budget" },
-            { text: "Văn phòng / Học tập", value: "Văn phòng / Học tập", next: "build_pc_budget" }
-        ]
-    },
-    build_pc_budget: {
-        text: "Tôi đã hiểu. Ngân sách dự kiến của bạn cho bộ máy này là bao nhiêu?",
-        options: [
-            { text: "Dưới 15 triệu", value: "Dưới 15 triệu", key: "low", next: "result_build" },
-            { text: "Từ 15 - 25 triệu", value: "15 - 25 triệu", key: "mid", next: "result_build" },
-            { text: "Từ 25 - 40 triệu", value: "25 - 40 triệu", key: "high", next: "result_build" },
-            { text: "Trên 40 triệu", value: "Trên 40 triệu", key: "ultra", next: "result_build" }
-        ]
-    },
-    // --- Luồng 2: Chẩn đoán sự cố ---
-    diagnose_symptom: {
-        text: "Tôi rất tiếc khi nghe điều đó. Vui lòng mô tả sự cố bạn đang gặp phải:",
-        options: [
-            { text: "Máy chạy rất chậm, giật lag", value: "slow", next: "result_diagnose" },
-            { text: "Máy không lên nguồn", value: "no_power", next: "result_diagnose" },
-            { text: "Máy hay bị treo, màn hình xanh", value: "crash", next: "result_diagnose" },
-            { text: "Vấn đề khác", value: "other", next: "result_diagnose" }
-        ]
-    },
-    // --- Luồng 3: Dịch vụ khác ---
-    other_services: {
-        text: "Ngoài PC, chúng tôi còn cung cấp các giải pháp chuyên nghiệp khác. Bạn quan tâm đến lĩnh vực nào?",
-        // Các options sẽ được tạo tự động
-    },
-    // --- Các bước kết quả ---
-    result_build: { action: "buildPcConfig" },
-    result_diagnose: { action: "diagnoseProblem" },
-    result_other: { action: "showSubServices" }
-};
+// Biến toàn cục để lưu trữ dữ liệu và trạng thái
+let allPcComponents = [];
+let conversationState = {};
+let currentBuild = [];
 
-// --- BỘ NÃO CỦA AI ---
-document.addEventListener('DOMContentLoaded', () => {
-    // --- Khai báo các biến DOM ---
-    const aiModal = document.getElementById('ai-assistant-modal');
-    const openAiBtn = document.getElementById('ai-assistant-btn');
-    const closeAiBtn = document.getElementById('ai-close-modal-btn');
+// Hàm khởi tạo, được gọi từ script.js
+function initializeAIAssistant(components) {
+    allPcComponents = components;
+    const aiBtn = document.getElementById('ai-assistant-btn');
+    const aiModal = document.getElementById('ai-modal');
+    const closeAiModalBtn = document.getElementById('close-ai-modal-btn');
+    // --- NÂNG CẤP: Lấy container cha của toàn bộ nội dung modal ---
+    const aiModalContent = document.querySelector('.ai-modal-content');
+
+    // Gắn các listener cố định
+    aiBtn?.addEventListener('click', startConversation);
+    closeAiModalBtn?.addEventListener('click', endConversation);
+    aiModal?.addEventListener('click', (e) => {
+        if (e.target === aiModal) endConversation();
+    });
+
+    // --- ĐẠI NÂNG CẤP: HỆ THỐNG GIÁM SÁT SỰ KIỆN TRUNG TÂM ---
+    // Gắn một listener duy nhất cho toàn bộ modal content để bắt tất cả các click
+    aiModalContent?.addEventListener('click', (e) => {
+        // Tìm nút bấm gần nhất với vị trí click
+        const button = e.target.closest('.ai-option-btn');
+        // Chỉ xử lý nếu tìm thấy nút và nút không bị vô hiệu hóa
+        if (button && !button.disabled) {
+            const text = button.textContent;
+            const action = button.dataset.action;
+            // Dữ liệu được lưu trong data-data attribute
+            const data = button.dataset.data ? JSON.parse(button.dataset.data) : {};
+            handleOptionClick(text, action, data);
+        }
+    });
+}
+
+// Bắt đầu cuộc trò chuyện
+function startConversation() {
+    document.getElementById('ai-modal')?.classList.add('visible');
+    document.getElementById('ai-chat-log').innerHTML = ''; // Xóa lịch sử
+    conversationState = { step: 'start' };
+    currentBuild = [];
+
+    appendMessage('ai', "Chào bạn, tôi là Trợ lý AI của Minh Đăng IT. Tôi có thể giúp gì cho bạn hôm nay?");
+    showOptions([
+        { text: 'Tư vấn lắp máy mới', action: 'startBuildPc' },
+        { text: 'Máy của tôi gặp sự cố', action: 'diagnoseProblem' },
+        { text: 'Tìm dịch vụ khác', action: 'findService' }
+    ]);
+}
+
+// Kết thúc cuộc trò chuyện
+function endConversation() {
+    document.getElementById('ai-modal')?.classList.remove('visible');
+}
+
+// Hiển thị tin nhắn trong chat log
+function appendMessage(sender, text, contentHtml = '') {
     const chatLog = document.getElementById('ai-chat-log');
-    const optionsContainer = document.getElementById('ai-options-container');
-
-    if (!aiModal || !openAiBtn || !closeAiBtn || !chatLog || !optionsContainer) {
-        console.error("Một hoặc nhiều thành phần UI của Trợ lý AI không được tìm thấy.");
-        return;
+    const messageDiv = document.createElement('div');
+    
+    if (sender === 'ai') {
+        messageDiv.className = 'ai-message';
+        messageDiv.innerHTML = `<div class="ai-avatar">🤖</div><div class="ai-bubble"><p>${text}</p>${contentHtml}</div>`;
+    } else {
+        messageDiv.className = 'user-message';
+        messageDiv.innerHTML = `<div class="user-bubble">${text}</div>`;
     }
-    
-    let isDataReady = false;
-    let conversationState = {};
+    chatLog.appendChild(messageDiv);
+    chatLog.scrollTop = chatLog.scrollHeight;
+}
 
-    document.addEventListener('dataLoaded', () => {
-        isDataReady = true;
-        console.log("AI Engine: Dữ liệu đã sẵn sàng, AI có thể hoạt động.");
+// Hiển thị các nút lựa chọn
+function showOptions(options) {
+    const optionsContainer = document.getElementById('ai-options-container');
+    optionsContainer.innerHTML = ''; // Luôn xóa các nút cũ
+    options.forEach(option => {
+        const button = document.createElement('button');
+        button.className = 'ai-option-btn';
+        button.textContent = option.text;
+        button.dataset.action = option.action;
+        if (option.data) {
+            // Luôn stringify data để đảm bảo tính nhất quán
+            button.dataset.data = JSON.stringify(option.data);
+        }
+        optionsContainer.appendChild(button);
     });
-    
-    const addMessage = (type, text, contentHtml = '') => {
-        const messageWrapper = document.createElement('div');
-        if (contentHtml) {
-            // Nếu có contentHtml, nó sẽ là toàn bộ nội dung của message
-            messageWrapper.innerHTML = contentHtml;
+}
+
+// Xử lý khi người dùng chọn một option
+function handleOptionClick(text, action, data = {}) {
+    // Chỉ hiển thị tin nhắn người dùng cho các hành động chính, không phải khi bấm "Thay đổi"
+    if(action !== 'changeComponent' && action !== 'selectNewComponent' && action !== 'redisplayBuild') {
+        appendMessage('user', text);
+    }
+    // Luôn dọn dẹp khu vực nút bấm chính
+    document.getElementById('ai-options-container').innerHTML = '';
+
+    setTimeout(() => {
+        switch (action) {
+            case 'startBuildPc': promptForBudget(); break;
+            case 'setBudget':
+                conversationState.budget = data;
+                promptForPurpose(data.key);
+                break;
+            case 'setPurpose':
+                conversationState.purpose = data;
+                processBuildConfig();
+                break;
+            case 'diagnoseProblem':
+                 appendMessage('ai', "Chức năng này đang được phát triển. Bạn có thể tham khảo các dịch vụ sửa chữa của chúng tôi nhé!");
+                 setTimeout(endConversation, 2000);
+                break;
+            case 'findService':
+                 appendMessage('ai', "Chức năng này đang được phát triển. Bạn có thể tham khảo các dịch vụ trên trang web nhé!");
+                 setTimeout(endConversation, 2000);
+                break;
+            case 'addToCart': addBuildToCart(); break;
+            case 'changeComponent': promptForComponentChange(data.type); break;
+            case 'selectNewComponent': updateComponent(data.newComponent); break;
+            case 'restart': startConversation(); break;
+            case 'redisplayBuild':
+                const result = calculatePsuAndFinalize(currentBuild, conversationState.budget);
+                if (result && result.build) {
+                    displayBuildResult(result.build, result.totalPrice, result.wattage);
+                    showOptions([{ text: 'Thêm vào Yêu Cầu', action: 'addToCart' }, { text: 'Làm lại từ đầu', action: 'restart' }]);
+                } else {
+                    appendMessage('ai', "Đã có lỗi xảy ra khi hiển thị lại cấu hình.");
+                }
+                break;
+        }
+    }, 500);
+}
+
+// --- LUỒNG TƯ VẤN BUILD PC ---
+function promptForBudget() {
+    appendMessage('ai', "Tuyệt vời! Trước hết, bạn dự định đầu tư khoảng bao nhiêu cho bộ máy mới này?");
+    showOptions([
+        { text: 'Học sinh (< 8 triệu)', action: 'setBudget', data: { key: 'student-lt-8m', min: 0, max: 8000000 } },
+        { text: 'Cơ bản (8 - 15 triệu)', action: 'setBudget', data: { key: 'basic-8-15m', min: 8000000, max: 15000000 } },
+        { text: 'Tầm trung (15 - 25 triệu)', action: 'setBudget', data: { key: 'mid-15-25m', min: 15000000, max: 25000000 } },
+        { text: 'Cao cấp (25 - 40 triệu)', action: 'setBudget', data: { key: 'high-25-40m', min: 25000000, max: 40000000 } },
+        { text: 'Hạng sang (> 40 triệu)', action: 'setBudget', data: { key: 'luxury-gt-40m', min: 40000000, max: Infinity } }
+    ]);
+}
+
+function promptForPurpose(budgetKey) {
+    appendMessage('ai', "Đã hiểu. Bạn sẽ dùng máy chủ yếu cho mục đích gì?");
+    let purposes = [
+        { text: 'Học tập & Giải trí nhẹ', action: 'setPurpose', data: 'study' },
+        { text: 'Chơi Game', action: 'setPurpose', data: 'gaming' },
+        { text: 'Làm Đồ họa / Video', action: 'setPurpose', data: 'workstation' }
+    ];
+    if (budgetKey === 'student-lt-8m' || budgetKey === 'basic-8-15m') {
+        purposes = purposes.filter(p => p.data !== 'workstation');
+    }
+    showOptions(purposes);
+}
+
+function processBuildConfig() {
+    appendMessage('ai', "Ok, dựa trên lựa chọn của bạn, tôi đang phân tích các linh kiện phù hợp nhất. Vui lòng chờ trong giây lát...");
+    setTimeout(() => {
+        const result = buildPc(conversationState.budget, conversationState.purpose);
+        if (result && result.build) {
+            currentBuild = result.build;
+            displayBuildResult(result.build, result.totalPrice, result.wattage);
+            showOptions([{ text: 'Thêm vào Yêu Cầu', action: 'addToCart' }, { text: 'Làm lại từ đầu', action: 'restart' }]);
         } else {
-            messageWrapper.className = type === 'ai' ? 'ai-message' : 'user-message';
-            let messageHtml = '';
-            if (type === 'ai') messageHtml += `<div class="ai-avatar">🤖</div>`;
-            messageHtml += `<div class="${type === 'ai' ? 'ai-bubble' : 'user-bubble'}">${text}</div>`;
-            messageWrapper.innerHTML = messageHtml;
+            appendMessage('ai', "Rất tiếc, tôi không tìm thấy cấu hình nào phù hợp với các tiêu chí này. Bạn vui lòng thử lại với lựa chọn khác nhé.");
+            showOptions([{ text: 'Chọn lại ngân sách', action: 'startBuildPc' }]);
         }
-        chatLog.appendChild(messageWrapper);
-        chatLog.scrollTop = chatLog.scrollHeight;
-    };
+    }, 1000);
+}
 
-    const showOptions = (options) => {
-        optionsContainer.innerHTML = '';
-        if (!options || options.length === 0) {
-            optionsContainer.style.display = 'none';
-            return;
-        }
-        optionsContainer.style.display = 'flex';
-        options.forEach(option => {
-            const button = document.createElement('button');
-            button.className = 'ai-option-btn';
-            button.textContent = option.text;
-            button.dataset.next = option.next;
-            button.dataset.value = option.value || option.text;
-            if(option.key) button.dataset.key = option.key;
-            optionsContainer.appendChild(button);
-        });
-    };
+// --- LOGIC BUILD PC --- (Giữ nguyên, không thay đổi)
+function findCheapestComponent(type, filterFunc = () => true) {
+    return allPcComponents.filter(c => c.type === type && filterFunc(c)).sort((a, b) => a.price - b.price)[0];
+}
 
-    const handleOptionClick = (e) => {
-        if (!e.target.matches('.ai-option-btn')) return;
-        const button = e.target;
-        addMessage('user', button.textContent);
-        
-        const previousNodeKey = conversationState.currentNode;
-        if (previousNodeKey === 'build_pc_purpose') conversationState.purpose = button.dataset.value;
-        if (previousNodeKey === 'build_pc_budget') {
-            conversationState.budget = button.dataset.value;
-            conversationState.budget_key = button.dataset.key;
-        }
-        if (previousNodeKey === 'diagnose_symptom') conversationState.symptom = button.dataset.value;
-        if (previousNodeKey === 'other_services') conversationState.serviceId = button.dataset.value;
+function findComponents(type, filterFunc = () => true) {
+    return allPcComponents.filter(c => c.type === type && filterFunc(c)).sort((a, b) => a.price - b.price);
+}
 
-        navigateToNode(button.dataset.next);
-    };
+function buildPc(budget, purpose) {
+    let cpu, mainboard, ram, gpu, storage, psu, caseComponent, cooler;
+    switch (budget.key) {
+        case 'student-lt-8m':
+            cpu = findCheapestComponent('cpu', c => c.price < 3500000 && c.name.includes('G'));
+            gpu = null;
+            mainboard = findCheapestComponent('mainboard', m => m.socket === cpu?.socket && m.ram_type === 'DDR4');
+            ram = findCheapestComponent('ram', r => r.ram_type === 'DDR4' && r.name.includes('8GB'));
+            storage = findCheapestComponent('storage', s => s.price < 1000000);
+            let affordableCase = findCheapestComponent('case', c => c.price < 800000);
+            caseComponent = affordableCase ? affordableCase : findCheapestComponent('case');
+            cooler = null;
+            break;
+        case 'basic-8-15m':
+            cpu = findCheapestComponent('cpu', c => c.price >= 2500000 && c.price < 4000000);
+            mainboard = findCheapestComponent('mainboard', m => m.socket === cpu?.socket && m.ram_type === 'DDR4');
+            ram = findCheapestComponent('ram', r => r.ram_type === 'DDR4' && r.name.includes('16GB'));
+            gpu = findCheapestComponent('gpu', g => g.price >= 5000000 && g.price < 7000000);
+            storage = findCheapestComponent('storage', s => s.name.includes('500GB'));
+            caseComponent = findCheapestComponent('case', c => c.price < 1000000);
+            cooler = findCheapestComponent('cooler', c => c.price < 500000);
+            break;
+        case 'mid-15-25m':
+            cpu = findCheapestComponent('cpu', c => c.price >= 4000000 && c.price < 6000000);
+            mainboard = findCheapestComponent('mainboard', m => m.socket === cpu?.socket);
+            ram = findCheapestComponent('ram', r => r.ram_type === mainboard?.ram_type && r.name.includes('16GB'));
+            gpu = findCheapestComponent('gpu', g => g.price >= 7000000 && g.price < 13000000);
+            storage = findCheapestComponent('storage', s => s.name.includes('1TB'));
+            caseComponent = findCheapestComponent('case');
+            cooler = findCheapestComponent('cooler', c => c.price < 1000000);
+            break;
+        case 'high-25-40m':
+            cpu = findCheapestComponent('cpu', c => c.price >= 6000000 && c.price < 12000000);
+            mainboard = findCheapestComponent('mainboard', m => m.socket === cpu?.socket && m.ram_type === 'DDR5');
+            ram = findCheapestComponent('ram', r => r.ram_type === 'DDR5' && r.name.includes('32GB'));
+            gpu = findCheapestComponent('gpu', g => g.price >= 13000000 && g.price < 25000000);
+            storage = findCheapestComponent('storage', s => s.name.includes('1TB') && s.price > 2000000);
+            caseComponent = findCheapestComponent('case', c => c.price > 2000000);
+            cooler = findCheapestComponent('cooler', c => c.price > 1000000);
+            break;
+        case 'luxury-gt-40m':
+            cpu = findCheapestComponent('cpu', c => c.price > 12000000);
+            mainboard = findCheapestComponent('mainboard', m => m.socket === cpu?.socket && m.ram_type === 'DDR5');
+            ram = findCheapestComponent('ram', r => r.ram_type === 'DDR5' && r.name.includes('32GB'));
+            gpu = findCheapestComponent('gpu', g => g.price > 25000000);
+            storage = findCheapestComponent('storage', s => s.name.includes('2TB'));
+            caseComponent = findCheapestComponent('case', c => c.price > 3000000);
+            cooler = findCheapestComponent('cooler', c => c.price > 2000000);
+            break;
+    }
+    const essentialComponents = [cpu, mainboard, ram, storage, caseComponent];
+    if (cpu && !cpu.name.includes('G') && !gpu) return null; 
+    if (essentialComponents.some(c => !c)) return null;
+    return calculatePsuAndFinalize([cpu, mainboard, ram, gpu, storage, psu, caseComponent, cooler], budget);
+}
 
-    const navigateToNode = (nodeKey) => {
-        const node = conversationTree[nodeKey];
-        conversationState.currentNode = nodeKey;
-        if (!node) return;
-
-        if (node.text) addMessage('ai', node.text);
-
-        if (node.options) {
-            showOptions(node.options);
-        } else if (node.action) {
-            showOptions([]);
-            executeAction(node.action);
-        } else if (nodeKey === 'other_services') {
-            const otherServiceOptions = servicesData
-                .filter(s => s.id !== 'xay-dung-pc' && s.id !== 'sua-chua-pc')
-                .map(s => ({ text: s.name, value: s.id, next: "result_other" }));
-             otherServiceOptions.push({ text: "Quay lại", next: "start" });
-             showOptions(otherServiceOptions);
-        }
-    };
-    
-    const executeAction = (actionName) => {
-        switch (actionName) {
-            case 'buildPcConfig': generatePcBuild(); break;
-            case 'diagnoseProblem': diagnoseProblem(); break;
-            case 'showSubServices': showSubServices(); break;
-        }
-    };
-    
-    const findComponent = (type, budget, constraints = {}) => {
-        const candidates = pcComponentsData
-            .filter(c => {
-                if (c.type !== type || c.price > budget) return false;
-                if (constraints.socket && c.socket && c.socket !== constraints.socket) return false;
-                if (constraints.ram_type && c.ram_type && c.ram_type !== constraints.ram_type) return false;
-                return true;
-            })
-            .sort((a, b) => b.price - a.price);
-        return candidates[0] || null;
-    };
-    
-    const generatePcBuild = () => {
-        const { purpose, budget_key } = conversationState;
-        addMessage('ai', `Ok, tôi đang phân tích theo nhu cầu **${purpose}**, ngân sách **${conversationState.budget}** để xây dựng cấu hình tương thích và tối ưu nhất...`);
-        
-        const budgetMappings = { low: 15000000, mid: 25000000, high: 40000000, ultra: 100000000 };
-        const maxBudget = budgetMappings[budget_key];
-
-        let build = {}; let currentCost = 0;
-
-        let cpuBudget = maxBudget * 0.25;
-        build.cpu = findComponent('cpu', cpuBudget);
-        if (!build.cpu) {
-            addMessage('ai', 'Rất tiếc, tôi không tìm thấy CPU phù hợp trong tầm giá này. Vui lòng thử lại với ngân sách khác.');
-            showOptions([{ text: "Bắt đầu lại", next: "start" }]); return;
-        }
-        currentCost += build.cpu.price;
-
-        let mainBudget = maxBudget * 0.15;
-        build.mainboard = findComponent('mainboard', mainBudget, { socket: build.cpu.socket });
-        if (!build.mainboard) build.mainboard = findComponent('mainboard', maxBudget, { socket: build.cpu.socket });
-        if (!build.mainboard) {
-            addMessage('ai', 'Rất tiếc, không có Mainboard nào tương thích với CPU đã chọn.');
-            showOptions([{ text: "Bắt đầu lại", next: "start" }]); return;
-        }
-        currentCost += build.mainboard.price;
-
-        let ramBudget = maxBudget * 0.1;
-        build.ram = findComponent('ram', ramBudget, { ram_type: build.mainboard.ram_type });
-        if (!build.ram) build.ram = findComponent('ram', maxBudget, { ram_type: build.mainboard.ram_type });
-        if (!build.ram) {
-            addMessage('ai', 'Rất tiếc, không có RAM nào tương thích với Mainboard đã chọn.');
-            showOptions([{ text: "Bắt đầu lại", next: "start" }]); return;
-        }
-        currentCost += build.ram.price;
-        
-        let remainingBudget = maxBudget - currentCost;
-        if (remainingBudget <= 0) {
-             addMessage('ai', 'Ngân sách của bạn chỉ vừa đủ cho CPU, Mainboard và RAM. Hãy cân nhắc tăng ngân sách để có một bộ máy hoàn chỉnh.');
-             displayBuildResult(Object.values(build).filter(c => c), currentCost); return;
-        }
-        
-        if (purpose !== 'Văn phòng / Học tập') {
-            build.gpu = findComponent('gpu', remainingBudget * 0.6);
-            if (build.gpu) remainingBudget -= build.gpu.price;
-        }
-        
-        build.storage = findComponent('storage', remainingBudget * 0.3);
-        if (build.storage) remainingBudget -= build.storage.price;
-        
-        build.psu = findComponent('psu', remainingBudget * 0.4);
-        if (build.psu) remainingBudget -= build.psu.price;
-
-        build.case = findComponent('case', remainingBudget * 0.8);
-        if(build.case) remainingBudget -= build.case.price;
-
-        const finalBuild = Object.values(build).filter(c => c);
-        const totalCost = finalBuild.reduce((sum, item) => sum + item.price, 0);
-        
-        displayBuildResult(finalBuild, totalCost);
-    };
-
-    const displayBuildResult = (build, total) => {
-        let itemsHtml = '';
-        build.forEach(item => {
-            itemsHtml += `
-                <div class="build-item-row">
-                    <img src="${item.image || 'https://placehold.co/100x100/0a0a1a/00ffff?text=IMG'}" alt="${item.name}" class="build-item-image">
-                    <div class="build-item-info">
-                        <span class="build-item-type">${item.type}</span>
-                        <span class="build-item-name">${item.name}</span>
-                    </div>
-                    <span class="build-item-price">${new Intl.NumberFormat('vi-VN').format(item.price)}đ</span>
-                </div>`;
-        });
-
-        const resultHtml = `
-            <div class="ai-result-card">
-                <div class="ai-result-header">
-                    <h3 class="font-tech">Cấu Hình Đề Xuất</h3>
-                    <p>Dành cho: <strong>${conversationState.purpose}</strong><br>Ngân sách: <strong>${conversationState.budget}</strong></p>
-                </div>
-                <div class="ai-result-body">
-                    ${itemsHtml}
-                </div>
-                <div class="ai-result-footer">
-                    <span>Tổng cộng (ước tính):</span>
-                    <span class="font-tech">${new Intl.NumberFormat('vi-VN').format(total)}đ</span>
-                </div>
-            </div>`;
-
-        addMessage('ai', '', resultHtml);
-        showOptions([
-            { text: "Thêm tất cả vào Yêu Cầu", value: JSON.stringify(build), next: "add_to_cart_and_close" },
-            { text: "Làm lại từ đầu", next: "start" }
-        ]);
-    };
-    
-    const diagnoseProblem = () => {
-        const { symptom } = conversationState;
-        let suggestions = [];
-        
-        switch (symptom) {
-            case 'slow':
-                suggestions.push(findSubServiceById('scpc01'), findSubServiceById('scpc02'), findSubServiceById('scpc03'));
-                break;
-            case 'no_power':
-            case 'crash':
-                 suggestions.push(findSubServiceById('scpc01'));
-                 addMessage('ai', "Sự cố này có thể do nhiều nguyên nhân (nguồn, mainboard, RAM...). Tốt nhất bạn nên mang máy đến để chúng tôi kiểm tra trực tiếp và báo giá chính xác.");
-                break;
-            case 'other':
-                addMessage('ai', "Với các sự cố phức tạp, bạn vui lòng liên hệ trực tiếp qua SĐT hoặc Zalo để được hỗ trợ nhanh nhất nhé.");
-                break;
-        }
-
-        const validSuggestions = suggestions.filter(s => s);
-        if (validSuggestions.length > 0) {
-            displayServiceResult(validSuggestions);
-        } else {
-             showOptions([{ text: "Làm lại từ đầu", next: "start" }]);
-        }
-    };
-    
-    const showSubServices = () => {
-        const service = servicesData.find(s => s.id === conversationState.serviceId);
-        if(service && service.subServices) displayServiceResult(service.subServices);
-    };
-
-    const findSubServiceById = (subId) => {
-        for (const service of servicesData) {
-            const found = service.subServices.find(sub => sub.subId === subId);
-            if (found) return found;
-        }
+function calculatePsuAndFinalize(build, budget) {
+    let currentBuild = [...build];
+    const wattage = currentBuild.filter(c => c).reduce((sum, item) => sum + (item.wattage || 0), 0);
+    const requiredWattage = Math.ceil((wattage * 1.4) / 50) * 50;
+    const psu = findCheapestComponent('psu', p => p.wattage >= requiredWattage);
+    if (!psu) return null;
+    currentBuild[currentBuild.findIndex(c => c?.type === 'psu')] = psu;
+    const finalBuild = currentBuild.filter(Boolean);
+    const totalPrice = finalBuild.reduce((sum, item) => sum + item.price, 0);
+    if (totalPrice > budget.max && !(budget.key === 'student-lt-8m' && totalPrice < 8500000)) {
         return null;
-    };
-    
-    const displayServiceResult = (services) => {
-        let contentHtml = `<div class="mt-4 space-y-2 border-t border-gray-700 pt-3">`;
-        services.forEach(item => {
-            contentHtml += `<div class="flex justify-between items-center text-sm"><span>- ${item.name}</span><span class="font-mono text-primary">${isNaN(item.price) ? item.price : new Intl.NumberFormat('vi-VN').format(item.price) + 'đ'}</span></div>`;
-        });
-        contentHtml += `</div>`;
-        
-        addMessage('ai', "Dựa trên mô tả của bạn, tôi gợi ý một số dịch vụ sau:", contentHtml);
-        showOptions([
-            { text: "Thêm tất cả vào Yêu Cầu", value: JSON.stringify(services), next: "add_to_cart_and_close" },
-            { text: "Làm lại từ đầu", next: "start" }
-        ]);
-    };
+    }
+    return { build: finalBuild, totalPrice, wattage: requiredWattage };
+}
 
-    const addToCartFromAI = (itemsJson) => {
-        const items = JSON.parse(itemsJson);
-        items.forEach(item => {
-            const itemId = item.subId || item.id;
-            const existingItem = cart.find(cartItem => (cartItem.subId || cartItem.id) === itemId);
-            if (existingItem) existingItem.quantity++;
-            else cart.push({ ...item, quantity: 1 });
-        });
-        localStorage.setItem('minhdangCart', JSON.stringify(cart));
-        window.renderCart(); 
-        
-        addMessage('ai', "Đã thêm các mục vào giỏ hàng! Giỏ hàng của bạn sẽ tự động mở.");
-        showOptions([{ text: "Bắt đầu cuộc trò chuyện mới", next: "start" }]);
-        
-        setTimeout(() => {
-            closeAiModal();
-            window.toggleCartPanel();
-        }, 1500);
-    };
+// --- HIỂN THỊ KẾT QUẢ VÀ TƯƠNG TÁC ---
+function formatPrice(price) {
+    return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price);
+}
 
-    const startConversation = () => {
-        chatLog.innerHTML = '';
-        conversationState = {}; 
-        if (!isDataReady) {
-            addMessage('ai', "Dữ liệu đang được tải, vui lòng chờ trong giây lát...");
-            setTimeout(startConversation, 1000);
-            return;
+function displayBuildResult(build, totalPrice, wattage) {
+    const componentToVietnamese = {
+        cpu: 'Vi xử lý (CPU)', mainboard: 'Bo mạch chủ', ram: 'RAM', gpu: 'Card đồ họa (VGA)',
+        storage: 'Ổ cứng', psu: 'Nguồn (PSU)', case: 'Vỏ case', cooler: 'Tản nhiệt'
+    };
+    const buildHtml = build.map(item => `
+        <div class="build-item-row">
+            <img src="${item.image}" alt="${item.name}" class="build-item-image">
+            <div class="build-item-info">
+                <span class="build-item-type">${componentToVietnamese[item.type] || item.type}</span>
+                <span class="build-item-name">${item.name}</span>
+            </div>
+            <span class="build-item-price">${formatPrice(item.price)}</span>
+            <button class="ai-option-btn change-btn" data-action="changeComponent" data-data='${JSON.stringify({type: item.type})}'>Thay đổi</button>
+        </div>`).join('');
+    const resultHtml = `
+        <div class="ai-result-card">
+            <div class="ai-result-header"><h3>Cấu Hình Đề Xuất</h3><p>Dựa trên nhu cầu của bạn, đây là cấu hình tối ưu nhất (yêu cầu khoảng ${wattage}W).</p></div>
+            <div class="ai-result-body">${buildHtml}</div>
+            <div class="ai-result-footer"><span>TỔNG CỘNG:</span><span>${formatPrice(totalPrice)}</span></div>
+        </div>`;
+    appendMessage('ai', 'Tôi đã hoàn tất cấu hình cho bạn!', resultHtml);
+}
+
+function addBuildToCart() {
+    appendMessage('ai', "Tuyệt vời! Tôi đang thêm các linh kiện vào giỏ hàng...");
+    if (typeof addToCartFromAI === 'function') {
+        addToCartFromAI(currentBuild);
+    }
+    setTimeout(() => {
+        appendMessage('ai', "Đã thêm thành công! Bạn có thể nhấn vào biểu tượng giỏ hàng để xem lại và gửi yêu cầu.");
+        showOptions([{ text: 'Bắt đầu lại', action: 'restart' }]);
+    }, 1000);
+}
+
+function promptForComponentChange(type) {
+    const componentToVietnamese = {
+        cpu: 'Vi xử lý (CPU)', mainboard: 'Bo mạch chủ', ram: 'RAM', gpu: 'Card đồ họa (VGA)',
+        storage: 'Ổ cứng', psu: 'Nguồn (PSU)', case: 'Vỏ case', cooler: 'Tản nhiệt'
+    };
+    const currentComponent = currentBuild.find(c => c.type === type);
+    const cpu = currentBuild.find(c => c.type === 'cpu');
+    const mainboard = currentBuild.find(c => c.type === 'mainboard');
+    let filterFunc = () => true;
+    if (type === 'mainboard') filterFunc = m => m.socket === cpu?.socket;
+    else if (type === 'cpu') filterFunc = c => c.socket === mainboard?.socket;
+    else if (type === 'ram') filterFunc = r => r.ram_type === mainboard?.ram_type;
+    const availableOptions = findComponents(type, filterFunc);
+    const optionsHtml = availableOptions.map(item => `
+        <div class="build-item-row ${item.id === currentComponent.id ? 'current' : ''}">
+            <img src="${item.image}" alt="${item.name}" class="build-item-image">
+            <div class="build-item-info"><span class="build-item-name">${item.name}</span></div>
+            <span class="build-item-price">${formatPrice(item.price)}</span>
+            <button class="ai-option-btn select-btn" ${item.id === currentComponent.id ? 'disabled' : ''}
+                data-action="selectNewComponent" data-data='${JSON.stringify({ newComponent: item })}'>
+                Chọn
+            </button>
+        </div>`).join('');
+    const resultHtml = `
+        <div class="ai-result-card">
+            <div class="ai-result-header"><h3>Chọn ${componentToVietnamese[type]} thay thế</h3><p>Các lựa chọn dưới đây đều tương thích.</p></div>
+            <div class="ai-result-body">${optionsHtml}</div>
+        </div>`;
+    appendMessage('ai', `Đây là các lựa chọn cho ${componentToVietnamese[type]}:`, resultHtml);
+    showOptions([{ text: 'Quay lại', action: 'redisplayBuild' }]);
+}
+
+function updateComponent(newComponent) {
+    const index = currentBuild.findIndex(c => c.type === newComponent.type);
+    if (index !== -1) {
+        currentBuild[index] = newComponent;
+        const cpu = currentBuild.find(c => c.type === 'cpu');
+        const mainboard = currentBuild.find(c => c.type === 'mainboard');
+        if (newComponent.type === 'cpu' && newComponent.socket !== mainboard.socket) {
+            const newMainboard = findCheapestComponent('mainboard', m => m.socket === newComponent.socket);
+            currentBuild[currentBuild.findIndex(c => c.type === 'mainboard')] = newMainboard;
         }
-        navigateToNode('start');
-    };
-
-    const openAiModal = () => { aiModal.classList.add('visible'); startConversation(); };
-    const closeAiModal = () => aiModal.classList.remove('visible');
-
-    openAiBtn.addEventListener('click', openAiModal);
-    closeAiBtn.addEventListener('click', closeAiModal);
-    optionsContainer.addEventListener('click', (e) => {
-        if (!e.target.matches('.ai-option-btn')) return;
-        if (e.target.dataset.next === 'add_to_cart_and_close') {
-            addMessage('user', e.target.textContent);
-            addToCartFromAI(e.target.dataset.value);
+        if (newComponent.type === 'mainboard') {
+             if (newComponent.socket !== cpu.socket) {
+                 const newCpu = findCheapestComponent('cpu', c => c.socket === newComponent.socket);
+                 currentBuild[currentBuild.findIndex(c => c.type === 'cpu')] = newCpu;
+             }
+             const ramIndex = currentBuild.findIndex(c => c.type === 'ram');
+             if (currentBuild[ramIndex].ram_type !== newComponent.ram_type) {
+                 const newRam = findCheapestComponent('ram', r => r.ram_type === newComponent.ram_type);
+                 currentBuild[ramIndex] = newRam;
+             }
+        }
+        const result = calculatePsuAndFinalize(currentBuild, conversationState.budget);
+        if (result && result.build) {
+            currentBuild = result.build;
+            displayBuildResult(result.build, result.totalPrice, result.wattage);
+            showOptions([{ text: 'Thêm vào Yêu Cầu', action: 'addToCart' }, { text: 'Làm lại từ đầu', action: 'restart' }]);
         } else {
-            handleOptionClick(e);
+             appendMessage('ai', "Rất tiếc, cấu hình mới vượt quá ngân sách của bạn. Vui lòng thử lại.");
+             showOptions([{ text: 'Làm lại từ đầu', action: 'restart' }]);
         }
-    });
-    
-    aiModal.addEventListener('click', (e) => { if (e.target === aiModal) closeAiModal(); });
-    document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && aiModal.classList.contains('visible')) closeAiModal(); });
-    console.log("Trợ lý AI đã sẵn sàng!");
-});
+    }
+}
 
