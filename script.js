@@ -1,5 +1,5 @@
 // ===================================================================
-//  SCRIPT.JS - PHIÊN BẢN 7.0 (Nâng cấp Project Gallery)
+//  SCRIPT.JS - PHIÊN BẢN 9.0 (Tích hợp Lưu & Tải Cấu Hình)
 // ===================================================================
 
 // --- KHỞI CHẠY KHI TÀI LIỆU SẴN SÀNG ---
@@ -18,7 +18,12 @@ async function initializeApp() {
     initCoreEffects();
     initInteractiveModules();
 
+    // MỚI: Kiểm tra xem có buildId trong URL không
+    const urlParams = new URLSearchParams(window.location.search);
+    const buildIdToLoad = urlParams.get('buildId');
+
     try {
+        // Tải đồng thời dịch vụ và linh kiện
         const [services, components] = await Promise.all([
             fetch(appsScriptUrl + '?action=getServices').then(res => res.json()),
             fetch(appsScriptUrl + '?action=getComponents').then(res => res.json())
@@ -30,15 +35,22 @@ async function initializeApp() {
         servicesData = services;
         pcComponentsData = components;
         
+        // Render các thành phần giao diện chính
         renderServiceCards();
-        renderProjectGallery(); // Sẽ được cập nhật
+        renderProjectGallery();
         initFloatingImages();
 
+        // Khởi tạo Trợ lý AI và truyền dữ liệu vào
         if (typeof initializeAIAssistant === 'function') {
             initializeAIAssistant(pcComponentsData, servicesData);
         } else {
-            console.error("Lỗi: Không tìm thấy hàm initializeAIAssistant từ ai_engine.js");
+            console.error("Lỗi: Không tìm thấy hàm initializeAIAssistant.");
             disableAIButton("Trợ lý AI đang bảo trì");
+        }
+        
+        // MỚI: Nếu có buildId, yêu cầu AI tải cấu hình đó
+        if (buildIdToLoad && typeof loadBuildFromUrl === 'function') {
+            loadBuildFromUrl(buildIdToLoad);
         }
         
         document.getElementById('service-loader').style.display = 'none';
@@ -46,7 +58,7 @@ async function initializeApp() {
     } catch (error) {
         console.error("Lỗi nghiêm trọng khi khởi tạo ứng dụng:", error);
         const serviceLoader = document.getElementById('service-loader');
-        serviceLoader.innerHTML = `<p class="text-center text-red-400 col-span-full">Không thể tải dữ liệu từ máy chủ. Vui lòng thử lại sau.</p>`;
+        serviceLoader.innerHTML = `<p class="text-center text-red-400 col-span-full">Không thể tải dữ liệu. Vui lòng thử lại sau.</p>`;
         disableAIButton("Trợ lý AI không sẵn sàng");
     }
 }
@@ -61,7 +73,7 @@ function disableAIButton(message) {
 }
 
 // ===================================================================
-//  MODULE 1: HIỆU ỨNG GIAO DIỆN CỐT LÕI 
+//  MODULE 1: HIỆU ỨNG GIAO DIỆN CỐT LÕI (Không thay đổi)
 // ===================================================================
 function initCoreEffects() {
     const header = document.getElementById('header');
@@ -170,7 +182,7 @@ function initCoreEffects() {
 }
 
 // ===================================================================
-//  MODULE 2: CÁC MODULE TƯƠNG TÁC (GIỎ HÀNG, MODAL, FORM)
+//  MODULE 2: CÁC MODULE TƯƠNG TÁC (GIỎ HÀNG, MODAL, FORM) (Không thay đổi)
 // ===================================================================
 function initInteractiveModules() {
     const serviceList = document.getElementById('service-list');
@@ -296,7 +308,7 @@ function initInteractiveModules() {
 }
 
 // ===================================================================
-//  MODULE 3: CÁC HÀM RENDER & TIỆN ÍCH
+//  MODULE 3: CÁC HÀM RENDER & TIỆN ÍCH (Không thay đổi)
 // ===================================================================
 function renderServiceCards() {
     const serviceList = document.getElementById('service-list');
@@ -318,11 +330,9 @@ function renderServiceCards() {
         </div>`).join('');
     serviceList.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
 }
-
 function renderProjectGallery() {
     const projectGallery = document.getElementById('project-gallery');
     if (!projectGallery) return;
-
     const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
@@ -330,20 +340,15 @@ function renderProjectGallery() {
             }
         });
     }, { threshold: 0.1 });
-
     const allImages = servicesData.flatMap(s => s.subServices.flatMap(sub => sub.images)).filter(img => img);
     const shuffledImages = allImages.sort(() => 0.5 - Math.random());
-    
-    // NÂNG CẤP: Bỏ các class kích thước, chỉ cần item và ảnh
     projectGallery.innerHTML = shuffledImages.slice(0, 12).map((imgUrl, index) => `
         <div class="project-item fade-in" style="transition-delay: ${index * 50}ms">
             <img src="${imgUrl}" alt="Ảnh dự án ${index + 1}" loading="lazy">
         </div>
     `).join('');
-
     projectGallery.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
 }
-
 function initFloatingImages() {
     const container = document.getElementById('floating-images-container');
     const allImages = servicesData.flatMap(s => s.subServices.flatMap(sub => sub.images));
@@ -478,17 +483,15 @@ async function handleFormSubmit(event) {
     btn.disabled = true;
     btn.textContent = 'ĐANG GỬI...';
     msgEl.textContent = '';
-    let payload;
+    let payload = { action: 'order' }; // Gắn action mặc định
     if (isOrderForm) {
-        payload = {
-            customer: { name: form.customerName.value, phone: form.customerPhone.value, notes: form.customerNotes.value },
-            cart: cart, total: document.getElementById('cart-total').textContent
-        };
+        payload.customer = { name: form.customerName.value, phone: form.customerPhone.value, notes: form.customerNotes.value };
+        payload.cart = cart;
+        payload.total = document.getElementById('cart-total').textContent;
     } else {
-        payload = {
-            customer: { name: form.contactName.value, email: form.contactEmail.value, notes: form.contactMessage.value },
-            cart: [], total: 'Tin nhắn từ Form Liên Hệ'
-        };
+        payload.customer = { name: form.contactName.value, email: form.contactEmail.value, notes: form.contactMessage.value };
+        payload.cart = [];
+        payload.total = 'Tin nhắn từ Form Liên Hệ';
     }
     try {
         await fetch(appsScriptUrl, {
