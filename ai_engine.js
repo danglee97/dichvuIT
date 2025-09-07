@@ -1,19 +1,19 @@
 /**
  * ai_engine.js - Bộ não xử lý logic cho Trợ lý AI
- * Phiên bản: 6.0 (Tích hợp Trí Tuệ Chẩn Đoán Sự Cố)
+ * Phiên bản: 8.0 (Hoàn Thiện - AI Service Navigator)
  */
 
 // Biến toàn cục để lưu trữ dữ liệu và trạng thái
 let allPcComponents = [];
-let allServicesData = []; // MỚI: Lưu trữ dữ liệu dịch vụ
+let allServicesData = [];
 let conversationState = {};
 let currentBuild = [];
-let recommendedServices = []; // MỚI: Lưu các dịch vụ được đề xuất
+let recommendedServices = [];
 
 // Hàm khởi tạo, được gọi từ script.js
 function initializeAIAssistant(components, services) {
     allPcComponents = components;
-    allServicesData = services; // MỚI: Nhận dữ liệu dịch vụ
+    allServicesData = services;
 
     const aiBtn = document.getElementById('ai-assistant-btn');
     const aiModal = document.getElementById('ai-modal');
@@ -50,8 +50,8 @@ function startConversation() {
     appendMessage('ai', "Chào bạn, tôi là Trợ lý AI của Minh Đăng IT. Tôi có thể giúp gì cho bạn hôm nay?");
     showOptions([
         { text: 'Tư vấn lắp máy mới', action: 'startBuildPc' },
-        { text: 'Máy của tôi gặp sự cố', action: 'startDiagnose' }, // NÂNG CẤP
-        { text: 'Tìm dịch vụ khác', action: 'findService' }
+        { text: 'Máy của tôi gặp sự cố', action: 'startDiagnose' },
+        { text: 'Tìm hiểu dịch vụ', action: 'startServiceNav' } // NÂNG CẤP
     ]);
 }
 
@@ -109,20 +109,57 @@ function handleOptionClick(text, action, data = {}) {
             case 'selectNewComponent': updateComponent(data.newComponent); break;
             case 'redisplayBuild': redisplayCurrentBuild(); break;
             
-            // NÂNG CẤP: Luồng Chẩn Đoán
+            // Luồng Chẩn Đoán
             case 'startDiagnose': promptForSymptom(); break;
             case 'setSymptom': processDiagnosis(data.symptom); break;
             case 'addServicesToCart': addRecommendedServicesToCart(); break;
 
+            // NÂNG CẤP: Luồng Dẫn Lối Dịch Vụ
+            case 'startServiceNav': promptForServiceCategory(); break;
+            case 'setServiceCategory': displaySubServices(data.categoryId); break;
+
             // Luồng Chung
-            case 'findService':
-                 appendMessage('ai', "Bạn có thể tham khảo các dịch vụ chính của chúng tôi trên trang web, hoặc cho tôi biết vấn đề bạn đang gặp phải để được tư vấn chính xác hơn nhé.");
-                 showOptions([{ text: 'Bắt đầu lại', action: 'restart' }]);
-                break;
             case 'restart': startConversation(); break;
         }
     }, 500);
 }
+
+
+// --- LUỒNG DẪN LỐI DỊCH VỤ ---
+function promptForServiceCategory() {
+    appendMessage('ai', "Rất sẵn lòng! Bạn đang quan tâm đến lĩnh vực dịch vụ nào sau đây?");
+    
+    // Lọc ra các dịch vụ không liên quan đến sửa chữa PC
+    const serviceCategories = allServicesData
+        .filter(service => service.id !== 'sua-chua-pc' && service.id !== 'xay-dung-pc')
+        .map(service => ({
+            text: service.name,
+            action: 'setServiceCategory',
+            data: { categoryId: service.id }
+        }));
+
+    showOptions(serviceCategories);
+}
+
+function displaySubServices(categoryId) {
+    const service = allServicesData.find(s => s.id === categoryId);
+    if (!service || !service.subServices) {
+        appendMessage('ai', "Rất tiếc, tôi không tìm thấy thông tin cho dịch vụ này.");
+        return;
+    }
+
+    appendMessage('ai', `Trong lĩnh vực "${service.name}", chúng tôi cung cấp các gói sau:`);
+    
+    recommendedServices = service.subServices; // Lưu lại để có thể thêm vào giỏ hàng
+    displayServiceRecommendations(recommendedServices, false); // Hiển thị nhưng không có header
+    
+    showOptions([
+        { text: 'Thêm tất cả vào Yêu Cầu', action: 'addServicesToCart' },
+        { text: 'Tìm hiểu lĩnh vực khác', action: 'startServiceNav' },
+        { text: 'Bắt đầu lại', action: 'restart' }
+    ]);
+}
+
 
 // --- LUỒNG CHẨN ĐOÁN SỰ CỐ ---
 function promptForSymptom() {
@@ -131,7 +168,7 @@ function promptForSymptom() {
         { text: 'Máy chạy rất chậm, giật lag', action: 'setSymptom', data: { symptom: 'slow' } },
         { text: 'Không lên nguồn / không lên hình', action: 'setSymptom', data: { symptom: 'no_power' } },
         { text: 'Lỗi màn hình xanh (BSOD)', action: 'setSymptom', data: { symptom: 'bsod' } },
-        { text: 'Nhiễm virus, hiện nhiều quảng cáo lạ', action: 'setSymptom', data: { symptom: 'virus' } },
+        { text: 'Nhiễm virus, hiện quảng cáo lạ', action: 'setSymptom', data: { symptom: 'virus' } },
         { text: 'Vấn đề khác', action: 'setSymptom', data: { symptom: 'other' } }
     ]);
 }
@@ -149,7 +186,7 @@ function processDiagnosis(symptom) {
             break;
         case 'no_power':
             diagnosisText = "Lỗi không lên nguồn/hình là một sự cố nghiêm trọng, có thể do nguồn, RAM, hoặc bo mạch chủ. Cần phải kiểm tra phần cứng chuyên sâu để xác định chính xác.";
-            serviceIds = ['scpc02']; // Dịch vụ kiểm tra, nâng cấp/thay thế
+            serviceIds = ['scpc02'];
             break;
         case 'bsod':
             diagnosisText = "Lỗi màn hình xanh thường liên quan đến lỗi phần mềm, driver không tương thích hoặc lỗi RAM. Cần kiểm tra và cài đặt lại hệ điều hành để đảm bảo ổn định.";
@@ -161,11 +198,10 @@ function processDiagnosis(symptom) {
             break;
         case 'other':
             diagnosisText = "Với các vấn đề phức tạp, cách tốt nhất là mang máy đến để được kiểm tra trực tiếp. Chúng tôi sẽ chẩn đoán chính xác và đưa ra giải pháp tối ưu cho bạn.";
-            serviceIds = []; // Không đề xuất dịch vụ cụ thể
+            serviceIds = [];
             break;
     }
     
-    // Tìm các dịch vụ đầy đủ từ ID
     const allSubServices = allServicesData.flatMap(s => s.subServices);
     recommendedServices = serviceIds.map(id => allSubServices.find(sub => sub.subId === id)).filter(Boolean);
 
@@ -184,7 +220,7 @@ function processDiagnosis(symptom) {
     }, 1000);
 }
 
-function displayServiceRecommendations(services) {
+function displayServiceRecommendations(services, showHeader = true) {
     const serviceHtml = services.map(item => `
         <div class="build-item-row">
             <img src="${item.images[0] || 'https://placehold.co/100x100/0a0a1a/00ffff?text=Dich+Vu'}" alt="${item.name}" class="build-item-image">
@@ -193,9 +229,12 @@ function displayServiceRecommendations(services) {
             </div>
             <span class="build-item-price">${formatPrice(item.price)}</span>
         </div>`).join('');
+    
+    const headerHtml = showHeader ? `<div class="ai-result-header"><h3>Dịch Vụ Đề Xuất</h3></div>` : '';
+
     const resultHtml = `
         <div class="ai-result-card">
-            <div class="ai-result-header"><h3>Dịch Vụ Đề Xuất</h3></div>
+            ${headerHtml}
             <div class="ai-result-body">${serviceHtml}</div>
         </div>`;
     appendMessage('ai', 'Đây là các dịch vụ phù hợp:', resultHtml);
@@ -210,7 +249,8 @@ function addRecommendedServicesToCart() {
             showOptions([{ text: 'Bắt đầu lại', action: 'restart' }]);
         }, 1000);
     } else {
-        appendMessage('ai', "Đã có lỗi xảy ra, vui lòng thử lại.");
+        appendMessage('ai', "Không có dịch vụ nào để thêm hoặc đã có lỗi xảy ra.");
+        showOptions([{ text: 'Bắt đầu lại', action: 'restart' }]);
     }
 }
 
