@@ -168,11 +168,11 @@ function initCoreEffects() {
 }
 
 // ===================================================================
-//  MODULE 2: DỊCH VỤ, GIỎ HÀNG VÀ FORM
+//  MODULE 2: DỊCH VỤ, GIỎ HÀNG VÀ FORM (NÂNG CẤP)
 // ===================================================================
 async function initServiceAndCart(observer) {
     const appsScriptUrl = 'https://script.google.com/macros/s/AKfycbyIremqvgCwYcVxsf09X-LbR1JRHZipuUr3xq9z-ZrGzaeXqgjxogkd3QyqKx_fYmQv/exec';
-    let servicesData = [], cart = JSON.parse(localStorage.getItem('minhdangCart')) || [];
+    let servicesData = [], pcComponentsData = [], cart = JSON.parse(localStorage.getItem('minhdangCart')) || [];
 
     const serviceList = document.getElementById('service-list');
     const serviceLoader = document.getElementById('service-loader');
@@ -220,49 +220,54 @@ async function initServiceAndCart(observer) {
     let currentImageIndex = 0;
     let currentSubServiceImages = [];
     
-    // === BỔ SUNG: Hàm khởi tạo hiệu ứng ảnh bay ===
     function initFloatingImages(data) {
         const container = document.getElementById('floating-images-container');
         if (!container) return;
 
         const allImages = data.flatMap(s => s.subServices.flatMap(sub => sub.images));
-        const uniqueImages = [...new Set(allImages)].filter(img => img); // Lọc bỏ link rỗng
-
+        const uniqueImages = [...new Set(allImages)].filter(img => img);
         if (uniqueImages.length === 0) return;
-
-        const imageCount = Math.min(uniqueImages.length, 7); // Tối đa 7 ảnh
+        const imageCount = Math.min(uniqueImages.length, 7);
 
         for (let i = 0; i < imageCount; i++) {
             const img = document.createElement('img');
             img.src = uniqueImages[i % uniqueImages.length];
             img.className = 'floating-image';
             
-            // Random thuộc tính
-            const size = Math.random() * (120 - 60) + 60; // Kích thước từ 60-120px
+            const size = Math.random() * (120 - 60) + 60;
             img.style.width = `${size}px`;
             img.style.height = 'auto';
-            img.style.top = `${Math.random() * 80 + 10}%`; // Vị trí top từ 10-90%
-            img.style.left = `${Math.random() * 80 + 10}%`; // Vị trí left từ 10-90%
-            img.style.animationDuration = `${Math.random() * 10 + 10}s`; // Thời gian bay 10-20s
-            img.style.animationDelay = `${Math.random() * 5}s`; // Delay xuất hiện
-            
-            // Animation để ảnh hiện ra
+            img.style.top = `${Math.random() * 80 + 10}%`;
+            img.style.left = `${Math.random() * 80 + 10}%`;
+            img.style.animationDuration = `${Math.random() * 10 + 10}s`;
+            img.style.animationDelay = `${Math.random() * 5}s`;
             img.style.animationName = `float, fade-in-float`;
             
             container.appendChild(img);
         }
     }
 
-
     try {
-        const response = await fetch(appsScriptUrl);
-        if (!response.ok) throw new Error('Network error');
-        servicesData = await response.json();
+        // NÂNG CẤP: Tải đồng thời cả dữ liệu dịch vụ và linh kiện
+        const [servicesResponse, componentsResponse] = await Promise.all([
+            fetch(appsScriptUrl + '?action=getServices'),
+            fetch(appsScriptUrl + '?action=getComponents')
+        ]);
+
+        if (!servicesResponse.ok || !componentsResponse.ok) {
+            throw new Error('Lỗi mạng khi đang tải dữ liệu.');
+        }
+
+        servicesData = await servicesResponse.json();
+        pcComponentsData = await componentsResponse.json();
+
+        // Log dữ liệu linh kiện để kiểm tra. Dữ liệu này sẽ được dùng cho AI ở bước sau.
+        console.log("Dữ liệu Linh kiện PC đã được tải thành công:", pcComponentsData);
         
         serviceLoader.style.display = 'none';
         renderServiceCards();
         renderProjectGallery();
-        initFloatingImages(servicesData); // Khởi tạo ảnh bay sau khi có dữ liệu
+        initFloatingImages(servicesData);
         
     } catch (error) {
         console.error("Lỗi khi tải dữ liệu:", error);
@@ -311,15 +316,15 @@ async function initServiceAndCart(observer) {
         } else {
             cartItemsContainer.innerHTML = cart.map(item => `
                 <div class="cart-item">
-                    <img src="${item.images[0] || 'img/placeholder.png'}" alt="${item.name}" class="w-16 h-16 object-cover rounded-md flex-shrink-0">
+                    <img src="${(item.images && item.images.length > 0) ? item.images[0] : (item.image || 'img/placeholder.png')}" alt="${item.name}" class="w-16 h-16 object-cover rounded-md flex-shrink-0">
                     <div class="cart-item-info">
                         <p class="font-bold text-white text-sm">${item.name}</p>
                         <p class="font-tech text-primary text-xs">${isNaN(item.price) ? item.price : new Intl.NumberFormat('vi-VN').format(item.price) + ' VNĐ'}</p>
                     </div>
                     <div class="cart-item-quantity">
-                        <button class="quantity-btn" data-sub-id="${item.subId}" data-change="-1">-</button>
+                        <button class="quantity-btn" data-sub-id="${item.subId || item.id}" data-change="-1">-</button>
                         <span>${item.quantity}</span>
-                        <button class="quantity-btn" data-sub-id="${item.subId}" data-change="1">+</button>
+                        <button class="quantity-btn" data-sub-id="${item.subId || item.id}" data-change="1">+</button>
                     </div>
                 </div>`).join('');
         }
@@ -353,7 +358,7 @@ async function initServiceAndCart(observer) {
 
     function updateModalGallery(isAuto = false) {
         if (currentSubServiceImages.length === 0) {
-            modalMainImg.src = 'img/placeholder.png'; // Ảnh mặc định
+            modalMainImg.src = 'img/placeholder.png';
             return;
         };
         
@@ -406,7 +411,7 @@ async function initServiceAndCart(observer) {
             updateModalContent(service.subServices[0]);
             modalSubservicesList.querySelector('.subservice-item').classList.add('highlighted');
         } else {
-             updateModalContent({ images: [] }); // Trường hợp không có subservice
+             updateModalContent({ images: [] });
         }
         
         modalLoader.style.display = 'none';
@@ -448,7 +453,6 @@ async function initServiceAndCart(observer) {
         }, 150);
     }
 
-
     function addToCart(subId, buttonElement) {
         let service;
         for (const s of servicesData) {
@@ -470,10 +474,10 @@ async function initServiceAndCart(observer) {
     }
 
     function handleQuantityChange(subId, change) {
-        const item = cart.find(i => i.subId === subId);
+        const item = cart.find(i => (i.subId || i.id) === subId);
         if (item) {
             item.quantity += change;
-            if (item.quantity <= 0) cart = cart.filter(i => i.subId !== subId);
+            if (item.quantity <= 0) cart = cart.filter(i => (i.subId || i.id) !== subId);
         }
         saveCartAndRender();
     }
@@ -518,7 +522,6 @@ async function initServiceAndCart(observer) {
         
         return isFormValid;
     }
-
 
     async function handleOrderSubmit(event) {
         event.preventDefault();
@@ -585,7 +588,6 @@ async function initServiceAndCart(observer) {
             submitContactBtn.textContent = 'Gửi Tin Nhắn';
         }
     }
-
 
     function flyToCart(imgSrc, buttonElement) {
         const cartIcon = document.getElementById('cart-icon');
@@ -683,4 +685,3 @@ async function initServiceAndCart(observer) {
 
     renderCart();
 }
-
