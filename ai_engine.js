@@ -171,6 +171,33 @@ function buildPcSmart(budget, subPurpose) {
     }
     return null;
 }
+function addBuildToCart() {
+    appendMessage('ai', "Đang thêm cấu hình bạn đã chọn vào giỏ hàng...");
+
+    // Kiểm tra xem hàm addBuildToCartFromAI có tồn tại không (để đảm bảo script.js đã tải)
+    // và biến currentBuild có dữ liệu không
+    if (typeof addBuildToCartFromAI === 'function' && currentBuild && currentBuild.length > 0) {
+        
+        // Gọi hàm từ script.js và truyền vào cấu hình hiện tại
+        addBuildToCartFromAI(currentBuild);
+
+        // Phản hồi cho người dùng sau khi thêm thành công
+        setTimeout(() => {
+            appendMessage('ai', "Đã thêm thành công! Bạn có thể nhấn vào biểu tượng giỏ hàng ở góc màn hình để kiểm tra và gửi yêu cầu.");
+            // Hiển thị các lựa chọn tiếp theo, không bao gồm nút "Thêm vào giỏ hàng" nữa
+            showOptions([
+                { text: 'Lưu ảnh cấu hình', action: 'saveBuild' },
+                { text: 'Làm lại từ đầu', action: 'restart' }
+            ]);
+        }, 1000); // Thêm độ trễ nhỏ để cảm giác mượt hơn
+
+    } else {
+        // Xử lý lỗi nếu không tìm thấy hàm hoặc không có cấu hình để thêm
+        console.error("Lỗi: Hàm addBuildToCartFromAI không tồn tại hoặc currentBuild rỗng.");
+        appendMessage('ai', "Rất tiếc, đã có lỗi xảy ra khi cố gắng thêm vào giỏ hàng. Vui lòng thử lại.");
+        showOptionsAfterBuild(); // Hiển thị lại các lựa chọn ban đầu
+    }
+}
 function displayBuildResult(build, totalPrice, wattage) {
     const componentToVietnamese = { cpu: 'Vi xử lý (CPU)', mainboard: 'Bo mạch chủ', ram: 'RAM', gpu: 'Card đồ họa (VGA)', storage: 'Ổ cứng', psu: 'Nguồn (PSU)', case: 'Vỏ case', cooler: 'Tản nhiệt' };
     const buildHtml = build.map(item => {
