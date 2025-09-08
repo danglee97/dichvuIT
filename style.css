@@ -238,6 +238,43 @@ body.menu-open #mobile-menu-btn {
 .project-item:hover img { transform: scale(1.1); }
 .project-item:hover::after { opacity: 1; }
 
+/* NÂNG CẤP: Khu vực "Tại Sao Chọn Chúng Tôi" */
+.feature-card {
+    background: var(--card-bg);
+    border: 1px solid transparent;
+    border-radius: 0.5rem;
+    transition: all 0.3s ease-out;
+    position: relative;
+    z-index: 1;
+    border: 1px solid var(--border-color);
+}
+
+.feature-card:hover {
+    transform: translateY(-5px);
+    border-color: var(--primary);
+    box-shadow: 0 10px 30px rgba(0, 255, 255, 0.2);
+}
+
+.feature-icon-wrapper {
+    width: 80px;
+    height: 80px;
+    margin-left: auto;
+    margin-right: auto;
+    background: linear-gradient(145deg, rgba(0, 255, 255, 0.1), rgba(255, 0, 255, 0.1));
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--primary);
+    transition: all 0.3s ease;
+    border: 1px solid var(--border-color);
+}
+.feature-card:hover .feature-icon-wrapper {
+    transform: scale(1.1) rotate(10deg);
+    box-shadow: 0 0 20px var(--glow-color);
+    background: linear-gradient(145deg, rgba(0, 255, 255, 0.2), rgba(255, 0, 255, 0.2));
+}
+
 .contact-info-item { display: flex; align-items: center; gap: 1rem; color: #E0E0E0; font-size: 1rem; }
 .contact-info-item svg { flex-shrink: 0; color: var(--primary); }
 .social-links { display: flex; gap: 1.5rem; }
@@ -440,4 +477,5 @@ body.cart-is-visible .scroll-to-top-btn { bottom: 5.5rem; }
 .floating-ai-btn:hover .floating-ai-tooltip {
     opacity: 1;
 }
+
 
