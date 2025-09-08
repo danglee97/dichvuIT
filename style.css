@@ -1,5 +1,5 @@
 /* ======================================================
-   STYLE.CSS - PHIÊN BẢN 9.0 (Tích hợp Link Chia Sẻ)
+   STYLE.CSS - PHIÊN BẢN 10.0 (Tích hợp Ảnh Chia Sẻ)
    ====================================================== */
 
 /* --- Biến màu và Font chữ --- */
@@ -333,6 +333,7 @@ body.cart-is-visible .scroll-to-top-btn { bottom: 5.5rem; }
     background-color: rgba(0,0,0,0.2);
     border-radius: 0.5rem;
     border: 1px solid var(--border-color);
+    width: 100%;
 }
 .share-link-container p {
     font-size: 0.875rem;
@@ -352,4 +353,3 @@ body.cart-is-visible .scroll-to-top-btn { bottom: 5.5rem; }
 .copy-btn {
     width: 100%;
 }
-
