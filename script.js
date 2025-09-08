@@ -308,12 +308,22 @@ function initInteractiveModules() {
     });
     
     renderCart();
+    document.getElementById('clear-cart-btn').addEventListener('click', handleClearCart);
+
 }
 
 // ===================================================================
 //  MODULE 3: CÁC HÀM RENDER & TIỆN ÍCH
 // ===================================================================
-
+/**
+ * Xử lý sự kiện xóa toàn bộ giỏ hàng
+ */
+function handleClearCart() {
+    if (cart.length > 0 && confirm('Bạn có chắc chắn muốn xóa tất cả sản phẩm trong giỏ hàng không?')) {
+        cart = [];
+        saveCartAndRender();
+    }
+}
 function renderServiceCards() {
     const serviceList = document.getElementById('service-list');
     const observer = new IntersectionObserver((entries) => {
@@ -375,12 +385,15 @@ function renderCart() {
     const cartTotalEl = document.getElementById('cart-total');
     const formContainer = document.getElementById('customer-form-container');
     const cartIcon = document.getElementById('cart-icon-container');
+    const clearCartBtn = document.getElementById('clear-cart-btn'); // Lấy nút
 
     if (cart.length === 0) {
         cartItemsContainer.innerHTML = '<p class="text-gray-400 text-center p-8">Giỏ hàng của bạn đang trống.</p>';
         formContainer.classList.add('is-hidden');
+        clearCartBtn.style.display = 'none'; // Ẩn nút khi giỏ hàng trống
     } else {
         formContainer.classList.remove('is-hidden');
+        clearCartBtn.style.display = 'block'; // Hiện nút khi có sản phẩm
         cartItemsContainer.innerHTML = cart.map(item => `
             <div class="cart-item">
                 <img src="${item.images && item.images.length > 0 ? item.images[0] : 'img/placeholder.png'}" alt="${item.name}" class="w-16 h-16 object-cover rounded-md">
@@ -388,6 +401,7 @@ function renderCart() {
                 <div class="cart-item-quantity"><button class="quantity-btn" data-sub-id="${item.subId}" data-change="-1">-</button><span>${item.quantity}</span><button class="quantity-btn" data-sub-id="${item.subId}" data-change="1">+</button></div>
             </div>`).join('');
     }
+    // ... phần còn lại của hàm giữ nguyên
     const total = cart.reduce((sum, item) => sum + (isNaN(item.price) ? 0 : Number(item.price) * item.quantity), 0);
     cartTotalEl.textContent = new Intl.NumberFormat('vi-VN').format(total) + ' VNĐ';
     const cartCount = document.getElementById('cart-count');
@@ -395,7 +409,7 @@ function renderCart() {
     cartCount.textContent = totalItems;
     cartIcon.classList.toggle('is-hidden', totalItems === 0);
     document.body.classList.toggle('cart-is-visible', totalItems > 0);
-    
+
     validateOrderForm();
 }
 function saveCartAndRender() {

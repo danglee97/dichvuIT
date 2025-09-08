@@ -331,7 +331,15 @@
             </div>
         </div>
         <div class="cart-panel-footer">
-            <div class="flex justify-between items-center text-lg mb-4"><span>Tổng Cộng:</span><span id="cart-total" class="font-bold text-primary">0 VNĐ</span></div>
+            <div class="flex justify-between items-center text-lg mb-4">
+                <span>Tổng Cộng:</span>
+                <span id="cart-total" class="font-bold text-primary">0 VNĐ</span>
+            </div>
+            <div class="flex justify-between items-center mb-4">
+                <button id="clear-cart-btn" class="text-sm text-gray-500 hover:text-red-500 transition-colors">
+                    Xóa tất cả
+                </button>
+            </div>
             <button id="submit-order-btn" type="submit" form="order-form" class="submit-btn-styling w-full" disabled>Gửi Yêu Cầu</button>
             <div id="form-message" class="text-center mt-4"></div>
         </div>
