@@ -1,5 +1,5 @@
 /* ======================================================
-   STYLE.CSS - PHIÊN BẢN 19.0 (Giao Diện Nâng Cấp Tương Tác)
+   STYLE.CSS - PHIÊN BẢN 28.0 (Thêm Nút AI Nổi)
    ====================================================== */
 
 /* --- Biến màu và Font chữ --- */
@@ -245,7 +245,7 @@ body.menu-open #mobile-menu-btn {
 .social-links a:hover { color: var(--primary); transform: translateY(-4px) scale(1.1); }
 .social-links svg { width: 32px; height: 32px; fill: currentColor; }
 
-.floating-cart-btn { position: fixed; bottom: 1rem; right: 1rem; z-index: 99; width: 55px; height: 55px; background: var(--primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 25px var(--glow-color); cursor: pointer; transition: transform 0.3s ease, bottom 0.3s ease; animation: pulse 2.5s infinite cubic-bezier(0.4, 0, 0.6, 1); }
+.floating-cart-btn { position: fixed; bottom: 1rem; right: 1rem; z-index: 99; width: 55px; height: 55px; background: var(--primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 25px var(--glow-color); cursor: pointer; transition: all 0.3s ease; animation: pulse 2.5s infinite cubic-bezier(0.4, 0, 0.6, 1); }
 @media (min-width: 768px) { .floating-cart-btn { bottom: 2rem; right: 2rem; width: 60px; height: 60px; } }
 .floating-cart-btn:hover { transform: scale(1.1); animation-play-state: paused; }
 #cart-count { top: -4px; right: -4px; }
@@ -331,14 +331,12 @@ body.cart-is-visible .scroll-to-top-btn { bottom: 5.5rem; }
 .info-tooltip { position: absolute; bottom: 120%; left: 50%; transform: translateX(-50%); width: 250px; background-color: #050510; color: #E0E0E0; padding: 10px; border-radius: 5px; border: 1px solid var(--border-color); font-size: 0.85rem; font-weight: normal; line-height: 1.4; text-align: left; opacity: 0; visibility: hidden; transition: opacity 0.2s, visibility 0.2s; z-index: 10; pointer-events: none; }
 .info-icon:hover .info-tooltip { opacity: 1; visibility: visible; }
 
-/* --- NÂNG CẤP: Style cho giao diện chọn linh kiện tương tác --- */
 .interactive-select-container {
     position: relative;
     margin-bottom: 0.75rem;
 }
 .interactive-select-input {
     width: 100%;
-    padding-right: 2.5rem !important; /* Dành chỗ cho icon */
 }
 .interactive-select-list {
     position: absolute;
@@ -351,7 +349,7 @@ body.cart-is-visible .scroll-to-top-btn { bottom: 5.5rem; }
     border: 1px solid var(--border-color);
     border-radius: 0.25rem;
     z-index: 20;
-    display: none; /* Mặc định ẩn */
+    display: none;
 }
 .interactive-select-item {
     padding: 0.75rem 1rem;
@@ -368,5 +366,78 @@ body.cart-is-visible .scroll-to-top-btn { bottom: 5.5rem; }
 }
 .interactive-select-item.selected {
     background-color: rgba(0, 255, 255, 0.2);
+}
+
+/* --- NÚT AI NỔI MỚI --- */
+.floating-ai-btn {
+    position: fixed;
+    bottom: 1rem;
+    left: 1rem;
+    z-index: 99;
+    width: 55px;
+    height: 55px;
+    background: linear-gradient(135deg, var(--secondary), #4a00e0);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 0 25px rgba(255, 0, 255, 0.7);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    opacity: 0;
+    transform: scale(0);
+    animation: fadeInScale 0.5s 1s forwards, pulse-ai 2.5s infinite 1.5s;
+}
+
+@media (min-width: 768px) {
+    .floating-ai-btn {
+        width: 60px;
+        height: 60px;
+        bottom: 2rem;
+        left: 2rem;
+    }
+}
+
+.floating-ai-btn:hover {
+    transform: scale(1.1);
+    animation-play-state: paused;
+}
+
+@keyframes fadeInScale {
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@keyframes pulse-ai {
+    0%, 100% {
+        box-shadow: 0 0 25px rgba(255, 0, 255, 0.7);
+    }
+    50% {
+        box-shadow: 0 0 40px var(--primary);
+    }
+}
+
+.floating-ai-tooltip {
+    position: absolute;
+    left: 110%;
+    top: 50%;
+    transform: translateY(-50%);
+    background-color: var(--dark-bg);
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+    border: 1px solid var(--border-color);
+}
+
+.floating-ai-btn:hover .floating-ai-tooltip {
+    opacity: 1;
 }
 

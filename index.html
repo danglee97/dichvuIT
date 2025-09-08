@@ -19,6 +19,8 @@
     <!-- Libraries & CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <!-- THÊM LẠI THƯ VIỆN html2canvas -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <link rel="stylesheet" href="style.css">
 </head>
 <body class="bg-dark-bg text-gray-200">
@@ -196,11 +198,21 @@
     </footer>
 
     <!-- Floating Cart Button -->
-    <div id="cart-icon-container" class="floating-cart-btn is-hidden">
+    <div id="cart-icon-container" class="floating-cart-btn">
         <svg id="cart-icon" xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 text-black" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
         </svg>
         <span id="cart-count" class="absolute -top-1 -right-1 bg-secondary text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center border-2 border-primary">0</span>
+    </div>
+
+    <!-- NÚT AI NỔI MỚI -->
+    <div id="floating-ai-btn" class="floating-ai-btn">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-8 w-8 text-white">
+            <path d="M12 8V4H8"/><rect x="4" y="12" width="16" height="8" rx="2"/>
+            <path d="M2 12h2"/><path d="M20 12h2"/>
+            <path d="M17 12v-2a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/>
+        </svg>
+        <span class="floating-ai-tooltip">Hỏi Trợ lý AI!</span>
     </div>
 
     <!-- Scroll to Top Button -->
@@ -255,7 +267,7 @@
         </div>
         <div class="cart-panel-body">
             <div id="cart-items-container"></div>
-            <div id="customer-form-container" class="mt-6 pt-6 border-t border-gray-700 is-hidden">
+            <div id="customer-form-container" class="mt-6 pt-6 border-t border-gray-700">
                 <form id="order-form" class="space-y-4">
                      <div>
                          <label for="customerName" class="form-label">Họ và Tên</label>
@@ -276,7 +288,7 @@
         </div>
         <div class="cart-panel-footer">
             <div class="flex justify-between items-center text-lg mb-4"><span>Tổng Cộng:</span><span id="cart-total" class="font-bold text-primary">0 VNĐ</span></div>
-            <button id="submit-order-btn" type="submit" form="order-form" class="submit-btn-styling w-full is-hidden" disabled>Gửi Yêu Cầu</button>
+            <button id="submit-order-btn" type="submit" form="order-form" class="submit-btn-styling w-full" disabled>Gửi Yêu Cầu</button>
             <div id="form-message" class="text-center mt-4"></div>
         </div>
     </div>
@@ -298,9 +310,29 @@
         </div>
     </div>
 
+    <!-- THÊM LẠI TEMPLATE ẢNH -->
+    <div id="image-template-container" style="position: fixed; top: -9999px; left: -9999px; width: 800px; background-color: #0d0d1f; color: white; font-family: 'Roboto', sans-serif; padding: 25px; border: 2px solid #00ffff; box-shadow: 0 0 20px rgba(0, 255, 255, 0.5);">
+        <div style="display: flex; align-items: center; border-bottom: 1px solid #00ffff; padding-bottom: 20px; margin-bottom: 20px;">
+            <img id="template-logo" src="" alt="Logo" style="width: 60px; height: 60px; margin-right: 20px; border-radius: 50%;">
+            <div>
+                <h3 style="font-family: 'Exo 2', sans-serif; font-size: 28px; margin: 0; color: #00ffff; text-shadow: 0 0 5px #00ffff;">Cấu Hình PC Đề Xuất</h3>
+                <p style="margin: 0; color: #E0E0E0; font-size: 16px;">từ Vi Tính Minh Đăng</p>
+            </div>
+        </div>
+        <div id="template-component-list" style="padding: 10px 0;">
+            <!-- Dữ liệu linh kiện sẽ được JS chèn vào đây -->
+        </div>
+        <div style="display: flex; justify-content: space-between; align-items: flex-end; border-top: 1px solid #00ffff; padding-top: 20px; margin-top: 20px;">
+            <p style="margin: 0; font-size: 16px; font-family: 'Exo 2', sans-serif;">dichvu.leminhdang.com</p>
+            <div>
+                <p style="margin: 0; font-size: 16px; color: #E0E0E0; text-align: right;">TỔNG CỘNG:</p>
+                <p id="template-total-price" style="margin: 0; font-size: 32px; font-weight: 900; color: white; font-family: 'Exo 2', sans-serif;"></p>
+            </div>
+        </div>
+    </div>
+
     <script src="script.js"></script>
     <script src="ai_engine.js"></script>
 </body>
 </html>
-
 

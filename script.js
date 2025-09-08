@@ -1,5 +1,5 @@
 // ===================================================================
-//  SCRIPT.JS - PHIÊN BẢN 9.1 (Sửa lỗi giao diện thẻ dịch vụ)
+//  SCRIPT.JS - PHIÊN BẢN 10.0 (Thêm Nút AI Nổi)
 // ===================================================================
 
 // --- KHỞI CHẠY KHI TÀI LIỆU SẴN SÀNG ---
@@ -173,7 +173,7 @@ function initCoreEffects() {
 }
 
 // ===================================================================
-//  MODULE 2: CÁC MODULE TƯƠNG TÁC (GIỎ HÀNG, MODAL, FORM) (Không thay đổi)
+//  MODULE 2: CÁC MODULE TƯƠNG TÁC (GIỎ HÀNG, MODAL, FORM)
 // ===================================================================
 function initInteractiveModules() {
     const serviceList = document.getElementById('service-list');
@@ -295,17 +295,25 @@ function initInteractiveModules() {
     orderForm.addEventListener('submit', handleFormSubmit);
     orderForm.addEventListener('input', validateOrderForm);
     contactForm.addEventListener('submit', handleFormSubmit);
+
+    // THÊM LOGIC CHO NÚT AI NỔI
+    const floatingAIBtn = document.getElementById('floating-ai-btn');
+    floatingAIBtn?.addEventListener('click', () => {
+        if (typeof startConversation === 'function') {
+            startConversation();
+        } else {
+            console.error("AI Assistant is not available.");
+            alert("Trợ lý AI đang được bảo trì, vui lòng thử lại sau.");
+        }
+    });
+    
     renderCart();
 }
 
 // ===================================================================
-//  MODULE 3: CÁC HÀM RENDER & TIỆN ÍCH (CẬP NHẬT)
+//  MODULE 3: CÁC HÀM RENDER & TIỆN ÍCH
 // ===================================================================
 
-/**
- * NÂNG CẤP: renderServiceCards
- * Sử dụng flexbox để thẻ dịch vụ có chiều cao bằng nhau và nội dung co giãn linh hoạt.
- */
 function renderServiceCards() {
     const serviceList = document.getElementById('service-list');
     const observer = new IntersectionObserver((entries) => {
@@ -366,9 +374,13 @@ function renderCart() {
     const cartItemsContainer = document.getElementById('cart-items-container');
     const cartTotalEl = document.getElementById('cart-total');
     const formContainer = document.getElementById('customer-form-container');
+    const cartIcon = document.getElementById('cart-icon-container');
+
     if (cart.length === 0) {
         cartItemsContainer.innerHTML = '<p class="text-gray-400 text-center p-8">Giỏ hàng của bạn đang trống.</p>';
+        formContainer.classList.add('is-hidden');
     } else {
+        formContainer.classList.remove('is-hidden');
         cartItemsContainer.innerHTML = cart.map(item => `
             <div class="cart-item">
                 <img src="${item.images && item.images.length > 0 ? item.images[0] : 'img/placeholder.png'}" alt="${item.name}" class="w-16 h-16 object-cover rounded-md">
@@ -381,9 +393,9 @@ function renderCart() {
     const cartCount = document.getElementById('cart-count');
     const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
     cartCount.textContent = totalItems;
-    document.getElementById('cart-icon-container').classList.toggle('is-hidden', totalItems === 0);
+    cartIcon.classList.toggle('is-hidden', totalItems === 0);
     document.body.classList.toggle('cart-is-visible', totalItems > 0);
-    formContainer.classList.toggle('is-hidden', cart.length === 0);
+    
     validateOrderForm();
 }
 function saveCartAndRender() {
@@ -467,7 +479,6 @@ function validateOrderForm() {
     phoneError.textContent = (phoneInput.value && !isPhoneValid) ? 'SĐT phải là 10 số, bắt đầu từ 0.' : '';
     const isFormValid = nameInput.value.trim() && phoneInput.value.trim() && isNameValid && isPhoneValid;
     submitBtn.disabled = !isFormValid;
-    submitBtn.classList.toggle('is-hidden', !isFormValid || cart.length === 0);
     return isFormValid;
 }
 async function handleFormSubmit(event) {
@@ -480,7 +491,7 @@ async function handleFormSubmit(event) {
     btn.disabled = true;
     btn.textContent = 'ĐANG GỬI...';
     msgEl.textContent = '';
-    let payload = { action: 'order' }; // Gắn action mặc định
+    let payload = { action: 'order' }; 
     if (isOrderForm) {
         payload.customer = { name: form.customerName.value, phone: form.customerPhone.value, notes: form.customerNotes.value };
         payload.cart = cart;
