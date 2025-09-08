@@ -1,5 +1,5 @@
 // ===================================================================
-//  SCRIPT.JS - PHIÊN BẢN 11.0 (Chia sẻ bằng Link Động)
+//  SCRIPT.JS - PHIÊN BẢN 9.1 (Sửa lỗi giao diện thẻ dịch vụ)
 // ===================================================================
 
 // --- KHỞI CHẠY KHI TÀI LIỆU SẴN SÀNG ---
@@ -9,23 +9,7 @@ document.addEventListener('DOMContentLoaded', initializeApp);
 let servicesData = [];
 let pcComponentsData = [];
 let cart = JSON.parse(localStorage.getItem('minhdangCart')) || [];
-// QUAN TRỌNG: URL này sẽ cần được cập nhật sau khi bạn deploy phiên bản mới của file code.gs
-const appsScriptUrl = 'https://script.google.com/macros/s/AKfycbyIremqvgCwYcVxsf09X-LbR1JRHZipuUr3xq9z-ZrGzaeXqgjxogkd3QyqKx_fYmQv/exec'; // <- THAY URL MỚI CỦA BẠN VÀO ĐÂY
-
-// Hàm tiện ích toàn cục để AI có thể gọi
-function copyShareLinkToClipboard(button) {
-    const input = document.getElementById('share-link-input');
-    if (input) {
-        input.select();
-        try {
-            document.execCommand('copy');
-            button.textContent = 'Đã sao chép!';
-            setTimeout(() => { button.textContent = 'Sao chép liên kết'; }, 2000);
-        } catch (err) {
-            console.error('Không thể sao chép:', err);
-        }
-    }
-}
+const appsScriptUrl = 'https://script.google.com/macros/s/AKfycbyIremqvgCwYcVxsf09X-LbR1JRHZipuUr3xq9z-ZrGzaeXqgjxogkd3QyqKx_fYmQv/exec';
 
 /**
  * Hàm khởi tạo chính, điều phối toàn bộ ứng dụng
@@ -34,11 +18,8 @@ async function initializeApp() {
     initCoreEffects();
     initInteractiveModules();
 
-    // NÂNG CẤP: Kiểm tra xem có buildId trong URL không
-    const urlParams = new URLSearchParams(window.location.search);
-    const buildIdToLoad = urlParams.get('buildId');
-
     try {
+        // Tải đồng thời dịch vụ và linh kiện
         const [services, components] = await Promise.all([
             fetch(appsScriptUrl + '?action=getServices').then(res => res.json()),
             fetch(appsScriptUrl + '?action=getComponents').then(res => res.json())
@@ -50,20 +31,17 @@ async function initializeApp() {
         servicesData = services;
         pcComponentsData = components;
         
+        // Render các thành phần giao diện chính
         renderServiceCards();
         renderProjectGallery();
         initFloatingImages();
 
+        // Khởi tạo Trợ lý AI và truyền dữ liệu vào
         if (typeof initializeAIAssistant === 'function') {
             initializeAIAssistant(pcComponentsData, servicesData);
         } else {
             console.error("Lỗi: Không tìm thấy hàm initializeAIAssistant.");
             disableAIButton("Trợ lý AI đang bảo trì");
-        }
-        
-        // NÂNG CẤP: Nếu có buildId, yêu cầu AI tải cấu hình đó
-        if (buildIdToLoad && typeof loadBuildFromUrl === 'function') {
-            loadBuildFromUrl(buildIdToLoad);
         }
         
         document.getElementById('service-loader').style.display = 'none';
@@ -76,8 +54,6 @@ async function initializeApp() {
     }
 }
 
-// (Toàn bộ các hàm còn lại trong script.js được giữ nguyên, không thay đổi)
-// ... (GIỮ NGUYÊN CODE TỪ disableAIButton() ĐẾN HẾT)
 function disableAIButton(message) {
     const aiBtn = document.getElementById('ai-assistant-btn');
     if (aiBtn) {
@@ -86,6 +62,10 @@ function disableAIButton(message) {
         aiBtn.classList.add('opacity-50', 'cursor-not-allowed');
     }
 }
+
+// ===================================================================
+//  MODULE 1: HIỆU ỨNG GIAO DIỆN CỐT LÕI (Không thay đổi)
+// ===================================================================
 function initCoreEffects() {
     const header = document.getElementById('header');
     const scrollToTopBtn = document.getElementById('scroll-to-top');
@@ -191,6 +171,10 @@ function initCoreEffects() {
         animate();
     }
 }
+
+// ===================================================================
+//  MODULE 2: CÁC MODULE TƯƠNG TÁC (GIỎ HÀNG, MODAL, FORM) (Không thay đổi)
+// ===================================================================
 function initInteractiveModules() {
     const serviceList = document.getElementById('service-list');
     const modal = document.getElementById('service-modal');
@@ -313,6 +297,15 @@ function initInteractiveModules() {
     contactForm.addEventListener('submit', handleFormSubmit);
     renderCart();
 }
+
+// ===================================================================
+//  MODULE 3: CÁC HÀM RENDER & TIỆN ÍCH (CẬP NHẬT)
+// ===================================================================
+
+/**
+ * NÂNG CẤP: renderServiceCards
+ * Sử dụng flexbox để thẻ dịch vụ có chiều cao bằng nhau và nội dung co giãn linh hoạt.
+ */
 function renderServiceCards() {
     const serviceList = document.getElementById('service-list');
     const observer = new IntersectionObserver((entries) => {
@@ -321,18 +314,19 @@ function renderServiceCards() {
         });
     }, { threshold: 0.1 });
     serviceList.innerHTML = servicesData.map(service => `
-        <div class="service-card group fade-in" data-tilt-card data-service-id="${service.id}">
+        <div class="service-card group fade-in flex flex-col" data-tilt-card data-service-id="${service.id}">
             <div class="relative overflow-hidden rounded-t-lg">
                 <img src="${service.image}" alt="${service.name}" class="w-full h-48 object-cover transition-transform duration-300 group-hover:scale-110">
             </div>
-            <div class="p-6">
+            <div class="p-6 flex flex-col flex-grow">
                 <h3 class="font-tech text-xl font-bold text-white mb-2">${service.name}</h3>
-                <p class="text-gray-400 text-sm mb-4 h-12 overflow-hidden">${service.description}</p>
-                <button class="font-semibold text-primary text-sm hover:text-secondary transition-colors">Xem Chi Tiết &rarr;</button>
+                <p class="text-gray-400 text-sm mb-4 flex-grow">${service.description}</p>
+                <button class="font-semibold text-primary text-sm hover:text-secondary transition-colors self-start mt-auto">Xem Chi Tiết &rarr;</button>
             </div>
         </div>`).join('');
     serviceList.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
 }
+
 function renderProjectGallery() {
     const projectGallery = document.getElementById('project-gallery');
     if (!projectGallery) return;
@@ -486,7 +480,7 @@ async function handleFormSubmit(event) {
     btn.disabled = true;
     btn.textContent = 'ĐANG GỬI...';
     msgEl.textContent = '';
-    let payload = { action: isOrderForm ? 'order' : 'contact' };
+    let payload = { action: 'order' }; // Gắn action mặc định
     if (isOrderForm) {
         payload.customer = { name: form.customerName.value, phone: form.customerPhone.value, notes: form.customerNotes.value };
         payload.cart = cart;
@@ -498,11 +492,10 @@ async function handleFormSubmit(event) {
     }
     try {
         await fetch(appsScriptUrl, {
-            method: 'POST',
-            body: JSON.stringify(payload),
-            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            method: 'POST', mode: 'no-cors',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
         });
-
         msgEl.textContent = 'Gửi yêu cầu thành công!';
         msgEl.className = 'text-green-400 text-center mt-4';
         form.reset();
@@ -512,7 +505,6 @@ async function handleFormSubmit(event) {
             setTimeout(() => document.getElementById('cart-panel-container').classList.remove('visible'), 2500);
         }
     } catch (error) {
-        console.error("Lỗi khi gửi form:", error);
         msgEl.textContent = 'Có lỗi xảy ra, vui lòng thử lại.';
         msgEl.className = 'text-red-400 text-center mt-4';
     } finally {
