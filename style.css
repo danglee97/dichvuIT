@@ -566,4 +566,35 @@ body.cart-is-visible .scroll-to-top-btn { bottom: 5.5rem; }
     background-color: #6b6b83;
 }
 
-/* === KẾT THÚC PHẦN THÊM MỚI === */
+/* --- BẮT ĐẦU PHẦN THÊM MỚI --- */
+/* Làm nổi bật Tab AI trên Desktop */
+#ai-nav-link {
+    background: linear-gradient(90deg, var(--primary), var(--secondary));
+    color: var(--dark-bg);
+    font-weight: 700;
+    text-shadow: none; /* Bỏ text-shadow mặc định để dễ đọc hơn */
+    animation: pulse-glow 2s infinite alternate;
+}
+
+#ai-nav-link:hover {
+    color: var(--dark-bg); /* Giữ màu chữ khi hover */
+    transform: scale(1.05); /* Thêm hiệu ứng phóng to nhẹ */
+    box-shadow: 0 0 20px var(--glow-color), 0 0 20px rgba(255, 0, 255, 0.7); /* Tăng cường hiệu ứng glow */
+}
+
+/* Hiệu ứng nhấp nháy phát sáng */
+@keyframes pulse-glow {
+    from {
+        box-shadow: 0 0 5px var(--glow-color), 0 0 5px rgba(255, 0, 255, 0.5);
+    }
+    to {
+        box-shadow: 0 0 15px var(--glow-color), 0 0 15px rgba(255, 0, 255, 0.7);
+    }
+}
+
+/* Style cho tab AI trên mobile */
+#ai-nav-link-mobile {
+    color: var(--primary);
+    text-shadow: 0 0 10px var(--glow-color);
+}
+/* --- KẾT THÚC PHẦN THÊM MỚI --- */
