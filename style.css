@@ -479,3 +479,91 @@ body.cart-is-visible .scroll-to-top-btn { bottom: 5.5rem; }
 }
 
 
+/* ... existing code ... */
+@keyframes pulse-ai {
+    0%, 100% {
+        box-shadow: 0 0 25px rgba(255, 0, 255, 0.7);
+    }
+    50% {
+        box-shadow: 0 0 45px rgba(0, 255, 255, 0.9);
+    }
+}
+
+/* === BẮT ĐẦU PHẦN THÊM MỚI === */
+
+/* --- Notification / Toast System --- */
+.notification-container {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.toast {
+    padding: 1rem 1.5rem;
+    border-radius: 8px;
+    color: white;
+    font-weight: 500;
+    border-left: 5px solid;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    opacity: 0;
+    transform: translateX(100%);
+    transition: all 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+}
+
+.toast.show {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+.toast.success {
+    background-color: #1a2e2a;
+    border-color: #2ddc8c;
+}
+
+.toast.error {
+    background-color: #3e1a21;
+    border-color: var(--error-color);
+}
+
+.toast.info {
+    background-color: #1c2a41;
+    border-color: #3498db;
+}
+
+/* --- Confirmation Modal --- */
+.confirmation-modal-content {
+    background: var(--dark-bg);
+    border: 1px solid var(--border-color);
+    box-shadow: 0 0 30px rgba(0, 255, 255, 0.2);
+    padding: 2.5rem;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 450px;
+    text-align: center;
+    transform: scale(0.9);
+    transition: transform 0.3s ease;
+}
+
+#confirmation-modal.visible .confirmation-modal-content {
+    transform: scale(1);
+}
+
+.cancel-btn-styling {
+    background-color: #4a4a5e;
+    color: #fff;
+    font-weight: bold;
+    border-radius: 8px;
+    transition: background-color 0.3s ease;
+}
+.cancel-btn-styling:hover {
+    background-color: #6b6b83;
+}
+
+/* === KẾT THÚC PHẦN THÊM MỚI === */
