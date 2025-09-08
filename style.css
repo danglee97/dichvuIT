@@ -176,7 +176,7 @@ body.menu-open #mobile-menu-btn {
 .service-card:hover::before { opacity: 1; }
 .service-card:hover { box-shadow: 0 0 30px rgba(0, 255, 255, 0.3); }
 
-.modal-container { position: fixed; inset: 0; z-index: 100; display: flex; align-items: center; justify-content: center; background-color: rgba(0, 0, 0, 0.7); backdrop-filter: blur(5px); opacity: 0; pointer-events: none; transition: opacity 0.3s ease-in-out; }
+.modal-container { position: fixed; inset: 0; z-index: 1000; display: flex; align-items: center; justify-content: center; background-color: rgba(0, 0, 0, 0.7); backdrop-filter: blur(5px); opacity: 0; pointer-events: none; transition: opacity 0.3s ease-in-out; }
 .modal-container.visible { opacity: 1; pointer-events: auto; }
 .modal-content { position: relative; width: 90%; max-width: 56rem; background: var(--dark-bg); border-radius: 0.5rem; padding: 1.5rem; transform: scale(0.95); transition: transform 0.3s ease-in-out; }
 @media (min-width: 768px) { .modal-content { padding: 2rem; } }
