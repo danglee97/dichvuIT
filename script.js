@@ -172,6 +172,8 @@ function initCoreEffects() {
 // ===================================================================
 //  MODULE 2: CÁC MODULE TƯƠNG TÁC (Cập nhật với Modal mới)
 // ===================================================================
+// script.js
+
 function initInteractiveModules() {
     // Lấy các element như cũ
     const serviceList = document.getElementById('service-list');
@@ -283,6 +285,50 @@ function initInteractiveModules() {
              }
         }
     });
+
+    // ======================================================
+    // ===== BẮT ĐẦU ĐOẠN MÃ SỬA LỖI ĐƯỢC THÊM VÀO =====
+    // ======================================================
+    const prevBtn = document.getElementById('modal-prev-btn');
+    const nextBtn = document.getElementById('modal-next-btn');
+
+    // Hàm điều hướng chung cho thư viện ảnh
+    const navigateGallery = (direction) => {
+        if (!currentSubServiceImages || currentSubServiceImages.length <= 1) return;
+        // Tính toán chỉ số ảnh mới, đảm bảo lặp lại khi đến cuối
+        currentImageIndex = (currentImageIndex + direction + currentSubServiceImages.length) % currentSubServiceImages.length;
+        updateModalGallery();
+        startSlideshow(); // Khởi động lại slideshow để không bị tự chuyển ảnh ngay sau đó
+    };
+
+    // Gán sự kiện click cho nút Previous và Next
+    prevBtn.addEventListener('click', () => navigateGallery(-1));
+    nextBtn.addEventListener('click', () => navigateGallery(1));
+
+    // Gán sự kiện click cho khu vực chứa các ảnh thumbnail
+    modalThumbnailContainer.addEventListener('click', (e) => {
+        const thumb = e.target.closest('.modal-thumbnail');
+        if (thumb) {
+            currentImageIndex = parseInt(thumb.dataset.index); // Lấy chỉ số từ ảnh được click
+            updateModalGallery();
+            startSlideshow(); // Khởi động lại slideshow
+        }
+    });
+
+    // (Tùy chọn) Thêm chức năng điều khiển bằng phím mũi tên trái/phải
+    document.addEventListener('keydown', (e) => {
+        if (modal.classList.contains('visible') && !lightbox.classList.contains('visible')) {
+            if (e.key === 'ArrowRight') {
+                navigateGallery(1);
+            } else if (e.key === 'ArrowLeft') {
+                navigateGallery(-1);
+            }
+        }
+    });
+    // ======================================================
+    // ===== KẾT THÚC ĐOẠN MÃ SỬA LỖI =======================
+    // ======================================================
+
     document.getElementById('modal-zoom-btn')?.addEventListener('click', () => showLightbox(currentImageIndex));
     document.getElementById('lightbox-close')?.addEventListener('click', () => lightbox.classList.remove('visible'));
     document.getElementById('lightbox-prev')?.addEventListener('click', () => navigateLightbox(-1));
