@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Công cụ kiểm tra link Google Drive</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f0f2f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .container {
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 600px;
+            text-align: center;
+        }
+        h1 {
+            color: #1c1e21;
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+        p {
+            color: #606770;
+            margin-bottom: 25px;
+        }
+        .input-group {
+            margin-bottom: 15px;
+            text-align: left;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #333;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #dddfe2;
+            border-radius: 6px;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+        button {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        #convertBtn {
+            background-color: #e74c3c;
+            color: white;
+            margin-bottom: 20px;
+        }
+        #convertBtn:hover {
+            background-color: #c0392b;
+        }
+        #copyBtn {
+            background-color: #3498db;
+            color: white;
+        }
+        #copyBtn:hover {
+            background-color: #2980b9;
+        }
+        .result-area {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #dddfe2;
+        }
+        #preview-container {
+            margin-top: 15px;
+            min-height: 100px;
+            border: 2px dashed #dddfe2;
+            border-radius: 6px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 10px;
+        }
+        #image-preview {
+            max-width: 100%;
+            max-height: 300px;
+            display: none;
+        }
+        .status {
+            margin-top: 10px;
+            font-weight: bold;
+        }
+        .status.success {
+            color: #27ae60;
+        }
+        .status.error {
+            color: #c0392b;
+            line-height: 1.5;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Công Cụ Chuyển Đổi & Kiểm Tra Link Google Drive</h1>
+        <p>Dán link chia sẻ từ Google Drive để lấy link trực tiếp và kiểm tra xem ảnh có hiển thị công khai hay không.</p>
+
+        <div class="input-group">
+            <label for="gdrive-link">Link Google Drive Gốc:</label>
+            <input type="text" id="gdrive-link" placeholder="https://drive.google.com/file/d/...">
+        </div>
+        
+        <button id="convertBtn">Chuyển Đổi & Kiểm Tra</button>
+
+        <div class="result-area" id="result-area" style="display: none;">
+            <div class="input-group">
+                <label for="direct-link">Link Trực Tiếp (dùng cho website):</label>
+                <div style="display: flex; gap: 10px;">
+                    <input type="text" id="direct-link" readonly>
+                    <button id="copyBtn" style="width: 120px;">Sao chép</button>
+                </div>
+            </div>
+
+            <label>Xem trước hình ảnh:</label>
+            <div id="preview-container">
+                <img id="image-preview" src="">
+                <div id="status" class="status"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const convertBtn = document.getElementById('convertBtn');
+        const gdriveLinkInput = document.getElementById('gdrive-link');
+        const resultArea = document.getElementById('result-area');
+        const directLinkInput = document.getElementById('direct-link');
+        const copyBtn = document.getElementById('copyBtn');
+        const imagePreview = document.getElementById('image-preview');
+        const statusDiv = document.getElementById('status');
+        const previewContainer = document.getElementById('preview-container');
+
+        function convertToDirectLink(url) {
+            if (typeof url !== 'string' || !url.includes('drive.google.com/file/d/')) {
+                return null;
+            }
+            const regex = /\/d\/([a-zA-Z0-9_-]+)/;
+            const match = url.match(regex);
+            if (match && match[1]) {
+                const fileId = match[1];
+                return `https://lh3.googleusercontent.com/d/${fileId}`;
+            }
+            return null;
+        }
+
+        convertBtn.addEventListener('click', () => {
+            const originalLink = gdriveLinkInput.value.trim();
+            const directLink = convertToDirectLink(originalLink);
+
+            resultArea.style.display = 'block';
+            imagePreview.style.display = 'none';
+
+            if (directLink) {
+                directLinkInput.value = directLink;
+                statusDiv.className = 'status';
+                statusDiv.textContent = 'Đang tải ảnh để kiểm tra...';
+                previewContainer.style.borderColor = '#dddfe2';
+                imagePreview.src = directLink;
+            } else {
+                directLinkInput.value = '';
+                statusDiv.className = 'status error';
+                statusDiv.textContent = 'Link không hợp lệ. Vui lòng kiểm tra lại link Google Drive.';
+                previewContainer.style.borderColor = '#c0392b';
+            }
+        });
+
+        imagePreview.onload = () => {
+            imagePreview.style.display = 'block';
+            statusDiv.className = 'status success';
+            statusDiv.textContent = 'Thành công! Ảnh này có thể sử dụng công khai.';
+            previewContainer.style.borderColor = '#27ae60';
+        };
+
+        imagePreview.onerror = () => {
+            imagePreview.style.display = 'none';
+            statusDiv.className = 'status error';
+            statusDiv.textContent = 'LỖI: Không thể tải ảnh! Vui lòng kiểm tra lại QUYỀN TRUY CẬP của file (phải được đặt là "Bất kỳ ai có đường liên kết").';
+            previewContainer.style.borderColor = '#c0392b';
+        };
+
+        copyBtn.addEventListener('click', () => {
+            navigator.clipboard.writeText(directLinkInput.value).then(() => {
+                copyBtn.textContent = 'Đã chép!';
+                setTimeout(() => {
+                    copyBtn.textContent = 'Sao chép';
+                }, 2000);
+            });
+        });
+    </script>
+
+</body>
+</html>
