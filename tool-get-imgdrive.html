@@ -1,146 +1,231 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="vi" class="scroll-smooth">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Công cụ kiểm tra link Google Drive</title>
+    <title>Tool Get ImgDrive - Công Cụ Lấy Link Ảnh Trực Tiếp</title>
+    <link rel="icon" href="img/favicon.png">
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@500;700;900&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
+    
+    <!-- Libraries & CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <style>
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background-color: #f0f2f5;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            margin: 0;
-            padding: 20px;
-            box-sizing: border-box;
+        :root {
+            --dark-bg: #0a0a1a;
+            --primary: #00ffff;
+            --secondary: #ff00ff;
+            --glow-color: rgba(0, 255, 255, 0.75);
+            --card-bg: rgba(10, 10, 26, 0.5);
+            --border-color: rgba(0, 255, 255, 0.2);
+            --error-color: #ff6b6b;
         }
-        .container {
-            background-color: #fff;
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: var(--dark-bg);
+            color: #E0E0E0;
+            overflow-x: hidden;
+        }
+        h1, h2, h3, .font-tech {
+            font-family: 'Exo 2', sans-serif;
+            text-shadow: 0 0 5px var(--glow-color);
+        }
+        #hero-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: -1;
+        }
+        .main-container {
+            position: relative;
+            z-index: 1;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1.5rem;
+        }
+        .tool-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            backdrop-filter: blur(5px);
+            border-radius: 0.5rem;
             width: 100%;
             max-width: 600px;
-            text-align: center;
+            box-shadow: 0 0 30px rgba(0, 255, 255, 0.2);
         }
-        h1 {
-            color: #1c1e21;
-            font-size: 24px;
-            margin-bottom: 10px;
-        }
-        p {
-            color: #606770;
-            margin-bottom: 25px;
-        }
-        .input-group {
-            margin-bottom: 15px;
-            text-align: left;
-        }
-        label {
+        .form-label {
             display: block;
-            margin-bottom: 5px;
-            font-weight: 600;
-            color: #333;
+            font-size: 0.875rem;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+            text-align: left;
+            font-weight: 500;
         }
-        input[type="text"] {
+        .form-input {
             width: 100%;
-            padding: 12px;
-            border: 1px solid #dddfe2;
-            border-radius: 6px;
-            font-size: 16px;
-            box-sizing: border-box;
+            background-color: rgba(255,255,255,0.1);
+            border: 1px solid var(--border-color);
+            color: white;
+            padding: 0.75rem;
+            border-radius: 0.25rem;
+            transition: all 0.2s;
         }
-        button {
-            width: 100%;
-            padding: 12px;
+        .form-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 10px var(--glow-color);
+        }
+        .submit-btn-styling {
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            color: black;
+            font-weight: 700;
+            padding-top: 0.85rem;
+            padding-bottom: 0.85rem;
+            border-radius: 9999px;
             border: none;
-            border-radius: 6px;
-            font-size: 16px;
-            font-weight: bold;
             cursor: pointer;
-            transition: background-color 0.2s;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            box-shadow: 0 0 15px var(--glow-color);
+            transition: all 0.3s ease-in-out;
         }
-        #convertBtn {
-            background-color: #e74c3c;
-            color: white;
-            margin-bottom: 20px;
+        .submit-btn-styling:hover {
+            transform: scale(1.05) translateY(-2px);
+            box-shadow: 0 0 20px var(--secondary);
         }
-        #convertBtn:hover {
-            background-color: #c0392b;
+        .copy-btn {
+            background-color: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--primary);
+            font-weight: 500;
+            transition: all 0.2s ease-in-out;
         }
-        #copyBtn {
-            background-color: #3498db;
-            color: white;
-        }
-        #copyBtn:hover {
-            background-color: #2980b9;
-        }
-        .result-area {
-            margin-top: 20px;
-            padding-top: 20px;
-            border-top: 1px solid #dddfe2;
+        .copy-btn:hover {
+            background-color: var(--primary);
+            color: var(--dark-bg);
         }
         #preview-container {
-            margin-top: 15px;
-            min-height: 100px;
-            border: 2px dashed #dddfe2;
-            border-radius: 6px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 10px;
-        }
-        #image-preview {
-            max-width: 100%;
-            max-height: 300px;
-            display: none;
+            min-height: 150px;
+            border: 2px dashed var(--border-color);
+            transition: border-color 0.3s;
         }
         .status {
-            margin-top: 10px;
             font-weight: bold;
+            padding: 1rem;
         }
         .status.success {
             color: #27ae60;
         }
         .status.error {
-            color: #c0392b;
+            color: var(--error-color);
             line-height: 1.5;
         }
     </style>
 </head>
 <body>
+    <div id="hero-canvas"></div>
+    <div class="main-container">
+        <div class="tool-card p-6 md:p-8">
+            <div class="text-center">
+                <a href="index.html" class="inline-block mb-4">
+                    <img src="img/logo.jpg" alt="Logo Minh Đăng IT" class="h-16 w-16 mx-auto">
+                </a>
+                <h1 class="text-2xl md:text-3xl font-black text-white uppercase tracking-wider mb-2">Công Cụ Lấy Link Ảnh Google Drive</h1>
+                <p class="text-gray-400 max-w-md mx-auto">Dán link chia sẻ từ Google Drive để lấy link trực tiếp và kiểm tra quyền truy cập công khai.</p>
+            </div>
 
-    <div class="container">
-        <h1>Công Cụ Chuyển Đổi & Kiểm Tra Link Google Drive</h1>
-        <p>Dán link chia sẻ từ Google Drive để lấy link trực tiếp và kiểm tra xem ảnh có hiển thị công khai hay không.</p>
+            <div class="mt-8 space-y-4">
+                <div>
+                    <label for="gdrive-link" class="form-label">Link Google Drive Gốc:</label>
+                    <input type="text" id="gdrive-link" class="form-input" placeholder="https://drive.google.com/file/d/...">
+                </div>
+                
+                <button id="convertBtn" class="submit-btn-styling w-full">Chuyển Đổi & Kiểm Tra</button>
+            </div>
 
-        <div class="input-group">
-            <label for="gdrive-link">Link Google Drive Gốc:</label>
-            <input type="text" id="gdrive-link" placeholder="https://drive.google.com/file/d/...">
-        </div>
-        
-        <button id="convertBtn">Chuyển Đổi & Kiểm Tra</button>
+            <div class="mt-8 pt-6 border-t border-gray-700 space-y-4" id="result-area" style="display: none;">
+                <div>
+                    <label for="direct-link" class="form-label">Link Trực Tiếp (dùng cho website):</label>
+                    <div class="flex gap-2">
+                        <input type="text" id="direct-link" class="form-input flex-grow" readonly>
+                        <button id="copyBtn" class="px-4 py-2 rounded-md copy-btn">Sao chép</button>
+                    </div>
+                </div>
 
-        <div class="result-area" id="result-area" style="display: none;">
-            <div class="input-group">
-                <label for="direct-link">Link Trực Tiếp (dùng cho website):</label>
-                <div style="display: flex; gap: 10px;">
-                    <input type="text" id="direct-link" readonly>
-                    <button id="copyBtn" style="width: 120px;">Sao chép</button>
+                <div>
+                    <label class="form-label">Xem trước hình ảnh:</label>
+                    <div id="preview-container" class="rounded-md flex justify-center items-center p-2">
+                        <img id="image-preview" src="" class="max-w-full max-h-48 object-contain hidden">
+                        <div id="status" class="status"></div>
+                    </div>
                 </div>
             </div>
 
-            <label>Xem trước hình ảnh:</label>
-            <div id="preview-container">
-                <img id="image-preview" src="">
-                <div id="status" class="status"></div>
+            <div class="text-center mt-8">
+                <a href="index.html" class="text-sm text-primary hover:text-secondary transition-colors">&larr; Quay lại trang Dịch Vụ</a>
             </div>
         </div>
     </div>
 
     <script>
+        // --- START: Three.js Background Effect ---
+        const container = document.getElementById('hero-canvas');
+        if (container && window.THREE) {
+            let scene, camera, renderer, particles, mouseX = 0, mouseY = 0;
+            let windowHalfX = window.innerWidth / 2, windowHalfY = window.innerHeight / 2;
+            scene = new THREE.Scene();
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 1000);
+            camera.position.z = 150;
+            renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+            renderer.setPixelRatio(window.devicePixelRatio);
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            container.appendChild(renderer.domElement);
+            const pCount = 200, positions = new Float32Array(pCount * 3), velocities = [];
+            for (let i = 0; i < pCount; i++) {
+                positions[i * 3] = (Math.random() * 2 - 1) * 200;
+                positions[i * 3 + 1] = (Math.random() * 2 - 1) * 200;
+                positions[i * 3 + 2] = (Math.random() * 2 - 1) * 200;
+                velocities.push(new THREE.Vector3((Math.random() - 0.5) * 0.2, (Math.random() - 0.5) * 0.2, (Math.random() - 0.5) * 0.2));
+            }
+            const pGeom = new THREE.BufferGeometry();
+            pGeom.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+            pGeom.velocities = velocities;
+            particles = new THREE.Points(pGeom, new THREE.PointsMaterial({ color: 0x00ffff, size: 1.5, blending: THREE.AdditiveBlending, transparent: true }));
+            scene.add(particles);
+            function animate() {
+                requestAnimationFrame(animate);
+                const pArray = particles.geometry.attributes.position.array, vArray = particles.geometry.velocities;
+                for (let i = 0; i < pCount; i++) {
+                    const i3 = i * 3;
+                    pArray[i3] += vArray[i].x; pArray[i3 + 1] += vArray[i].y; pArray[i3 + 2] += vArray[i].z;
+                    if (pArray[i3] < -200 || pArray[i3] > 200) vArray[i].x *= -1;
+                    if (pArray[i3 + 1] < -200 || pArray[i3 + 1] > 200) vArray[i].y *= -1;
+                    if (pArray[i3 + 2] < -200 || pArray[i3 + 2] > 200) vArray[i].z *= -1;
+                }
+                particles.geometry.attributes.position.needsUpdate = true;
+                camera.position.x += (mouseX - camera.position.x) * 0.05;
+                camera.position.y += (-mouseY - camera.position.y) * 0.05;
+                camera.lookAt(scene.position);
+                renderer.render(scene, camera);
+            }
+            document.addEventListener('mousemove', (e) => { mouseX = (e.clientX - windowHalfX) / 4; mouseY = (e.clientY - windowHalfY) / 4; });
+            window.addEventListener('resize', () => {
+                windowHalfX = window.innerWidth / 2; windowHalfY = window.innerHeight / 2;
+                camera.aspect = window.innerWidth / window.innerHeight; camera.updateProjectionMatrix();
+                renderer.setSize(window.innerWidth, window.innerHeight);
+            });
+            animate();
+        }
+        // --- END: Three.js Background Effect ---
+
+        // --- START: Tool Logic ---
         const convertBtn = document.getElementById('convertBtn');
         const gdriveLinkInput = document.getElementById('gdrive-link');
         const resultArea = document.getElementById('result-area');
@@ -168,34 +253,34 @@
             const directLink = convertToDirectLink(originalLink);
 
             resultArea.style.display = 'block';
-            imagePreview.style.display = 'none';
+            imagePreview.classList.add('hidden');
 
             if (directLink) {
                 directLinkInput.value = directLink;
                 statusDiv.className = 'status';
                 statusDiv.textContent = 'Đang tải ảnh để kiểm tra...';
-                previewContainer.style.borderColor = '#dddfe2';
+                previewContainer.style.borderColor = 'var(--border-color)';
                 imagePreview.src = directLink;
             } else {
                 directLinkInput.value = '';
                 statusDiv.className = 'status error';
                 statusDiv.textContent = 'Link không hợp lệ. Vui lòng kiểm tra lại link Google Drive.';
-                previewContainer.style.borderColor = '#c0392b';
+                previewContainer.style.borderColor = 'var(--error-color)';
             }
         });
 
         imagePreview.onload = () => {
-            imagePreview.style.display = 'block';
+            imagePreview.classList.remove('hidden');
             statusDiv.className = 'status success';
             statusDiv.textContent = 'Thành công! Ảnh này có thể sử dụng công khai.';
             previewContainer.style.borderColor = '#27ae60';
         };
 
         imagePreview.onerror = () => {
-            imagePreview.style.display = 'none';
+            imagePreview.classList.add('hidden');
             statusDiv.className = 'status error';
             statusDiv.textContent = 'LỖI: Không thể tải ảnh! Vui lòng kiểm tra lại QUYỀN TRUY CẬP của file (phải được đặt là "Bất kỳ ai có đường liên kết").';
-            previewContainer.style.borderColor = '#c0392b';
+            previewContainer.style.borderColor = 'var(--error-color)';
         };
 
         copyBtn.addEventListener('click', () => {
@@ -206,7 +291,7 @@
                 }, 2000);
             });
         });
+        // --- END: Tool Logic ---
     </script>
-
 </body>
 </html>
