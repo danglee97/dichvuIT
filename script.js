@@ -1,5 +1,5 @@
 // ===================================================================
-//  SCRIPT.JS - PHIÊN BẢN 12.0 (Hệ thống thông báo & Modal tùy chỉnh)
+//  SCRIPT.JS - PHIÊN BẢN 13.1 (Sửa lỗi & Hoàn thiện Giao diện Sáng/Tối)
 // ===================================================================
 
 // --- KHỞI CHẠY KHI TÀI LIỆU SẴN SÀNG ---
@@ -15,6 +15,7 @@ const appsScriptUrl = 'https://script.google.com/macros/s/AKfycbyIremqvgCwYcVxsf
  * Hàm khởi tạo chính, điều phối toàn bộ ứng dụng
  */
 async function initializeApp() {
+    initThemeSwitcher(); // Phải chạy đầu tiên để áp dụng giao diện đúng
     initCoreEffects();
     initInteractiveModules();
 
@@ -58,6 +59,53 @@ function disableAIButton(message) {
         aiBtn.classList.add('opacity-50', 'cursor-not-allowed');
     }
 }
+
+// ===================================================================
+//  MODULE 0: GIAO DIỆN SÁNG/TỐI
+// ===================================================================
+function initThemeSwitcher() {
+    const switcher = document.getElementById('theme-switcher');
+    const sunIcon = document.getElementById('theme-icon-sun');
+    const moonIcon = document.getElementById('theme-icon-moon');
+    const tooltip = document.getElementById('theme-tooltip');
+    const docElement = document.documentElement;
+
+    const applyTheme = (theme) => {
+        if (theme === 'light') {
+            docElement.classList.add('light-mode');
+            sunIcon?.classList.add('hidden');
+            moonIcon?.classList.remove('hidden');
+            if (tooltip) tooltip.textContent = 'Chuyển sang giao diện tối';
+        } else {
+            docElement.classList.remove('light-mode');
+            sunIcon?.classList.remove('hidden');
+            moonIcon?.classList.add('hidden');
+            if (tooltip) tooltip.textContent = 'Chuyển sang giao diện sáng';
+        }
+    };
+
+    const toggleTheme = () => {
+        const currentTheme = docElement.classList.contains('light-mode') ? 'light' : 'dark';
+        const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+        localStorage.setItem('theme', newTheme);
+        applyTheme(newTheme);
+    };
+
+    switcher?.addEventListener('click', toggleTheme);
+
+    // Initial theme setup
+    const savedTheme = localStorage.getItem('theme');
+    const prefersLight = window.matchMedia('(prefers-color-scheme: light)').matches;
+
+    if (savedTheme) {
+        applyTheme(savedTheme);
+    } else if (prefersLight) {
+        applyTheme('light');
+    } else {
+        applyTheme('dark'); // Default
+    }
+}
+
 
 // ===================================================================
 //  MODULE 1: HIỆU ỨNG GIAO DIỆN CỐT LÕI (Không thay đổi nhiều)
@@ -172,10 +220,7 @@ function initCoreEffects() {
 // ===================================================================
 //  MODULE 2: CÁC MODULE TƯƠNG TÁC (Cập nhật với Modal mới)
 // ===================================================================
-// script.js
-
 function initInteractiveModules() {
-    // Lấy các element như cũ
     const serviceList = document.getElementById('service-list');
     const modal = document.getElementById('service-modal');
     const closeModalBtn = document.getElementById('close-modal-btn');
@@ -186,7 +231,6 @@ function initInteractiveModules() {
     const orderForm = document.getElementById('order-form');
     const contactForm = document.getElementById('contact-form');
     
-    // ... logic modal dịch vụ giữ nguyên ...
     let modalSlideshowInterval, currentImageIndex = 0, currentSubServiceImages = [];
     const modalMainImg = document.getElementById('modal-main-img');
     const modalThumbnailContainer = document.getElementById('modal-thumbnail-container');
@@ -194,6 +238,7 @@ function initInteractiveModules() {
     const modalSubservicesList = document.getElementById('modal-subservices-list');
     const modalLoader = document.getElementById('modal-loader');
     const modalData = document.getElementById('modal-data');
+
     const openModal = (serviceId) => {
         const service = servicesData.find(s => s.id === serviceId);
         if (!service) return;
@@ -215,6 +260,7 @@ function initInteractiveModules() {
         modalLoader.style.display = 'none';
         modalData.classList.remove('hidden');
     };
+
     const updateModalContent = (subService) => {
         currentSubServiceImages = subService.images || [];
         currentImageIndex = 0;
@@ -222,6 +268,7 @@ function initInteractiveModules() {
         updateModalGallery();
         startSlideshow();
     };
+
     const updateModalGallery = () => {
         if (currentSubServiceImages.length === 0) {
             modalMainImg.src = 'https://placehold.co/600x400/0a0a1a/00ffff?text=Minh+Dang+IT';
@@ -230,6 +277,7 @@ function initInteractiveModules() {
         modalMainImg.src = currentSubServiceImages[currentImageIndex];
         modalThumbnailContainer.querySelectorAll('.modal-thumbnail').forEach((thumb, i) => thumb.classList.toggle('active', i === currentImageIndex));
     };
+
     const startSlideshow = () => {
         clearInterval(modalSlideshowInterval);
         if (currentSubServiceImages.length <= 1) return;
@@ -238,8 +286,10 @@ function initInteractiveModules() {
             updateModalGallery();
         }, 3000);
     };
+
     const lightbox = document.getElementById('lightbox');
     const lightboxImg = document.getElementById('lightbox-img');
+
     const showLightbox = (index) => {
         currentImageIndex = index;
         if (currentSubServiceImages.length > 0) {
@@ -247,15 +297,18 @@ function initInteractiveModules() {
             lightbox.classList.add('visible');
         }
     };
+
     const navigateLightbox = (direction) => {
         currentImageIndex = (currentImageIndex + direction + currentSubServiceImages.length) % currentSubServiceImages.length;
         lightboxImg.src = currentSubServiceImages[currentImageIndex];
     };
+
     const toggleCartPanel = () => {
         cartPanel.classList.toggle('visible');
         cartOverlay.classList.toggle('opacity-0');
         cartOverlay.classList.toggle('pointer-events-none');
     };
+
     const handleQuantityChange = (subId, change) => {
         const item = cart.find(i => i.subId === subId);
         if (item) {
@@ -265,13 +318,14 @@ function initInteractiveModules() {
         saveCartAndRender();
     };
 
-    // Binding events
     serviceList.addEventListener('click', e => {
         const card = e.target.closest('.service-card');
         if (card) openModal(card.dataset.serviceId);
     });
+
     closeModalBtn.addEventListener('click', () => modal.classList.remove('visible'));
     modal.addEventListener('click', e => { if (e.target === modal) modal.classList.remove('visible'); });
+    
     modalSubservicesList.addEventListener('click', e => {
         const btn = e.target.closest('.add-to-cart-btn');
         if (btn) return addToCart(btn.dataset.subId, btn);
@@ -286,48 +340,30 @@ function initInteractiveModules() {
         }
     });
 
-    // ======================================================
-    // ===== BẮT ĐẦU ĐOẠN MÃ SỬA LỖI ĐƯỢC THÊM VÀO =====
-    // ======================================================
     const prevBtn = document.getElementById('modal-prev-btn');
     const nextBtn = document.getElementById('modal-next-btn');
-
-    // Hàm điều hướng chung cho thư viện ảnh
     const navigateGallery = (direction) => {
         if (!currentSubServiceImages || currentSubServiceImages.length <= 1) return;
-        // Tính toán chỉ số ảnh mới, đảm bảo lặp lại khi đến cuối
         currentImageIndex = (currentImageIndex + direction + currentSubServiceImages.length) % currentSubServiceImages.length;
         updateModalGallery();
-        startSlideshow(); // Khởi động lại slideshow để không bị tự chuyển ảnh ngay sau đó
+        startSlideshow();
     };
-
-    // Gán sự kiện click cho nút Previous và Next
     prevBtn.addEventListener('click', () => navigateGallery(-1));
     nextBtn.addEventListener('click', () => navigateGallery(1));
-
-    // Gán sự kiện click cho khu vực chứa các ảnh thumbnail
     modalThumbnailContainer.addEventListener('click', (e) => {
         const thumb = e.target.closest('.modal-thumbnail');
         if (thumb) {
-            currentImageIndex = parseInt(thumb.dataset.index); // Lấy chỉ số từ ảnh được click
+            currentImageIndex = parseInt(thumb.dataset.index);
             updateModalGallery();
-            startSlideshow(); // Khởi động lại slideshow
+            startSlideshow();
         }
     });
-
-    // (Tùy chọn) Thêm chức năng điều khiển bằng phím mũi tên trái/phải
     document.addEventListener('keydown', (e) => {
         if (modal.classList.contains('visible') && !lightbox.classList.contains('visible')) {
-            if (e.key === 'ArrowRight') {
-                navigateGallery(1);
-            } else if (e.key === 'ArrowLeft') {
-                navigateGallery(-1);
-            }
+            if (e.key === 'ArrowRight') navigateGallery(1);
+            else if (e.key === 'ArrowLeft') navigateGallery(-1);
         }
     });
-    // ======================================================
-    // ===== KẾT THÚC ĐOẠN MÃ SỬA LỖI =======================
-    // ======================================================
 
     document.getElementById('modal-zoom-btn')?.addEventListener('click', () => showLightbox(currentImageIndex));
     document.getElementById('lightbox-close')?.addEventListener('click', () => lightbox.classList.remove('visible'));
@@ -343,7 +379,6 @@ function initInteractiveModules() {
     orderForm.addEventListener('submit', handleFormSubmit);
     orderForm.addEventListener('input', validateOrderForm);
     contactForm.addEventListener('submit', handleFormSubmit);
-
     const floatingAIBtn = document.getElementById('floating-ai-btn');
     floatingAIBtn?.addEventListener('click', () => {
         if (typeof startConversation === 'function') {
@@ -352,24 +387,20 @@ function initInteractiveModules() {
             showNotification("Trợ lý AI đang bảo trì, vui lòng thử lại sau.", "error");
         }
     });
-    
     document.getElementById('clear-cart-btn')?.addEventListener('click', handleClearCart);
-    
     renderCart();
 }
 
 // ===================================================================
-//  MODULE 3: HÀM RENDER & TIỆN ÍCH (Cập nhật lớn)
+//  MODULE 3: HÀM RENDER & TIỆN ÍCH
 // ===================================================================
 
-// --- HÀM MỚI: Hệ thống thông báo & Modal ---
 function showNotification(message, type = 'success') {
     const container = document.getElementById('notification-container');
     const toast = document.createElement('div');
     toast.className = `toast ${type}`;
     toast.innerHTML = `<span>${message}</span>`;
     container.appendChild(toast);
-
     setTimeout(() => toast.classList.add('show'), 10);
     setTimeout(() => {
         toast.classList.remove('show');
@@ -383,25 +414,19 @@ function showConfirmation(message) {
         const msgEl = document.getElementById('confirmation-message');
         const yesBtn = document.getElementById('confirm-btn-yes');
         const noBtn = document.getElementById('confirm-btn-no');
-
         msgEl.textContent = message;
         modal.classList.add('visible');
-
         const close = (value) => {
             modal.classList.remove('visible');
-            // Gỡ bỏ event listeners để tránh bị gọi lại nhiều lần
             yesBtn.replaceWith(yesBtn.cloneNode(true));
             noBtn.replaceWith(noBtn.cloneNode(true));
             resolve(value);
         }
-
         modal.querySelector('#confirm-btn-yes').onclick = () => close(true);
         modal.querySelector('#confirm-btn-no').onclick = () => close(false);
     });
 }
 
-
-// --- Các hàm render được giữ nguyên ---
 function renderServiceCards() {
     const serviceList = document.getElementById('service-list');
     const observer = new IntersectionObserver((entries) => {
@@ -440,9 +465,10 @@ function renderProjectGallery() {
     `).join('');
     projectGallery.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
 }
+
 function initFloatingImages() {
     const container = document.getElementById('floating-images-container');
-    if(container.children.length > 0) return; // Chỉ chạy 1 lần
+    if(container.children.length > 0) return;
     const allImages = servicesData.flatMap(s => s.subServices.flatMap(sub => sub.images));
     const uniqueImages = [...new Set(allImages)].filter(img => img);
     for (let i = 0; i < Math.min(uniqueImages.length, 7); i++) {
@@ -458,7 +484,6 @@ function initFloatingImages() {
     }
 }
 
-// --- Logic giỏ hàng được cập nhật để dùng hệ thống thông báo mới ---
 function renderCart() {
     const cartItemsContainer = document.getElementById('cart-items-container');
     const cartTotalEl = document.getElementById('cart-total');
@@ -497,15 +522,17 @@ function saveCartAndRender() {
 }
 
 function addToCart(subId, buttonElement) {
-    const service = servicesData.flatMap(s => s.subServices).find(sub => sub.subId === subId);
+    const allSubServices = servicesData.flatMap(s => s.subServices);
+    const service = allSubServices.find(sub => sub.subId === subId);
     if (!service) return;
     const existingItem = cart.find(item => item.subId === subId);
-    if (existingItem) existingItem.quantity++;
-    else cart.push({ ...service, quantity: 1 });
-    
+    if (existingItem) {
+        existingItem.quantity++;
+    } else {
+        cart.push({ ...service, quantity: 1 });
+    }
     showNotification(`Đã thêm "${service.name}" vào giỏ hàng!`);
     saveCartAndRender();
-    
     const flyImgSrc = service.images && service.images.length > 0 ? service.images[0] : 'https://placehold.co/100x100/0a0a1a/00ffff?text=ITEM';
     flyToCart(flyImgSrc, buttonElement);
 }
@@ -513,55 +540,45 @@ function addToCart(subId, buttonElement) {
 function addServicesToCartFromAI(servicesToAdd) {
     servicesToAdd.forEach(service => {
         const existingItem = cart.find(item => item.subId === service.subId);
-        if (existingItem) existingItem.quantity++;
-        else cart.push({ ...service, quantity: 1 });
+        if (existingItem) {
+            existingItem.quantity++;
+        } else {
+            cart.push({ ...service, quantity: 1 });
+        }
     });
     showNotification(`Đã thêm ${servicesToAdd.length} dịch vụ vào giỏ hàng.`);
     saveCartAndRender();
     const cartPanel = document.getElementById('cart-panel-container');
     if (!cartPanel.classList.contains('visible')) {
-        cartPanel.classList.add('visible');
-        document.getElementById('cart-overlay').classList.remove('opacity-0', 'pointer-events-none');
+        toggleCartPanel();
     }
 }
 
-/**
- * NÂNG CẤP: Thêm phản hồi trực quan ngay lập tức để xác nhận hành động
- */
 function addBuildToCartFromAI(build) {
     showNotification("Đang thêm cấu hình vào giỏ hàng...", "info");
-
     if (!build || !Array.isArray(build) || build.length === 0) {
-        console.error("AI đã cố gắng thêm một cấu hình rỗng hoặc không hợp lệ vào giỏ hàng.");
         showNotification("Lỗi: Không tìm thấy cấu hình để thêm.", "error");
         return;
     }
-
     build.forEach(component => {
         const subId = component.id || `ai_build_${component.name.replace(/\s+/g, '_').toLowerCase()}`;
         const images = [component.image || 'img/logo.jpg'];
         const existingItem = cart.find(item => item.subId === subId);
-
         if (existingItem) {
             existingItem.quantity++;
         } else {
-            const newItem = {
-                subId: subId, name: component.name,
-                price: component.price || 0, images: images, quantity: 1
-            };
+            const newItem = { subId, name: component.name, price: component.price || 0, images, quantity: 1 };
             cart.push(newItem);
         }
     });
-
     setTimeout(() => {
         showNotification(`Đã thêm cấu hình ${build.length} linh kiện vào giỏ!`);
         saveCartAndRender();
         const cartPanel = document.getElementById('cart-panel-container');
         if (!cartPanel.classList.contains('visible')) {
-            cartPanel.classList.add('visible');
-            document.getElementById('cart-overlay').classList.remove('opacity-0', 'pointer-events-none');
+            toggleCartPanel();
         }
-    }, 500); // Thêm một chút delay để người dùng thấy thông báo "đang thêm"
+    }, 500);
 }
 
 function flyToCart(imgSrc, buttonElement) {
@@ -586,6 +603,7 @@ function flyToCart(imgSrc, buttonElement) {
         setTimeout(() => document.getElementById('cart-icon-container').classList.remove('shake'), 400);
     });
 }
+
 function validateOrderForm() {
     const nameInput = document.getElementById('customerName');
     const phoneInput = document.getElementById('customerPhone');
@@ -606,13 +624,10 @@ async function handleFormSubmit(event) {
     const form = event.target;
     const isOrderForm = form.id === 'order-form';
     const btn = form.querySelector('button[type="submit"]');
-    
     if (isOrderForm && !validateOrderForm()) return;
-    
     const originalBtnText = btn.textContent;
     btn.disabled = true;
     btn.textContent = 'ĐANG GỬI...';
-    
     let payload = { action: 'order' };
     if (isOrderForm) {
         payload.customer = { name: form.customerName.value, phone: form.customerPhone.value, notes: form.customerNotes.value };
@@ -623,23 +638,19 @@ async function handleFormSubmit(event) {
         payload.cart = [];
         payload.total = 'Tin nhắn từ Form Liên Hệ';
     }
-    
     try {
         await fetch(appsScriptUrl, {
             method: 'POST', mode: 'no-cors',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
         });
-        
         showNotification(isOrderForm ? 'Gửi yêu cầu thành công!' : 'Gửi tin nhắn thành công!');
         form.reset();
-        
         if (isOrderForm) {
             cart = [];
             saveCartAndRender();
             setTimeout(() => {
-                document.getElementById('cart-panel-container')?.classList.remove('visible');
-                document.getElementById('cart-overlay')?.classList.add('opacity-0', 'pointer-events-none');
+                toggleCartPanel();
             }, 1500);
         }
     } catch (error) {
