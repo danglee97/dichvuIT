@@ -1,5 +1,5 @@
 // ===================================================================
-//  SCRIPT.JS - PHIÊN BẢN 13.1 (Sửa lỗi & Hoàn thiện Giao diện Sáng/Tối)
+//  SCRIPT.JS - PHIÊN BẢN 13.6 (Sửa lỗi nút submit giỏ hàng)
 // ===================================================================
 
 // --- KHỞI CHẠY KHI TÀI LIỆU SẴN SÀNG ---
@@ -93,14 +93,9 @@ function initThemeSwitcher() {
 
     switcher?.addEventListener('click', toggleTheme);
 
-    // Initial theme setup
     const savedTheme = localStorage.getItem('theme');
-    const prefersLight = window.matchMedia('(prefers-color-scheme: light)').matches;
-
     if (savedTheme) {
         applyTheme(savedTheme);
-    } else if (prefersLight) {
-        applyTheme('light');
     } else {
         applyTheme('dark'); // Default
     }
@@ -108,10 +103,9 @@ function initThemeSwitcher() {
 
 
 // ===================================================================
-//  MODULE 1: HIỆU ỨNG GIAO DIỆN CỐT LÕI (Không thay đổi nhiều)
+//  MODULE 1: HIỆU ỨNG GIAO DIỆN CỐT LÕI
 // ===================================================================
 function initCoreEffects() {
-    // Các hiệu ứng cốt lõi giữ nguyên như phiên bản trước
     const header = document.getElementById('header');
     const scrollToTopBtn = document.getElementById('scroll-to-top');
     window.addEventListener('scroll', () => {
@@ -218,7 +212,7 @@ function initCoreEffects() {
 }
 
 // ===================================================================
-//  MODULE 2: CÁC MODULE TƯƠNG TÁC (Cập nhật với Modal mới)
+//  MODULE 2: CÁC MODULE TƯƠNG TÁC
 // ===================================================================
 function initInteractiveModules() {
     const serviceList = document.getElementById('service-list');
@@ -440,7 +434,7 @@ function renderServiceCards() {
                 <img src="${service.image}" alt="${service.name}" class="w-full h-48 object-cover transition-transform duration-300 group-hover:scale-110">
             </div>
             <div class="p-6 flex flex-col flex-grow">
-                <h3 class="font-tech text-xl font-bold text-white mb-2">${service.name}</h3>
+                <h3 class="font-tech text-xl font-bold mb-2">${service.name}</h3>
                 <p class="text-gray-400 text-sm mb-4 flex-grow">${service.description}</p>
                 <button class="font-semibold text-primary text-sm hover:text-secondary transition-colors self-start mt-auto">Xem Chi Tiết &rarr;</button>
             </div>
@@ -619,47 +613,83 @@ function validateOrderForm() {
     return isFormValid;
 }
 
+// ===================================================================
+// ===== BẮT ĐẦU PHẦN SỬA LỖI ========================================
+// ===================================================================
 async function handleFormSubmit(event) {
     event.preventDefault();
     const form = event.target;
     const isOrderForm = form.id === 'order-form';
-    const btn = form.querySelector('button[type="submit"]');
+    
+    // SỬA LỖI: Tìm nút submit một cách chính xác
+    // Nút của form giỏ hàng nằm ngoài thẻ form, nên phải tìm bằng ID
+    // Nút của form liên hệ nằm trong, có thể tìm bằng querySelector
+    let btn;
+    if (isOrderForm) {
+        btn = document.getElementById('submit-order-btn');
+    } else {
+        btn = form.querySelector('button[type="submit"]');
+    }
+    
+    // Kiểm tra nếu không tìm thấy nút thì thoát để tránh lỗi
+    if (!btn) {
+        console.error('Không tìm thấy nút submit cho form:', form.id);
+        return;
+    }
+
     if (isOrderForm && !validateOrderForm()) return;
     const originalBtnText = btn.textContent;
     btn.disabled = true;
     btn.textContent = 'ĐANG GỬI...';
-    let payload = { action: 'order' };
+    
+    const formData = new FormData();
     if (isOrderForm) {
-        payload.customer = { name: form.customerName.value, phone: form.customerPhone.value, notes: form.customerNotes.value };
-        payload.cart = cart;
-        payload.total = document.getElementById('cart-total').textContent;
+        const payload = {
+            action: 'order',
+            customer: { name: form.customerName.value, phone: form.customerPhone.value, notes: form.customerNotes.value },
+            cart: cart,
+            total: document.getElementById('cart-total').textContent
+        };
+        formData.append('payload', JSON.stringify(payload)); 
     } else {
-        payload.customer = { name: form.contactName.value, email: form.contactEmail.value, notes: form.contactMessage.value };
-        payload.cart = [];
-        payload.total = 'Tin nhắn từ Form Liên Hệ';
+        const payload = {
+             action: 'contact',
+             customer: { name: form.contactName.value, email: form.contactEmail.value, notes: form.contactMessage.value }
+        };
+        formData.append('payload', JSON.stringify(payload));
     }
+
     try {
-        await fetch(appsScriptUrl, {
-            method: 'POST', mode: 'no-cors',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
+        const response = await fetch(appsScriptUrl, {
+            method: 'POST',
+            body: formData,
         });
+
         showNotification(isOrderForm ? 'Gửi yêu cầu thành công!' : 'Gửi tin nhắn thành công!');
         form.reset();
+        
         if (isOrderForm) {
             cart = [];
             saveCartAndRender();
             setTimeout(() => {
-                toggleCartPanel();
+                const cartPanel = document.getElementById('cart-panel-container');
+                const cartOverlay = document.getElementById('cart-overlay');
+                cartPanel?.classList.remove('visible');
+                cartOverlay?.classList.add('opacity-0', 'pointer-events-none');
             }, 1500);
         }
+
     } catch (error) {
-        showNotification('Có lỗi xảy ra, vui lòng thử lại.', 'error');
+        showNotification('Có lỗi mạng xảy ra, vui lòng thử lại.', 'error');
+        console.error('Lỗi khi gửi form:', error);
     } finally {
         btn.disabled = false;
         btn.textContent = originalBtnText;
     }
 }
+// ===================================================================
+// ===== KẾT THÚC PHẦN SỬA LỖI =======================================
+// ===================================================================
 
 async function handleClearCart() {
     if (cart.length > 0) {
@@ -671,4 +701,3 @@ async function handleClearCart() {
         }
     }
 }
-
