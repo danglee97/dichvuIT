@@ -227,7 +227,10 @@ function addAssemblyServiceToCart() {
     } else {
         appendMessage('ai', "Rất tiếc, tôi không tìm thấy dịch vụ lắp ráp lúc này, nhưng bạn có thể yêu cầu thêm khi liên hệ nhé.");
     }
-    showOptionsAfterBuild();
+    
+    // THÊM DÒNG NÀY ĐỂ TIẾP TỤC CUỘC TRÒ CHUYỆN
+    showOptionsAfterBuild(); 
+ 
 }
 
 // --- LUỒNG TƯ VẤN NÂNG CẤP ---

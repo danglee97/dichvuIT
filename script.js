@@ -542,10 +542,13 @@ function addServicesToCartFromAI(servicesToAdd) {
     });
     showNotification(`Đã thêm ${servicesToAdd.length} dịch vụ vào giỏ hàng.`);
     saveCartAndRender();
+    
+    /* // VÔ HIỆU HÓA ĐOẠN CODE TỰ ĐỘNG MỞ GIỎ HÀNG
     const cartPanel = document.getElementById('cart-panel-container');
     if (!cartPanel.classList.contains('visible')) {
         toggleCartPanel();
     }
+    */
 }
 
 function addBuildToCartFromAI(build) {
