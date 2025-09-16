@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tool Get ImgDrive - Công Cụ Lấy Link Ảnh Trực Tiếp</title>
-    <link rel="icon" href="https://placehold.co/32x32/0a0a1a/00ffff?text=Logo">
+    <link rel="icon" href="img/favicon.png">
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -230,7 +230,7 @@
         <div class="tool-card p-6 md:p-8">
             <div class="text-center">
                 <a href="#" class="inline-block mb-4">
-                    <img src="img/logo.png" alt="Logo" class="h-16 w-16 mx-auto rounded-full">
+                    <img src="img/logo.png" alt="Minh Đăng Logo" class="h-16 w-16 mx-auto rounded-full">
                 </a>
                 <h1 class="text-2xl md:text-3xl font-black uppercase tracking-wider mb-2 font-tech">Công Cụ Lấy Link Ảnh Google Drive</h1>
                 <p class="text-gray-400 max-w-md mx-auto">Dán link chia sẻ từ Google Drive để lấy link trực tiếp và kiểm tra quyền truy cập công khai.</p>
@@ -302,9 +302,9 @@
             // --- END: Theme Switcher Logic ---
 
 
-            // --- START: Tool Logic ---
+            // --- START: Tool Logic (LOGIC MỚI) ---
             const gdriveLinkInput = document.getElementById('gdrive-link');
-            const convertBtn = document.getElementById('convertBtn'); // <-- LỖI Ở ĐÂY, THIẾU DÒNG NÀY
+            const convertBtn = document.getElementById('convertBtn');
             const resultArea = document.getElementById('result-area');
             const directLinkInput = document.getElementById('direct-link');
             const copyBtn = document.getElementById('copyBtn');
@@ -320,7 +320,7 @@
                 const match = url.match(regex);
                 if (match && match[1]) {
                     const fileId = match[1];
-                    // Thay đổi link để tương thích tốt hơn với việc nhúng ảnh trực tiếp
+                    // Sử dụng link uc?export=view để tương thích tốt hơn
                     return `https://lh3.googleusercontent.com/d/${fileId}`;
                 }
                 return null;
@@ -335,20 +335,18 @@
                 statusDiv.textContent = ''; // Xóa trạng thái cũ
 
                 if (directLink) {
-                    directLinkInput.value = directLink;
-                    statusDiv.className = 'status';
-                    statusDiv.textContent = 'Đang tải ảnh để kiểm tra...';
-                    previewContainer.style.borderColor = 'var(--border-color)';
-                    
-                    // Thêm một tham số ngẫu nhiên để tránh cache của trình duyệt
-                    imagePreview.src = directLink + '&t=' + new Date().getTime();
-                } else {
-                    directLinkInput.value = '';
-                    statusDiv.className = 'status error';
-                    statusDiv.textContent = 'Link không hợp lệ. Vui lòng kiểm tra lại link Google Drive.';
-                    previewContainer.style.borderColor = 'var(--error-color)';
-                }
-            });
+                directLinkInput.value = directLink;
+                statusDiv.className = 'status';
+                statusDiv.textContent = 'Đang tải ảnh để kiểm tra...';
+                previewContainer.style.borderColor = '#dddfe2';
+                imagePreview.src = directLink;
+            } else {
+                directLinkInput.value = '';
+                statusDiv.className = 'status error';
+                statusDiv.textContent = 'Link không hợp lệ. Vui lòng kiểm tra lại link Google Drive.';
+                previewContainer.style.borderColor = '#c0392b';
+            }
+        });
 
             imagePreview.onload = () => {
                 imagePreview.style.display = 'block';
@@ -365,7 +363,7 @@
             };
 
             copyBtn.addEventListener('click', () => {
-                if (!directLinkInput.value) return; // Không làm gì nếu không có link
+                if (!directLinkInput.value) return;
                 navigator.clipboard.writeText(directLinkInput.value).then(() => {
                     copyBtn.textContent = 'Đã chép!';
                     setTimeout(() => {
@@ -373,10 +371,11 @@
                     }, 2000);
                 }).catch(err => {
                     console.error('Không thể sao chép: ', err);
-                    // Có thể thêm thông báo lỗi cho người dùng ở đây
                 });
             });
+             // --- END: Tool Logic (LOGIC MỚI) ---
         });
+        
         
         // --- START: Background Animation ---
         let scene, camera, renderer, stars;
@@ -426,23 +425,27 @@
             requestAnimationFrame(animate);
         }
         
-        // Chỉ chạy animation nếu không ở chế độ light-mode
-        if (!document.documentElement.classList.contains('light-mode')) {
-            init();
+        let animationInitialized = false;
+        function startAnimation() {
+            if (!document.documentElement.classList.contains('light-mode') && !animationInitialized) {
+                init();
+                animationInitialized = true;
+            }
         }
         
-        // Lắng nghe sự kiện chuyển theme để bật/tắt animation
+        document.addEventListener('DOMContentLoaded', startAnimation);
+        
         const themeSwitcher = document.getElementById('theme-switcher');
-        themeSwitcher.addEventListener('click', () => {
-            const isLight = document.documentElement.classList.contains('light-mode');
-            if(isLight && renderer) {
-                 // Không cần làm gì vì canvas đã bị ẩn bởi CSS
-            } else if (!isLight && !renderer) {
-                // Nếu renderer chưa được khởi tạo thì khởi tạo
-                init();
-            }
+        themeSwitcher?.addEventListener('click', () => {
+            setTimeout(() => { // Đợi theme class được áp dụng
+                if (!document.documentElement.classList.contains('light-mode') && !animationInitialized) {
+                    init();
+                    animationInitialized = true;
+                }
+            }, 50);
         });
         // --- END: Background Animation ---
     </script>
 </body>
 </html>
+
