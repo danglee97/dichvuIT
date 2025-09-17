@@ -1,9 +1,6 @@
 // ===================================================================
-//  SCRIPT.JS - PHIÊN BẢN 13.6 (Sửa lỗi nút submit giỏ hàng)
+//  SCRIPT.JS - PHIÊN BẢN 15.0 (Hoàn thiện hỗ trợ đa trang & đồng bộ)
 // ===================================================================
-
-// --- KHỞI CHẠY KHI TÀI LIỆU SẴN SÀNG ---
-document.addEventListener('DOMContentLoaded', initializeApp);
 
 // --- BIẾN TOÀN CỤC ---
 let servicesData = [];
@@ -11,14 +8,39 @@ let pcComponentsData = [];
 let cart = JSON.parse(localStorage.getItem('minhdangCart')) || [];
 const appsScriptUrl = 'https://script.google.com/macros/s/AKfycbyIremqvgCwYcVxsf09X-LbR1JRHZipuUr3xq9z-ZrGzaeXqgjxogkd3QyqKx_fYmQv/exec';
 
+
+// --- BỘ LẮNG NGHE SỰ KIỆN CHÍNH ---
+// Tự động chạy hàm khởi tạo phù hợp khi trang được tải xong.
+document.addEventListener('DOMContentLoaded', () => {
+    // Nếu tìm thấy #service-list, đây là trang chủ -> chạy khởi tạo đầy đủ.
+    if (document.getElementById('service-list')) {
+        initializeApp();
+    }
+    // Các trang con khác (như baogia.js) sẽ tự gọi hàm initializeCommonComponents().
+});
+
+
+// ===================================================================
+//  CÁC HÀM KHỞI TẠO
+// ===================================================================
+
 /**
- * Hàm khởi tạo chính, điều phối toàn bộ ứng dụng
+ * HÀM KHỞI TẠO CHUNG: Dành cho các thành phần có trên MỌI trang
+ * (giỏ hàng, header, menu, theme switcher, v.v.)
+ */
+function initializeCommonComponents() {
+    if (typeof initThemeSwitcher === 'function') initThemeSwitcher();
+    if (typeof initCoreEffects === 'function') initCoreEffects();
+    if (typeof initInteractiveModules === 'function') initInteractiveModules();
+}
+
+/**
+ * HÀM KHỞI TẠO TRANG CHỦ: Chạy khởi tạo chung, sau đó fetch dữ liệu riêng.
  */
 async function initializeApp() {
-    initThemeSwitcher(); // Phải chạy đầu tiên để áp dụng giao diện đúng
-    initCoreEffects();
-    initInteractiveModules();
+    initializeCommonComponents(); // Chạy khởi tạo chung trước
 
+    // Các tác vụ riêng của trang chủ
     try {
         const [services, components] = await Promise.all([
             fetch(appsScriptUrl + '?action=getServices').then(res => res.json()),
@@ -31,9 +53,9 @@ async function initializeApp() {
         servicesData = services;
         pcComponentsData = components;
         
-        renderServiceCards();
-        renderProjectGallery();
-        initFloatingImages();
+        if(document.getElementById('service-list')) renderServiceCards();
+        if(document.getElementById('project-gallery')) renderProjectGallery();
+        if(document.getElementById('floating-images-container')) initFloatingImages();
 
         if (typeof initializeAIAssistant === 'function') {
             initializeAIAssistant(pcComponentsData, servicesData);
@@ -42,23 +64,17 @@ async function initializeApp() {
             disableAIButton("Trợ lý AI đang bảo trì");
         }
         
-        document.getElementById('service-loader').style.display = 'none';
+        const serviceLoader = document.getElementById('service-loader');
+        if (serviceLoader) serviceLoader.style.display = 'none';
 
     } catch (error) {
         console.error("Lỗi nghiêm trọng khi khởi tạo ứng dụng:", error);
-        document.getElementById('service-loader').innerHTML = `<p class="text-center text-red-400 col-span-full">Không thể tải dữ liệu. Vui lòng thử lại sau.</p>`;
+        const serviceLoader = document.getElementById('service-loader');
+        if(serviceLoader) serviceLoader.innerHTML = `<p class="text-center text-red-400 col-span-full">Không thể tải dữ liệu. Vui lòng thử lại sau.</p>`;
         disableAIButton("Trợ lý AI không sẵn sàng");
     }
 }
 
-function disableAIButton(message) {
-    const aiBtn = document.getElementById('ai-assistant-btn');
-    if (aiBtn) {
-        aiBtn.textContent = message;
-        aiBtn.disabled = true;
-        aiBtn.classList.add('opacity-50', 'cursor-not-allowed');
-    }
-}
 
 // ===================================================================
 //  MODULE 0: GIAO DIỆN SÁNG/TỐI
@@ -94,11 +110,7 @@ function initThemeSwitcher() {
     switcher?.addEventListener('click', toggleTheme);
 
     const savedTheme = localStorage.getItem('theme');
-    if (savedTheme) {
-        applyTheme(savedTheme);
-    } else {
-        applyTheme('dark'); // Default
-    }
+    applyTheme(savedTheme || 'dark');
 }
 
 
@@ -107,12 +119,21 @@ function initThemeSwitcher() {
 // ===================================================================
 function initCoreEffects() {
     const header = document.getElementById('header');
+    if (header) {
+        window.addEventListener('scroll', () => {
+            header.classList.toggle('scrolled', window.scrollY > 50);
+        });
+    }
+
     const scrollToTopBtn = document.getElementById('scroll-to-top');
-    window.addEventListener('scroll', () => {
-        header.classList.toggle('scrolled', window.scrollY > 50);
-        scrollToTopBtn?.classList.toggle('visible', window.scrollY > 300);
-    });
-    scrollToTopBtn?.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+    if (scrollToTopBtn) {
+        window.addEventListener('scroll', () => {
+            scrollToTopBtn.classList.toggle('visible', window.scrollY > 300);
+        });
+        scrollToTopBtn.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+    }
+    
+    // Typing effect for homepage
     const mainTitle = document.getElementById('main-title');
     const subTitle = document.getElementById('sub-title');
     if (mainTitle && subTitle) {
@@ -129,12 +150,16 @@ function initCoreEffects() {
         }
         typeMain();
     }
+
+    // Fade-in observer
     const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
             if (entry.isIntersecting) entry.target.classList.add('visible');
         });
     }, { threshold: 0.1 });
     document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+    
+    // Tilt card effect
     if (!window.matchMedia("(max-width: 768px)").matches) {
         document.querySelectorAll('[data-tilt-card]').forEach(card => {
             card.addEventListener('mousemove', (e) => {
@@ -148,6 +173,8 @@ function initCoreEffects() {
             });
         });
     }
+
+    // Mobile menu
     const mobileMenuBtn = document.getElementById('mobile-menu-btn');
     const mobileMenu = document.getElementById('mobile-menu');
     const menuIconOpen = document.getElementById('menu-icon-open');
@@ -156,14 +183,16 @@ function initCoreEffects() {
         const toggleMenu = () => {
             const isOpen = mobileMenu.classList.toggle('is-open');
             document.body.classList.toggle('menu-open', isOpen);
-            menuIconOpen.classList.toggle('hidden', isOpen);
-            menuIconClose.classList.toggle('hidden', !isOpen);
+            if (menuIconOpen) menuIconOpen.classList.toggle('hidden', isOpen);
+            if (menuIconClose) menuIconClose.classList.toggle('hidden', !isOpen);
         };
         mobileMenuBtn.addEventListener('click', toggleMenu);
         mobileMenu.querySelectorAll('a').forEach(link => link.addEventListener('click', toggleMenu));
     }
+
+    // Background canvas animation
     const container = document.getElementById('hero-canvas');
-    if (container && window.THREE) {
+    if (container && window.THREE && container.children.length === 0) {
         let scene, camera, renderer, particles, mouseX = 0, mouseY = 0;
         let windowHalfX = window.innerWidth / 2, windowHalfY = window.innerHeight / 2;
         scene = new THREE.Scene();
@@ -211,96 +240,160 @@ function initCoreEffects() {
     }
 }
 
+
 // ===================================================================
 //  MODULE 2: CÁC MODULE TƯƠNG TÁC
 // ===================================================================
 function initInteractiveModules() {
     const serviceList = document.getElementById('service-list');
     const modal = document.getElementById('service-modal');
-    const closeModalBtn = document.getElementById('close-modal-btn');
     const cartIconContainer = document.getElementById('cart-icon-container');
     const cartPanel = document.getElementById('cart-panel-container');
-    const closeCartBtn = document.getElementById('close-cart-btn');
     const cartOverlay = document.getElementById('cart-overlay');
+    const closeCartBtn = document.getElementById('close-cart-btn');
     const orderForm = document.getElementById('order-form');
     const contactForm = document.getElementById('contact-form');
-    
-    let modalSlideshowInterval, currentImageIndex = 0, currentSubServiceImages = [];
-    const modalMainImg = document.getElementById('modal-main-img');
-    const modalThumbnailContainer = document.getElementById('modal-thumbnail-container');
-    const modalTitle = document.getElementById('modal-title');
-    const modalSubservicesList = document.getElementById('modal-subservices-list');
-    const modalLoader = document.getElementById('modal-loader');
-    const modalData = document.getElementById('modal-data');
+    const floatingAIBtn = document.getElementById('floating-ai-btn');
+    const clearCartBtn = document.getElementById('clear-cart-btn');
 
-    const openModal = (serviceId) => {
-        const service = servicesData.find(s => s.id === serviceId);
-        if (!service) return;
-        modalLoader.style.display = 'block';
-        modalData.classList.add('hidden');
-        modal.classList.add('visible');
-        modalTitle.textContent = service.name;
-        modalSubservicesList.innerHTML = service.subServices.map(sub => `
-            <div class="subservice-item" data-sub-id="${sub.subId}">
-                <div class="subservice-info"><h4>${sub.name}</h4><p>${sub.details}</p></div>
-                <div class="subservice-action"><span>${isNaN(sub.price) ? sub.price : new Intl.NumberFormat('vi-VN').format(sub.price) + ' VNĐ'}</span><button class="add-to-cart-btn" data-sub-id="${sub.subId}">Thêm +</button></div>
-            </div>`).join('');
-        if (service.subServices.length > 0) {
-            updateModalContent(service.subServices[0]);
-            modalSubservicesList.querySelector('.subservice-item').classList.add('highlighted');
-        } else {
-            updateModalContent({ images: [] });
-        }
-        modalLoader.style.display = 'none';
-        modalData.classList.remove('hidden');
-    };
+    if (serviceList && modal) {
+        const closeModalBtn = document.getElementById('close-modal-btn');
+        let modalSlideshowInterval, currentImageIndex = 0, currentSubServiceImages = [];
+        const modalMainImg = document.getElementById('modal-main-img');
+        const modalThumbnailContainer = document.getElementById('modal-thumbnail-container');
+        const modalTitle = document.getElementById('modal-title');
+        const modalSubservicesList = document.getElementById('modal-subservices-list');
+        const modalLoader = document.getElementById('modal-loader');
+        const modalData = document.getElementById('modal-data');
+        const lightbox = document.getElementById('lightbox');
+        const lightboxImg = document.getElementById('lightbox-img');
 
-    const updateModalContent = (subService) => {
-        currentSubServiceImages = subService.images || [];
-        currentImageIndex = 0;
-        modalThumbnailContainer.innerHTML = currentSubServiceImages.map((img, i) => `<img src="${img}" class="modal-thumbnail ${i === 0 ? 'active' : ''}" data-index="${i}">`).join('');
-        updateModalGallery();
-        startSlideshow();
-    };
-
-    const updateModalGallery = () => {
-        if (currentSubServiceImages.length === 0) {
-            modalMainImg.src = 'https://placehold.co/600x400/0a0a1a/00ffff?text=Minh+Dang+IT';
-            return;
+        const openModal = (serviceId) => {
+            const service = servicesData.find(s => s.id === serviceId);
+            if (!service) return;
+            modalLoader.style.display = 'block';
+            modalData.classList.add('hidden');
+            modal.classList.add('visible');
+            modalTitle.textContent = service.name;
+            modalSubservicesList.innerHTML = service.subServices.map(sub => `
+                <div class="subservice-item" data-sub-id="${sub.subId}">
+                    <div class="subservice-info"><h4>${sub.name}</h4><p>${sub.details}</p></div>
+                    <div class="subservice-action"><span>${isNaN(sub.price) ? sub.price : new Intl.NumberFormat('vi-VN').format(sub.price) + ' VNĐ'}</span><button class="add-to-cart-btn" data-sub-id="${sub.subId}">Thêm +</button></div>
+                </div>`).join('');
+            if (service.subServices.length > 0) {
+                updateModalContent(service.subServices[0]);
+                modalSubservicesList.querySelector('.subservice-item').classList.add('highlighted');
+            } else {
+                updateModalContent({ images: [] });
+            }
+            modalLoader.style.display = 'none';
+            modalData.classList.remove('hidden');
         };
-        modalMainImg.src = currentSubServiceImages[currentImageIndex];
-        modalThumbnailContainer.querySelectorAll('.modal-thumbnail').forEach((thumb, i) => thumb.classList.toggle('active', i === currentImageIndex));
-    };
 
-    const startSlideshow = () => {
-        clearInterval(modalSlideshowInterval);
-        if (currentSubServiceImages.length <= 1) return;
-        modalSlideshowInterval = setInterval(() => {
-            currentImageIndex = (currentImageIndex + 1) % currentSubServiceImages.length;
+        const updateModalContent = (subService) => {
+            currentSubServiceImages = subService.images || [];
+            currentImageIndex = 0;
+            modalThumbnailContainer.innerHTML = currentSubServiceImages.map((img, i) => `<img src="${img}" class="modal-thumbnail ${i === 0 ? 'active' : ''}" data-index="${i}">`).join('');
             updateModalGallery();
-        }, 3000);
-    };
+            startSlideshow();
+        };
 
-    const lightbox = document.getElementById('lightbox');
-    const lightboxImg = document.getElementById('lightbox-img');
+        const updateModalGallery = () => {
+            if (currentSubServiceImages.length === 0) {
+                modalMainImg.src = 'https://placehold.co/600x400/0a0a1a/00ffff?text=Minh+Dang+IT';
+                return;
+            };
+            modalMainImg.src = currentSubServiceImages[currentImageIndex];
+            modalThumbnailContainer.querySelectorAll('.modal-thumbnail').forEach((thumb, i) => thumb.classList.toggle('active', i === currentImageIndex));
+        };
 
-    const showLightbox = (index) => {
-        currentImageIndex = index;
-        if (currentSubServiceImages.length > 0) {
-            lightboxImg.src = currentSubServiceImages[currentImageIndex];
-            lightbox.classList.add('visible');
+        const startSlideshow = () => {
+            clearInterval(modalSlideshowInterval);
+            if (currentSubServiceImages.length <= 1) return;
+            modalSlideshowInterval = setInterval(() => {
+                currentImageIndex = (currentImageIndex + 1) % currentSubServiceImages.length;
+                updateModalGallery();
+            }, 3000);
+        };
+        
+        const showLightbox = (index) => {
+            currentImageIndex = index;
+            if (currentSubServiceImages.length > 0 && lightbox) {
+                lightboxImg.src = currentSubServiceImages[currentImageIndex];
+                lightbox.classList.add('visible');
+            }
+        };
+
+        const navigateLightbox = (direction) => {
+            currentImageIndex = (currentImageIndex + direction + currentSubServiceImages.length) % currentSubServiceImages.length;
+            if (lightboxImg) lightboxImg.src = currentSubServiceImages[currentImageIndex];
+        };
+        
+        const navigateGallery = (direction) => {
+            if (!currentSubServiceImages || currentSubServiceImages.length <= 1) return;
+            currentImageIndex = (currentImageIndex + direction + currentSubServiceImages.length) % currentSubServiceImages.length;
+            updateModalGallery();
+            startSlideshow();
+        };
+        
+        serviceList.addEventListener('click', e => {
+            const card = e.target.closest('.service-card');
+            if (card) openModal(card.dataset.serviceId);
+        });
+        if(closeModalBtn) closeModalBtn.addEventListener('click', () => modal.classList.remove('visible'));
+        modal.addEventListener('click', e => { if (e.target === modal) modal.classList.remove('visible'); });
+        if(modalSubservicesList) {
+            modalSubservicesList.addEventListener('click', e => {
+                const btn = e.target.closest('.add-to-cart-btn');
+                if (btn) return addToCart(btn.dataset.subId, btn);
+                const subItem = e.target.closest('.subservice-item');
+                if(subItem) {
+                     const subService = servicesData.flatMap(s => s.subServices).find(sub => sub.subId === subItem.dataset.subId);
+                     if (subService) {
+                        updateModalContent(subService);
+                        modalSubservicesList.querySelectorAll('.subservice-item').forEach(item => item.classList.remove('highlighted'));
+                        subItem.classList.add('highlighted');
+                     }
+                }
+            });
         }
-    };
+        
+        const prevBtn = document.getElementById('modal-prev-btn');
+        const nextBtn = document.getElementById('modal-next-btn');
+        if(prevBtn) prevBtn.addEventListener('click', () => navigateGallery(-1));
+        if(nextBtn) nextBtn.addEventListener('click', () => navigateGallery(1));
+        if(modalThumbnailContainer) {
+            modalThumbnailContainer.addEventListener('click', (e) => {
+                const thumb = e.target.closest('.modal-thumbnail');
+                if (thumb) {
+                    currentImageIndex = parseInt(thumb.dataset.index);
+                    updateModalGallery();
+                    startSlideshow();
+                }
+            });
+        }
 
-    const navigateLightbox = (direction) => {
-        currentImageIndex = (currentImageIndex + direction + currentSubServiceImages.length) % currentSubServiceImages.length;
-        lightboxImg.src = currentSubServiceImages[currentImageIndex];
-    };
+        if(lightbox) {
+            document.getElementById('modal-zoom-btn')?.addEventListener('click', () => showLightbox(currentImageIndex));
+            document.getElementById('lightbox-close')?.addEventListener('click', () => lightbox.classList.remove('visible'));
+            document.getElementById('lightbox-prev')?.addEventListener('click', () => navigateLightbox(-1));
+            document.getElementById('lightbox-next')?.addEventListener('click', () => navigateLightbox(1));
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (modal.classList.contains('visible') && !lightbox?.classList.contains('visible')) {
+                if (e.key === 'ArrowRight') navigateGallery(1);
+                else if (e.key === 'ArrowLeft') navigateGallery(-1);
+            }
+        });
+    }
 
     const toggleCartPanel = () => {
-        cartPanel.classList.toggle('visible');
-        cartOverlay.classList.toggle('opacity-0');
-        cartOverlay.classList.toggle('pointer-events-none');
+        if (cartPanel) cartPanel.classList.toggle('visible');
+        if (cartOverlay) {
+            cartOverlay.classList.toggle('opacity-0');
+            cartOverlay.classList.toggle('pointer-events-none');
+        }
     };
 
     const handleQuantityChange = (subId, change) => {
@@ -312,85 +405,61 @@ function initInteractiveModules() {
         saveCartAndRender();
     };
 
-    serviceList.addEventListener('click', e => {
-        const card = e.target.closest('.service-card');
-        if (card) openModal(card.dataset.serviceId);
-    });
+    if (cartIconContainer) cartIconContainer.addEventListener('click', toggleCartPanel);
+    if (closeCartBtn) closeCartBtn.addEventListener('click', toggleCartPanel);
+    if (cartOverlay) cartOverlay.addEventListener('click', toggleCartPanel);
 
-    closeModalBtn.addEventListener('click', () => modal.classList.remove('visible'));
-    modal.addEventListener('click', e => { if (e.target === modal) modal.classList.remove('visible'); });
+    const cartItemsContainer = document.getElementById('cart-items-container');
+    if (cartItemsContainer) {
+        cartItemsContainer.addEventListener('click', e => {
+            const btn = e.target.closest('.quantity-btn');
+            if (btn) handleQuantityChange(btn.dataset.subId, parseInt(btn.dataset.change));
+        });
+    }
+
+    if (orderForm) {
+        orderForm.addEventListener('submit', handleFormSubmit);
+        orderForm.addEventListener('input', validateOrderForm);
+    }
     
-    modalSubservicesList.addEventListener('click', e => {
-        const btn = e.target.closest('.add-to-cart-btn');
-        if (btn) return addToCart(btn.dataset.subId, btn);
-        const subItem = e.target.closest('.subservice-item');
-        if(subItem) {
-             const subService = servicesData.flatMap(s => s.subServices).find(sub => sub.subId === subItem.dataset.subId);
-             if (subService) {
-                updateModalContent(subService);
-                modalSubservicesList.querySelectorAll('.subservice-item').forEach(item => item.classList.remove('highlighted'));
-                subItem.classList.add('highlighted');
-             }
-        }
-    });
+    if (contactForm) {
+        contactForm.addEventListener('submit', handleFormSubmit);
+    }
+    
+    if (floatingAIBtn) {
+        floatingAIBtn.addEventListener('click', () => {
+            if (typeof startConversation === 'function') {
+                startConversation();
+            } else {
+                showNotification("Trợ lý AI đang bảo trì, vui lòng thử lại sau.", "error");
+            }
+        });
+    }
 
-    const prevBtn = document.getElementById('modal-prev-btn');
-    const nextBtn = document.getElementById('modal-next-btn');
-    const navigateGallery = (direction) => {
-        if (!currentSubServiceImages || currentSubServiceImages.length <= 1) return;
-        currentImageIndex = (currentImageIndex + direction + currentSubServiceImages.length) % currentSubServiceImages.length;
-        updateModalGallery();
-        startSlideshow();
-    };
-    prevBtn.addEventListener('click', () => navigateGallery(-1));
-    nextBtn.addEventListener('click', () => navigateGallery(1));
-    modalThumbnailContainer.addEventListener('click', (e) => {
-        const thumb = e.target.closest('.modal-thumbnail');
-        if (thumb) {
-            currentImageIndex = parseInt(thumb.dataset.index);
-            updateModalGallery();
-            startSlideshow();
-        }
-    });
-    document.addEventListener('keydown', (e) => {
-        if (modal.classList.contains('visible') && !lightbox.classList.contains('visible')) {
-            if (e.key === 'ArrowRight') navigateGallery(1);
-            else if (e.key === 'ArrowLeft') navigateGallery(-1);
-        }
-    });
-
-    document.getElementById('modal-zoom-btn')?.addEventListener('click', () => showLightbox(currentImageIndex));
-    document.getElementById('lightbox-close')?.addEventListener('click', () => lightbox.classList.remove('visible'));
-    document.getElementById('lightbox-prev')?.addEventListener('click', () => navigateLightbox(-1));
-    document.getElementById('lightbox-next')?.addEventListener('click', () => navigateLightbox(1));
-    cartIconContainer.addEventListener('click', toggleCartPanel);
-    closeCartBtn.addEventListener('click', toggleCartPanel);
-    cartOverlay.addEventListener('click', toggleCartPanel);
-    document.getElementById('cart-items-container').addEventListener('click', e => {
-        const btn = e.target.closest('.quantity-btn');
-        if (btn) handleQuantityChange(btn.dataset.subId, parseInt(btn.dataset.change));
-    });
-    orderForm.addEventListener('submit', handleFormSubmit);
-    orderForm.addEventListener('input', validateOrderForm);
-    contactForm.addEventListener('submit', handleFormSubmit);
-    const floatingAIBtn = document.getElementById('floating-ai-btn');
-    floatingAIBtn?.addEventListener('click', () => {
-        if (typeof startConversation === 'function') {
-            startConversation();
-        } else {
-            showNotification("Trợ lý AI đang bảo trì, vui lòng thử lại sau.", "error");
-        }
-    });
-    document.getElementById('clear-cart-btn')?.addEventListener('click', handleClearCart);
+    if (clearCartBtn) {
+        clearCartBtn.addEventListener('click', handleClearCart);
+    }
+    
     renderCart();
 }
+
 
 // ===================================================================
 //  MODULE 3: HÀM RENDER & TIỆN ÍCH
 // ===================================================================
 
+function disableAIButton(message) {
+    const aiBtn = document.getElementById('ai-assistant-btn');
+    if (aiBtn) {
+        aiBtn.textContent = message;
+        aiBtn.disabled = true;
+        aiBtn.classList.add('opacity-50', 'cursor-not-allowed');
+    }
+}
+
 function showNotification(message, type = 'success') {
     const container = document.getElementById('notification-container');
+    if (!container) return;
     const toast = document.createElement('div');
     toast.className = `toast ${type}`;
     toast.innerHTML = `<span>${message}</span>`;
@@ -408,8 +477,12 @@ function showConfirmation(message) {
         const msgEl = document.getElementById('confirmation-message');
         const yesBtn = document.getElementById('confirm-btn-yes');
         const noBtn = document.getElementById('confirm-btn-no');
+        
+        if (!modal || !msgEl || !yesBtn || !noBtn) return resolve(false);
+
         msgEl.textContent = message;
         modal.classList.add('visible');
+        
         const close = (value) => {
             modal.classList.remove('visible');
             yesBtn.replaceWith(yesBtn.cloneNode(true));
@@ -423,6 +496,7 @@ function showConfirmation(message) {
 
 function renderServiceCards() {
     const serviceList = document.getElementById('service-list');
+    if (!serviceList) return;
     const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
             if (entry.isIntersecting) entry.target.classList.add('visible');
@@ -462,7 +536,7 @@ function renderProjectGallery() {
 
 function initFloatingImages() {
     const container = document.getElementById('floating-images-container');
-    if(container.children.length > 0) return;
+    if(!container || container.children.length > 0) return;
     const allImages = servicesData.flatMap(s => s.subServices.flatMap(sub => sub.images));
     const uniqueImages = [...new Set(allImages)].filter(img => img);
     for (let i = 0; i < Math.min(uniqueImages.length, 7); i++) {
@@ -479,19 +553,25 @@ function initFloatingImages() {
 }
 
 function renderCart() {
+    // Sửa lỗi đồng bộ: Luôn đọc dữ liệu mới nhất từ localStorage trước khi render.
+    cart = JSON.parse(localStorage.getItem('minhdangCart')) || [];
+
     const cartItemsContainer = document.getElementById('cart-items-container');
     const cartTotalEl = document.getElementById('cart-total');
     const formContainer = document.getElementById('customer-form-container');
     const cartIcon = document.getElementById('cart-icon-container');
     const clearCartBtn = document.getElementById('clear-cart-btn');
+    const cartCount = document.getElementById('cart-count');
+
+    if (!cartItemsContainer || !cartTotalEl || !formContainer || !cartIcon || !clearCartBtn || !cartCount) return;
 
     if (cart.length === 0) {
         cartItemsContainer.innerHTML = '<p class="text-gray-400 text-center p-8">Giỏ hàng của bạn đang trống.</p>';
-        formContainer.classList.add('is-hidden');
-        if (clearCartBtn) clearCartBtn.style.display = 'none';
+        if(formContainer) formContainer.classList.add('is-hidden');
+        if(clearCartBtn) clearCartBtn.style.display = 'none';
     } else {
-        formContainer.classList.remove('is-hidden');
-        if (clearCartBtn) clearCartBtn.style.display = 'block';
+        if(formContainer) formContainer.classList.remove('is-hidden');
+        if(clearCartBtn) clearCartBtn.style.display = 'block';
         cartItemsContainer.innerHTML = cart.map(item => `
             <div class="cart-item">
                 <img src="${item.images && item.images.length > 0 ? item.images[0] : 'img/placeholder.png'}" alt="${item.name}" class="w-16 h-16 object-cover rounded-md">
@@ -501,7 +581,7 @@ function renderCart() {
     }
     const total = cart.reduce((sum, item) => sum + (isNaN(item.price) ? 0 : Number(item.price) * item.quantity), 0);
     cartTotalEl.textContent = new Intl.NumberFormat('vi-VN').format(total) + ' VNĐ';
-    const cartCount = document.getElementById('cart-count');
+    
     const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
     cartCount.textContent = totalItems;
     cartIcon.classList.toggle('is-hidden', totalItems === 0);
@@ -515,20 +595,35 @@ function saveCartAndRender() {
     renderCart();
 }
 
-function addToCart(subId, buttonElement) {
-    const allSubServices = servicesData.flatMap(s => s.subServices);
-    const service = allSubServices.find(sub => sub.subId === subId);
-    if (!service) return;
-    const existingItem = cart.find(item => item.subId === subId);
+function addItemToCart(itemToAdd, buttonElement) {
+    if (!itemToAdd || !itemToAdd.subId) {
+        console.error("Sản phẩm không hợp lệ:", itemToAdd);
+        return;
+    }
+
+    const existingItem = cart.find(item => item.subId === itemToAdd.subId);
+    
     if (existingItem) {
         existingItem.quantity++;
     } else {
-        cart.push({ ...service, quantity: 1 });
+        cart.push({ ...itemToAdd, quantity: 1 });
     }
-    showNotification(`Đã thêm "${service.name}" vào giỏ hàng!`);
+    
+    showNotification(`Đã thêm "${itemToAdd.name}" vào giỏ hàng!`);
     saveCartAndRender();
-    const flyImgSrc = service.images && service.images.length > 0 ? service.images[0] : 'https://placehold.co/100x100/0a0a1a/00ffff?text=ITEM';
-    flyToCart(flyImgSrc, buttonElement);
+
+    if (buttonElement) {
+        const flyImgSrc = itemToAdd.images && itemToAdd.images.length > 0 ? itemToAdd.images[0] : 'https://placehold.co/100x100/0a0a1a/00ffff?text=ITEM';
+        flyToCart(flyImgSrc, buttonElement);
+    }
+}
+
+function addToCart(subId, buttonElement) {
+    const allSubServices = servicesData.flatMap(s => s.subServices);
+    const service = allSubServices.find(sub => sub.subId === subId);
+    if (service) {
+        addItemToCart(service, buttonElement);
+    }
 }
 
 function addServicesToCartFromAI(servicesToAdd) {
@@ -542,13 +637,6 @@ function addServicesToCartFromAI(servicesToAdd) {
     });
     showNotification(`Đã thêm ${servicesToAdd.length} dịch vụ vào giỏ hàng.`);
     saveCartAndRender();
-    
-    /* // VÔ HIỆU HÓA ĐOẠN CODE TỰ ĐỘNG MỞ GIỎ HÀNG
-    const cartPanel = document.getElementById('cart-panel-container');
-    if (!cartPanel.classList.contains('visible')) {
-        toggleCartPanel();
-    }
-    */
 }
 
 function addBuildToCartFromAI(build) {
@@ -572,14 +660,16 @@ function addBuildToCartFromAI(build) {
         showNotification(`Đã thêm cấu hình ${build.length} linh kiện vào giỏ!`);
         saveCartAndRender();
         const cartPanel = document.getElementById('cart-panel-container');
-        if (!cartPanel.classList.contains('visible')) {
-            toggleCartPanel();
+        if (cartPanel && !cartPanel.classList.contains('visible')) {
+            cartPanel.classList.add('visible');
+            document.getElementById('cart-overlay')?.classList.remove('opacity-0', 'pointer-events-none');
         }
     }, 500);
 }
 
 function flyToCart(imgSrc, buttonElement) {
     const cartIcon = document.getElementById('cart-icon');
+    if (!cartIcon) return;
     const flyingImg = document.createElement('img');
     flyingImg.src = imgSrc;
     flyingImg.className = 'flying-img';
@@ -596,8 +686,8 @@ function flyToCart(imgSrc, buttonElement) {
     });
     flyingImg.addEventListener('transitionend', () => {
         flyingImg.remove();
-        document.getElementById('cart-icon-container').classList.add('shake');
-        setTimeout(() => document.getElementById('cart-icon-container').classList.remove('shake'), 400);
+        document.getElementById('cart-icon-container')?.classList.add('shake');
+        setTimeout(() => document.getElementById('cart-icon-container')?.classList.remove('shake'), 400);
     });
 }
 
@@ -607,26 +697,25 @@ function validateOrderForm() {
     const nameError = document.getElementById('name-error');
     const phoneError = document.getElementById('phone-error');
     const submitBtn = document.getElementById('submit-order-btn');
+
+    if (!nameInput || !phoneInput || !submitBtn) return false;
+
     const isNameValid = /^[a-zA-ZÀÁÂÃÈÉÊÌÍÒÓÔÕÙÚĂĐĨŨƠàáâãèéêìíòóôõùúăđĩũơƯĂẠẢẤẦẨẪẬẮẰẲẴẶẸẺẼỀỀỂưăạảấầẩẫậắằẳẵặẹẻẽềềểỄỆỈỊỌỎỐỒỔỖỘỚỜỞỠỢỤỦỨỪễệỉịọỏốồổỗộớờởỡợụủứừỬỮỰỲỴÝỶỸửữựỳỵỷỹ\s]+$/.test(nameInput.value.trim());
     const isPhoneValid = /^0\d{9}$/.test(phoneInput.value.trim());
-    nameError.textContent = (nameInput.value && !isNameValid) ? 'Họ tên không hợp lệ.' : '';
-    phoneError.textContent = (phoneInput.value && !isPhoneValid) ? 'SĐT phải là 10 số, bắt đầu từ 0.' : '';
+    
+    if (nameError) nameError.textContent = (nameInput.value && !isNameValid) ? 'Họ tên không hợp lệ.' : '';
+    if (phoneError) phoneError.textContent = (phoneInput.value && !isPhoneValid) ? 'SĐT phải là 10 số, bắt đầu từ 0.' : '';
+    
     const isFormValid = nameInput.value.trim() && phoneInput.value.trim() && isNameValid && isPhoneValid;
     submitBtn.disabled = !isFormValid;
     return isFormValid;
 }
 
-// ===================================================================
-// ===== BẮT ĐẦU PHẦN SỬA LỖI ========================================
-// ===================================================================
 async function handleFormSubmit(event) {
     event.preventDefault();
     const form = event.target;
     const isOrderForm = form.id === 'order-form';
     
-    // SỬA LỖI: Tìm nút submit một cách chính xác
-    // Nút của form giỏ hàng nằm ngoài thẻ form, nên phải tìm bằng ID
-    // Nút của form liên hệ nằm trong, có thể tìm bằng querySelector
     let btn;
     if (isOrderForm) {
         btn = document.getElementById('submit-order-btn');
@@ -634,7 +723,6 @@ async function handleFormSubmit(event) {
         btn = form.querySelector('button[type="submit"]');
     }
     
-    // Kiểm tra nếu không tìm thấy nút thì thoát để tránh lỗi
     if (!btn) {
         console.error('Không tìm thấy nút submit cho form:', form.id);
         return;
@@ -663,11 +751,7 @@ async function handleFormSubmit(event) {
     }
 
     try {
-        const response = await fetch(appsScriptUrl, {
-            method: 'POST',
-            body: formData,
-        });
-
+        await fetch(appsScriptUrl, { method: 'POST', body: formData });
         showNotification(isOrderForm ? 'Gửi yêu cầu thành công!' : 'Gửi tin nhắn thành công!');
         form.reset();
         
@@ -690,9 +774,6 @@ async function handleFormSubmit(event) {
         btn.textContent = originalBtnText;
     }
 }
-// ===================================================================
-// ===== KẾT THÚC PHẦN SỬA LỖI =======================================
-// ===================================================================
 
 async function handleClearCart() {
     if (cart.length > 0) {

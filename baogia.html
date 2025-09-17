@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="vi" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Báo Giá Dịch Vụ - Minh Đăng IT</title>
+    <meta name="description" content="Bảng báo giá chi tiết các dịch vụ sửa chữa, nâng cấp, linh kiện PC và sản phẩm công nghệ tại Minh Đăng IT.">
+    <link rel="icon" href="img/favicon.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@500;700;900&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* CSS dành riêng cho trang báo giá */
+        .price-table-container { background-color: var(--card-bg-color); border: 1px solid var(--border-color); border-radius: 0.5rem; backdrop-filter: blur(5px); overflow: hidden; }
+        .price-table thead { background-color: rgba(0, 255, 255, 0.1); }
+        html.light-mode .price-table thead { background-color: rgba(0, 123, 255, 0.1); }
+        .price-table th, .price-table td { padding: 1rem 1.25rem; text-align: left; }
+        .price-table tbody tr { border-bottom: 1px solid var(--border-color); }
+        .price-table tbody tr:last-child { border-bottom: none; }
+        .price-table tbody tr:hover { background-color: rgba(0, 255, 255, 0.05); }
+        html.light-mode .price-table tbody tr:hover { background-color: rgba(0, 123, 255, 0.05); }
+        .product-info { display: flex; align-items: center; gap: 1rem; }
+        .product-image { width: 60px; height: 60px; object-fit: cover; border-radius: 0.25rem; border: 1px solid var(--border-color); }
+        .description-cell ul { list-style-type: disc; padding-left: 1.25rem; }
+    </style>
+</head>
+<body class="bg-dark-bg text-gray-200">
+    <div id="hero-canvas"></div>
+
+    <!-- Header (Đầy đủ chức năng) -->
+    <header id="header" class="fixed top-0 left-0 w-full z-50 transition-all duration-300">
+        <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <a href="index.html" aria-label="Trang chủ" class="flex items-center gap-3">
+                <img src="img/logo.png" alt="Logo Minh Đăng IT" class="h-10 w-10 object-cover">
+                <span class="font-tech text-xl font-bold text-white hidden sm:block">Vi Tính Minh Đăng</span>
+            </a>
+            <div class="hidden md:flex items-center space-x-2">
+                <a href="index.html#services" class="nav-link">Dịch Vụ</a>
+                <a href="baogia.html" class="nav-link" style="color: var(--primary); font-weight: 700;">Báo Giá</a>
+                <a href="index.html#projects" class="nav-link">Dự Án</a>
+                <a href="index.html#contact" class="nav-link">Liên Hệ</a>
+            </div>
+            <button id="mobile-menu-btn" class="md:hidden z-[101]">
+                 <svg id="menu-icon-open" xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" /></svg>
+                 <svg id="menu-icon-close" xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-white hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+            </button>
+        </nav>
+    </header>
+
+    <!-- Mobile Menu Panel -->
+    <div id="mobile-menu" class="mobile-menu">
+        <div class="flex flex-col items-center justify-center space-y-8">
+            <a href="index.html#services" class="mobile-nav-link">Dịch Vụ</a>
+            <a href="baogia.html" class="mobile-nav-link">Báo Giá</a>
+            <a href="index.html#projects" class="mobile-nav-link">Dự Án</a>
+            <a href="index.html#contact" class="mobile-nav-link">Liên Hệ</a>
+        </div>
+    </div>
+
+
+    <main class="pt-24 md:pt-32">
+        <section id="pricelist" class="py-16 md:py-20">
+            <div class="container mx-auto px-6">
+                <div class="text-center mb-12 md:mb-16 fade-in">
+                    <h1 class="text-4xl md:text-5xl font-extrabold text-white">Bảng Giá Dịch Vụ & Sản Phẩm</h1>
+                    <p class="text-lg text-gray-400 mt-4 max-w-3xl mx-auto">Cập nhật mới nhất, cam kết chất lượng và giá cả cạnh tranh.</p>
+                    <div class="section-glow"></div>
+                </div>
+                <div class="mb-8 flex flex-col md:flex-row gap-4 justify-between items-center">
+                    <div class="relative w-full md:w-1/2 lg:w-1/3">
+                        <input type="text" id="searchInput" class="form-input pl-10" placeholder="Tìm kiếm dịch vụ, linh kiện...">
+                        <svg class="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" /></svg>
+                    </div>
+                    <div id="categoryFilters" class="flex flex-wrap gap-2 justify-center"></div>
+                </div>
+                <div id="price-loader" class="text-center py-10">
+                    <p class="text-lg text-primary">Đang tải bảng giá...</p>
+                </div>
+                <div id="price-table-container" class="price-table-container hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full price-table">
+                            <thead>
+                                <tr>
+                                    <th class="w-2/5">Tên Sản Phẩm / Dịch Vụ</th>
+                                    <th class="w-2/5 hidden md:table-cell">Mô Tả Chi Tiết</th>
+                                    <th class="w-1/5">Đơn Giá</th>
+                                    <th class="w-[120px]">Thao Tác</th>
+                                </tr>
+                            </thead>
+                            <tbody id="price-table-body"></tbody>
+                        </table>
+                    </div>
+                </div>
+                <p id="no-results" class="text-center text-gray-400 py-10 hidden">Không tìm thấy kết quả phù hợp.</p>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="py-16 border-t border-gray-800">
+        <div class="border-t border-gray-800 pt-8">
+            <p class="text-center text-gray-500">&copy; 2025 Minh Đăng IT. All Rights Reserved.</p>
+        </div>
+    </footer>
+
+    <!-- Các thành phần giỏ hàng và thông báo -->
+    <div id="cart-icon-container" class="floating-cart-btn">
+        <svg id="cart-icon" xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 text-black" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
+        <span id="cart-count" class="absolute -top-1 -right-1 bg-secondary text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center border-2 border-primary">0</span>
+    </div>
+    <div id="cart-panel-container" class="cart-panel-container">
+         <div class="cart-panel-header"><h3 class="font-tech text-2xl text-white">Yêu Cầu Dịch Vụ</h3><button id="close-cart-btn" class="text-2xl text-white hover:text-primary" aria-label="Đóng giỏ hàng">×</button></div>
+         <div class="cart-panel-body"><div id="cart-items-container"></div><div id="customer-form-container" class="mt-6 pt-6 border-t border-gray-700"><form id="order-form" class="space-y-4"><div><label for="customerName" class="form-label">Họ và Tên</label><input type="text" id="customerName" name="customerName" class="form-input" required><p id="name-error" class="form-error"></p></div><div><label for="customerPhone" class="form-label">Số Điện Thoại</label><input type="tel" id="customerPhone" name="customerPhone" class="form-input" required><p id="phone-error" class="form-error"></p></div><div><label for="customerNotes" class="form-label">Ghi Chú Thêm</label><textarea id="customerNotes" name="customerNotes" rows="3" class="form-input"></textarea></div></form></div></div>
+         <div class="cart-panel-footer"><div class="flex justify-between items-center text-lg mb-4"><span>Tổng Cộng:</span><span id="cart-total" class="font-bold text-primary">0 VNĐ</span></div><div class="text-right mb-4"><button id="clear-cart-btn" class="text-sm text-gray-500 hover:text-red-500 transition-colors duration-200 underline">Xóa tất cả sản phẩm</button></div><button id="submit-order-btn" type="submit" form="order-form" class="submit-btn-styling w-full" disabled>Gửi Yêu Cầu</button><div id="form-message" class="text-center mt-4"></div></div>
+    </div>
+    <div id="cart-overlay" class="fixed inset-0 bg-black bg-opacity-70 z-[90] opacity-0 pointer-events-none transition-opacity duration-300"></div>
+    <div id="notification-container" class="notification-container"></div>
+    <div id="confirmation-modal" class="modal-container"><div class="confirmation-modal-content"><p id="confirmation-message" class="mb-6 text-center text-lg"></p><div class="flex justify-center gap-4"><button id="confirm-btn-yes" class="submit-btn-styling px-8 py-2">Đồng Ý</button><button id="confirm-btn-no" class="cancel-btn-styling px-8 py-2">Hủy Bỏ</button></div></div></div>
+
+    <!-- Tải script đúng thứ tự -->
+    <script src="script.js"></script>
+    <script src="baogia.js"></script>
+</body>
+</html>
