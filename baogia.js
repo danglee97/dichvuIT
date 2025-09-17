@@ -60,17 +60,22 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     };
 
+    // === BẮT ĐẦU PHẦN SỬA LỖI GIAO DIỆN SÁNG/TỐI ===
     const createCategoryFilters = (products) => {
         const categories = ['Tất cả', ...new Set(products.map(p => p.category))];
+        // Sử dụng class chung .filter-btn và .active để CSS xử lý màu sắc
         categoryFiltersContainer.innerHTML = categories.map(category => 
-            `<button class="filter-btn px-4 py-2 rounded-full text-sm font-medium border transition-colors ${category === 'Tất cả' ? 'bg-primary text-black border-primary' : 'border-gray-600 hover:bg-gray-700'}" data-category="${category}">
+            `<button class="filter-btn px-4 py-2 rounded-full text-sm font-medium ${category === 'Tất cả' ? 'active' : ''}" data-category="${category}">
                 ${category}
             </button>`
         ).join('');
+
         document.querySelectorAll('.filter-btn').forEach(btn => {
             btn.addEventListener('click', () => {
-                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('bg-primary', 'text-black', 'border-primary'));
-                btn.classList.add('bg-primary', 'text-black', 'border-primary');
+                // Xóa class 'active' khỏi tất cả các nút
+                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                // Thêm class 'active' vào nút vừa được nhấn
+                btn.classList.add('active');
                 filterAndSearch();
             });
         });
@@ -78,7 +83,10 @@ document.addEventListener('DOMContentLoaded', () => {
     
     const filterAndSearch = () => {
         const searchTerm = searchInput.value.toLowerCase();
-        const activeCategory = document.querySelector('.filter-btn.bg-primary').dataset.category;
+        // Tìm nút đang được active bằng class '.active'
+        const activeButton = document.querySelector('.filter-btn.active');
+        const activeCategory = activeButton ? activeButton.dataset.category : 'Tất cả';
+
         const filteredProducts = allProducts.filter(product => {
             const matchesCategory = activeCategory === 'Tất cả' || product.category === activeCategory;
             const matchesSearch = product.name.toLowerCase().includes(searchTerm) || product.category.toLowerCase().includes(searchTerm);
@@ -86,6 +94,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         renderTable(filteredProducts);
     };
+    // === KẾT THÚC PHẦN SỬA LỖI ===
 
     async function fetchData() {
         try {
@@ -121,3 +130,4 @@ document.addEventListener('DOMContentLoaded', () => {
     
     fetchData();
 });
+

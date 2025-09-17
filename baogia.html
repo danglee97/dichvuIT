@@ -24,6 +24,29 @@
         .product-info { display: flex; align-items: center; gap: 1rem; }
         .product-image { width: 60px; height: 60px; object-fit: cover; border-radius: 0.25rem; border: 1px solid var(--border-color); }
         .description-cell ul { list-style-type: disc; padding-left: 1.25rem; }
+
+        /* === BẮT ĐẦU PHẦN SỬA LỖI GIAO DIỆN SÁNG/TỐI === */
+        .filter-btn {
+            border: 1px solid var(--border-color);
+            color: var(--text-color-muted);
+            background-color: transparent;
+            transition: all 0.2s ease-in-out;
+        }
+        .filter-btn:hover {
+            color: var(--primary);
+            border-color: var(--primary);
+            background-color: rgba(0, 255, 255, 0.1);
+        }
+        html.light-mode .filter-btn:hover {
+            background-color: rgba(0, 123, 255, 0.1);
+        }
+        .filter-btn.active {
+            background-color: var(--primary);
+            border-color: var(--primary);
+            color: var(--text-color-inverted);
+            font-weight: 700;
+        }
+        /* === KẾT THÚC PHẦN SỬA LỖI === */
     </style>
 </head>
 <body class="bg-dark-bg text-gray-200">
@@ -124,3 +147,4 @@
     <script src="baogia.js"></script>
 </body>
 </html>
+
