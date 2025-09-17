@@ -9,8 +9,14 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@500;700;900&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
+    
+    <!-- Libraries & CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- === BẮT ĐẦU PHẦN THÊM MỚI: Thư viện 3D === -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <!-- === KẾT THÚC PHẦN THÊM MỚI === -->
     <link rel="stylesheet" href="style.css">
+
     <style>
         /* CSS dành riêng cho trang báo giá */
         .price-table-container { background-color: var(--card-bg-color); border: 1px solid var(--border-color); border-radius: 0.5rem; backdrop-filter: blur(5px); overflow: hidden; }
@@ -25,12 +31,16 @@
         .product-image { width: 60px; height: 60px; object-fit: cover; border-radius: 0.25rem; border: 1px solid var(--border-color); }
         .description-cell ul { list-style-type: disc; padding-left: 1.25rem; }
 
-        /* === BẮT ĐẦU PHẦN SỬA LỖI GIAO DIỆN SÁNG/TỐI === */
+        /* CSS cho các nút lọc danh mục */
         .filter-btn {
             border: 1px solid var(--border-color);
             color: var(--text-color-muted);
             background-color: transparent;
             transition: all 0.2s ease-in-out;
+        }
+        html.light-mode .filter-btn {
+            color: #374151;
+            border-color: #d1d5db;
         }
         .filter-btn:hover {
             color: var(--primary);
@@ -38,6 +48,8 @@
             background-color: rgba(0, 255, 255, 0.1);
         }
         html.light-mode .filter-btn:hover {
+            color: var(--primary);
+            border-color: var(--primary);
             background-color: rgba(0, 123, 255, 0.1);
         }
         .filter-btn.active {
@@ -46,7 +58,31 @@
             color: var(--text-color-inverted);
             font-weight: 700;
         }
-        /* === KẾT THÚC PHẦN SỬA LỖI === */
+
+        /* Sửa lỗi hiển thị chữ trên nền sáng */
+        html.light-mode .price-table th {
+            color: #111827;
+            font-weight: 600;
+        }
+        html.light-mode .price-table td,
+        html.light-mode .price-table .font-bold.text-white {
+            color: #1f2937 !important;
+            font-weight: 500;
+        }
+        html.light-mode .price-table .text-gray-400 {
+            color: #4b5563 !important;
+        }
+        html.light-mode .price-table .font-bold.text-primary {
+            color: #c53030 !important;
+            font-weight: 700;
+        }
+
+
+        /* CSS làm nổi bật chi tiết */
+        .description-cell ul { list-style-type: none; padding-left: 0; }
+        .description-cell li { position: relative; padding-left: 1.25rem; margin-bottom: 0.35rem; line-height: 1.6; }
+        .description-cell li::before { content: '▪'; position: absolute; left: 0; top: 1px; color: var(--primary); font-size: 0.9em; line-height: inherit; }
+        .keyword-highlight { color: var(--primary); font-weight: 600; }
     </style>
 </head>
 <body class="bg-dark-bg text-gray-200">
@@ -98,9 +134,12 @@
                     </div>
                     <div id="categoryFilters" class="flex flex-wrap gap-2 justify-center"></div>
                 </div>
-                <div id="price-loader" class="text-center py-10">
-                    <p class="text-lg text-primary">Đang tải bảng giá...</p>
+                
+                <div id="price-loader" class="service-loader-container">
+                    <img src="img/logo.png" alt="Đang tải..." class="loader-logo">
+                    <p class="loader-text">Đang tải bảng giá, vui lòng chờ...</p>
                 </div>
+
                 <div id="price-table-container" class="price-table-container hidden">
                     <div class="overflow-x-auto">
                         <table class="w-full price-table">
@@ -128,6 +167,24 @@
         </div>
     </footer>
 
+    <button id="theme-switcher" class="theme-switcher-btn" aria-label="Chuyển đổi giao diện">
+        <svg id="theme-icon-sun" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="5"></circle>
+            <line x1="12" y1="1" x2="12" y2="3"></line>
+            <line x1="12" y1="21" x2="12" y2="23"></line>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+            <line x1="1" y1="12" x2="3" y2="12"></line>
+            <line x1="21" y1="12" x2="23" y2="12"></line>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+        </svg>
+        <svg id="theme-icon-moon" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+        </svg>
+        <span id="theme-tooltip" class="theme-switcher-tooltip"></span>
+    </button>
+
     <!-- Các thành phần giỏ hàng và thông báo -->
     <div id="cart-icon-container" class="floating-cart-btn">
         <svg id="cart-icon" xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 text-black" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
@@ -143,8 +200,8 @@
     <div id="confirmation-modal" class="modal-container"><div class="confirmation-modal-content"><p id="confirmation-message" class="mb-6 text-center text-lg"></p><div class="flex justify-center gap-4"><button id="confirm-btn-yes" class="submit-btn-styling px-8 py-2">Đồng Ý</button><button id="confirm-btn-no" class="cancel-btn-styling px-8 py-2">Hủy Bỏ</button></div></div></div>
 
     <!-- Tải script đúng thứ tự -->
-    <script src="script.js"></script>
-    <script src="baogia.js"></script>
+    <script src="js/script.js"></script>
+    <script src="js/baogia.js"></script>
 </body>
 </html>
 
