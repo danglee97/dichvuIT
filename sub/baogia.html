@@ -19,6 +19,13 @@
         html.light-mode .price-table thead { background-color: rgba(0, 123, 255, 0.1); }
         .price-table th, .price-table td { padding: 1rem 1.25rem; text-align: left; }
         
+        /* === BẮT ĐẦU SỬA LỖI HIỂN THỊ TIÊU ĐỀ BẢNG === */
+        html.light-mode .price-table thead th {
+            color: #212529; /* Đặt màu chữ thành đen đậm */
+            font-weight: 700;  /* In đậm chữ */
+        }
+        /* === KẾT THÚC SỬA LỖI === */
+
         .price-table tbody tr {
             border-bottom: 1px solid var(--border-color);
             transition: all 0.2s ease-in-out; 
@@ -54,15 +61,12 @@
         html.light-mode .price-table .text-gray-300 { color: #343a40 !important; }
         html.light-mode .price-table .text-primary { color: #dc3545 !important; }
 
-        /* === BẮT ĐẦU SỬA LỖI HOVER CHO FOOTER === */
         footer a {
-            transition: color 0.2s ease-in-out; /* Thêm hiệu ứng chuyển động mượt mà cho tất cả link trong footer */
+            transition: color 0.2s ease-in-out;
         }
-        /* Định nghĩa màu hover cho tất cả link, tự động đổi theo theme nhờ biến var(--primary) */
         footer a:hover {
             color: var(--primary); 
         }
-        /* === KẾT THÚC SỬA LỖI HOVER CHO FOOTER === */
     </style>
 </head>
 <body class="bg-dark-bg text-gray-200">
@@ -137,7 +141,7 @@
         </section>
     </main>
 
-    <!-- Footer (Đã lược bỏ các lớp hover không cần thiết) -->
+    <!-- Footer -->
     <footer class="bg-dark-bg border-t border-gray-800 pt-16 pb-8">
         <div class="container mx-auto px-6">
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-12">
