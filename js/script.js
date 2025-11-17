@@ -137,7 +137,7 @@ function initCoreEffects() {
     const mainTitle = document.getElementById('main-title');
     const subTitle = document.getElementById('sub-title');
     if (mainTitle && subTitle) {
-        const mainText = "VI TÍNH MINH ĐĂNG";
+        const mainText = "MÁY TÍNH MINH ĐĂNG";
         const subText = "GIẢI PHÁP TỐT NHẤT DÀNH CHO KHÁCH HÀNG";
         let i = 0, j = 0;
         mainTitle.textContent = ''; subTitle.textContent = '';
