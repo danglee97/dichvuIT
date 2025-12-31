@@ -1,4 +1,5 @@
 @echo off
 echo Dang tai Tool Minh Dang ve may...
-curl -L -o "ToolMinhDang.rar" "https://drive.google.com/uc?export=download&id=1pfDDw4nobboENffDjNDTwt_f0rFjB8jw"
+curl -L -o "ToolMinhDang.exe" "https://drive.google.com/uc?export=download&id=1pfDDw4nobboENffDjNDTwt_f0rFjB8jw"
+
 echo Tai hoan tat! File luu tai thu muc hien tai.
